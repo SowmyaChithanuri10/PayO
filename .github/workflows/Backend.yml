@@ -1,0 +1,189 @@
+name: Backend CI/CD (Express + Docker + EC2) - PRODUCTION
+ 
+on:
+  push:
+    branches:
+      - Backend  # Note: Capital B - production branch
+      - main
+  workflow_dispatch:
+ 
+jobs:
+  # ========== CI JOB (Testing) ==========
+  ci:
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+ 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+ 
+      - name: Install dependencies
+        run: npm install
+ 
+      - name: Test server start
+        run: |
+          node server.js &
+          sleep 5
+          curl http://localhost:3000 || echo "Server running successfully"
+ 
+  # ========== DOCKER BUILD JOB ==========
+  docker:
+    runs-on: ubuntu-latest
+    needs: ci
+    if: success()
+ 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+ 
+      - name: Build Docker image
+        run: |
+          docker build -t payo-app:production .
+          docker save payo-app:production -o payo-image.tar
+ 
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: payo-image.tar
+ 
+  # ========== DEPLOY TO EC2 (PORT 3001) ==========
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker
+    if: success()
+ 
+    steps:
+      - name: Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: ./
+ 
+      - name: Copy Docker image to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "payo-image.tar"
+          target: "/home/ubuntu/payo-app-prod/"
+ 
+      - name: Deploy with Health Check & Rollback (Port 3001)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/payo-app-prod/
+ 
+            echo "=========================================="
+            echo "Loading Docker image..."
+            echo "=========================================="
+            docker load -i payo-image.tar
+ 
+            echo ""
+            echo "=========================================="
+            echo "Testing new container on port 3002..."
+            echo "=========================================="
+ 
+            # Run test container on port 3002
+            docker run -d \
+              --name test-container-prod \
+              -p 3002:3000 \
+              -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+              payo-app:production
+ 
+            sleep 10
+ 
+            # Health check on test container
+            if curl -f http://localhost:3002/health; then
+              echo ""
+              echo "=========================================="
+              echo "Health check PASSED - Deploying to PRODUCTION"
+              echo "=========================================="
+ 
+              # Clean up test container
+              docker stop test-container-prod
+              docker rm test-container-prod
+ 
+              # Backup existing container
+              if docker ps -a --format '{{.Names}}' | grep -q "^payo-app-prod$"; then
+                echo "Backing up current production version..."
+                docker tag payo-app-prod payo-app-prod:backup
+                docker stop payo-app-prod
+                docker rm payo-app-prod
+              fi
+ 
+              # Run new container on port 3001 (PRODUCTION)
+              echo "Starting new production container on port 3001..."
+              docker run -d \
+                --name payo-app-prod \
+                --restart always \
+                -p 3001:3000 \
+                -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+                payo-app:production
+ 
+              sleep 5
+ 
+              # Final health check on production container
+              if curl -f http://localhost:3001/health; then
+                echo ""
+                echo "=========================================="
+                echo "PRODUCTION DEPLOYMENT SUCCESSFUL!"
+                echo "=========================================="
+                echo "API URL: http://payo-app.duckdns.org:3001"
+                docker ps | grep payo-app-prod
+              else
+                echo ""
+                echo "=========================================="
+                echo "Production container failed health check! Rolling back..."
+                echo "=========================================="
+                docker stop payo-app-prod
+                docker rm payo-app-prod
+                # Restore backup
+                docker run -d \
+                  --name payo-app-prod \
+                  --restart always \
+                  -p 3001:3000 \
+                  -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+                  payo-app-prod:backup
+                echo "Rollback complete - Previous version restored"
+              fi
+ 
+            else
+              echo ""
+              echo "=========================================="
+              echo "Health check FAILED - Not deploying!"
+              echo "=========================================="
+              echo "Keeping existing production container running"
+              echo ""
+              echo "Test container logs:"
+              docker logs test-container-prod --tail 20
+              # Clean up test container
+              docker stop test-container-prod
+              docker rm test-container-prod
+              exit 1
+            fi
+ 
+            # Clean up old images
+            rm -f payo-image.tar
+            echo ""
+            echo "=========================================="
+            echo "Final Container Status:"
+            echo "=========================================="
+            docker ps
+            echo ""
+            echo "Recent Logs:"
+            docker logs payo-app-prod --tail 20
+            echo ""
+            echo "=========================================="
+            echo "Production API available at:"
+            echo "   http://payo-app.duckdns.org:3001/health"
+            echo "=========================================="
