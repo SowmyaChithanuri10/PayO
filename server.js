@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 });
  
 app.get('/health', (req, res) => {
-  res.json({ status: 'UP' });
+  res.status(200).send('OK');  
 });
  
 app.listen(3001, () => console.log("Server running on 3001"));
