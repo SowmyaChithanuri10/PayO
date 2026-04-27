@@ -14,7 +14,7 @@ RUN npm ci --only=production
 COPY . .
  
 # Expose port (checking your package.json - need to find port)
-EXPOSE 3000
+EXPOSE 3001
  
 # Start the app
 CMD ["node", "server.js"]
