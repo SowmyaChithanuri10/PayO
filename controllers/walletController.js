@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const QRCode = require("qrcode");
 const { v4: uuidv4 } = require("uuid");
 const Recent = require("../models/Recents");
-const Bank = require("../models/Bank");
+
 // ================= get wallet =================
  
 exports.getWallet = async (req, res) => {  
