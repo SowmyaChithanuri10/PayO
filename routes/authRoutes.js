@@ -9,5 +9,7 @@ router.post("/resend-otp",authController.resendOtp);
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.post("/set-pin",auth,authController.setPin);
-
+router.post("/send-login-otp",authController.sendLoginOtp);
+router.post("/change-pin",auth,authController.changePin);
+router.post("/verify-login-otp",authController.verifyLoginOtp);
 module.exports = router;
