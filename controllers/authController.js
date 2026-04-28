@@ -89,41 +89,40 @@ const wallet = await Wallet.create({
     // ================= REFERRAL BONUS =================
     const REFERRAL_BONUS = 50;
  
-    if (referralCode) {
-      const referrer = await User.findOne({ myReferralCode: referralCode });
+   if (referralCode) {
  
-      // prevent self-referral
-      if (referrer && referrer._id.toString() !== user._id.toString()) {
+  // 1. Find referrer
+  const referrer = await User.findOne({ myReferralCode: referralCode });
  
-        const referrerWallet = await Wallet.findOne({ userId: referrer._id });
-        const newUserWallet = await Wallet.findOne({ userId: user._id });
+  // 2. Validate referral
+  if (!referrer) {
+    return res.status(400).json({ message: "Invalid referral code" });
+  }
  
-        if (referrerWallet && newUserWallet) {
+  // 3. Prevent self-referral
+  if (referrer._id.toString() === user._id.toString()) {
+    return res.status(400).json({ message: "You cannot refer yourself" });
+  }
  
-          // credit referrer
-          referrerWallet.balance += REFERRAL_BONUS;
-          await referrerWallet.save();
+  // 4. Get referrer wallet
+  const referrerWallet = await Wallet.findOne({ userId: referrer._id });
  
-          await Transaction.create({
-            userId: referrer._id,
-            amount: REFERRAL_BONUS,
-            type: "credit",
-            message: "Referral bonus received"
-          });
+  if (!referrerWallet) {
+    return res.status(404).json({ message: "Referrer wallet not found" });
+  }
  
-          // credit new user
-          newUserWallet.balance += REFERRAL_BONUS;
-          await newUserWallet.save();
+  // 5. Give bonus ONLY to referrer
+  referrerWallet.balance += REFERRAL_BONUS;
+  await referrerWallet.save();
  
-          await Transaction.create({
-            userId: user._id,
-            amount: REFERRAL_BONUS,
-            type: "credit",
-            message: "Referral bonus for joining"
-          });
-        }
-      }
-    }
+  await Transaction.create({
+    userId: referrer._id,
+    amount: REFERRAL_BONUS,
+    type: "credit",
+    message: "Referral bonus received"
+  });
+ 
+}
  
     // ================= CLEANUP =================
     await Otp.deleteOne({ mobile });
