@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const QRCode = require("qrcode");
 const { v4: uuidv4 } = require("uuid");
 const Recent = require("../models/Recents");
+const Bank = require("../models/Bank");
 // ================= get wallet =================
  
 exports.getWallet = async (req, res) => {  
@@ -16,281 +17,7 @@ exports.getWallet = async (req, res) => {
  
 };
 // ================= Send tokens =================
-// exports.transfer=async (req, res) => {
-//   try {
-//     const { amount, toAddress, pin } = req.body;
  
-//     if (!amount || !toAddress || !pin) {
-//       return res.status(400).json({ message: "All fields required" });
-//     }
- 
-//     // Get sender user
-//     const user = await User.findById(req.userId);
-//     if (!user) return res.status(404).json({ message: "User not found" });
- 
-//     // Verify PIN
-//     const isMatch = await bcrypt.compare(pin, user.transactionPin);
-//     if (!isMatch) {
-//       return res.status(401).json({ message: "Invalid PIN" });
-//     }
- 
-//     // Get sender wallet
-//     const senderWallet = await Wallet.findOne({ userId: req.userId });
-//     if (!senderWallet) {
-//       return res.status(404).json({ message: "Sender wallet not found" });
-//     }
- 
-//     // Check balance
-//    const amt = Number(amount);
- 
-// if (isNaN(amt) || amt <= 0) {
-//   return res.status(400).json({ message: "Invalid amount" });
-// }
- 
-// if (senderWallet.balance < amt) {
-//   return res.status(400).json({ message: "Insufficient balance" });
-// }
- 
-//     // Get receiver wallet
-//    const receiverWallet = await Wallet.findOne({ walletAddress: toAddress });
-//     if (!receiverWallet) {
-//       return res.status(404).json({ message: "Receiver not found" });
-//     }
- 
-//     // Prevent self transfer
-//     if (senderWallet.walletAddress === receiverWallet.walletAddress){
-//       return res.status(400).json({ message: "Cannot transfer to self" });
-//     }
- 
-//     //  Update balances
-//   senderWallet.balance -= amt;
-// receiverWallet.balance += amt;
- 
-//     await senderWallet.save();
-//     await receiverWallet.save();
- 
-//     // Save transaction
-//     const txn = new Transaction({
-//       from: senderWallet.walletAddress,
-//       to: receiverWallet.walletAddress,
-//       amount,
-//       status: "SUCCESS",
-//       date: new Date(),
-//     });
- 
-//     await txn.save();
- 
-//     // Response
-//     res.json({
-//       message: "Transfer successful",
-//       balance: senderWallet.balance,
-//     });
- 
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
- 
- 
- 
-// exports.transfer = async (req, res) => {
-//   let txn; // declare outside so we can update in catch
- 
-//   try {
-//     const { amount, toAddress, pin } = req.body;
- 
-//     // 1. Validate input
-//     if (!amount || !toAddress || !pin) {
-//       return res.status(400).json({ message: "All fields required" });
-//     }
- 
-//     const amt = Number(amount);
- 
-//     if (isNaN(amt) || amt <= 0) {
-//       return res.status(400).json({ message: "Invalid amount" });
-//     }
- 
-//     // 2. Get user
-//     const user = await User.findById(req.userId);
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
- 
-//     // 3. Get sender wallet early (needed for txn record)
-//     const senderWallet = await Wallet.findOne({ userId: req.userId });
- 
-// if (!senderWallet) {
-//   return res.status(404).json({ message: "Sender wallet not found" });
-// }
- 
-// // create txn AFTER validation
-// txn = new Transaction({
-//   senderWallet: senderWallet.walletAddress,
-//   receiverWallet: toAddress,
-//   amount: amt,
-//   status: "pending",
-// });
- 
-// await txn.save();
- 
- 
- 
-//     if (!senderWallet) {
-//       txn.status = "failed";
-//       await txn.save();
-//       return res.status(404).json({ message: "Sender wallet not found" });
-//     }
- 
-//     // 5. Verify PIN
-// const senderWallet = await Wallet.findOne({ userId: req.userId });
- 
-// if (!senderWallet) {
-//   return res.status(404).json({ message: "Sender wallet not found" });
-// }
- 
-// // create txn AFTER validation
-// txn = new Transaction({
-//   senderWallet: senderWallet.walletAddress,
-//   receiverWallet: toAddress,
-//   amount: amt,
-//   status: "pending",
-// });
- 
-// await txn.save();
-//     if (!isMatch) {
-//       txn.status = "failed";
-//       await txn.save();
-//       return res.status(401).json({ message: "Invalid PIN" });
-//     }
- 
-//     // 6. Check balance
-//     if (senderWallet.balance < amt) {
-//       txn.status = "failed";
-//       await txn.save();
-//       return res.status(400).json({ message: "Insufficient balance" });
-//     }
- 
-//     // 7. Get receiver wallet
-//     const receiverWallet = await Wallet.findOne({ walletAddress: toAddress });
-//     if (!receiverWallet) {
-//       txn.status = "failed";
-//       await txn.save();
-//       return res.status(404).json({ message: "Receiver not found" });
-//     }
- 
-//     // 8. Prevent self-transfer
-//     if (senderWallet.walletAddress === receiverWallet.walletAddress) {
-//       txn.status = "failed";
-//       await txn.save();
-//       return res.status(400).json({ message: "Cannot transfer to self" });
-//     }
- 
-//     // 9. Update balances
-//     senderWallet.balance -= amt;
-//     receiverWallet.balance += amt;
- 
-//     await senderWallet.save();
-//     await receiverWallet.save();
- 
-//     // 10. Mark success transaction
-//     txn.status = "success";
-//     await txn.save();
- 
-//     // 11. Response
-//     return res.json({
-//       message: "Transfer successful",
-//       balance: senderWallet.balance,
-//     });
- 
-//   } catch (err) {
-//     console.error("TRANSFER ERROR:", err);
- 
-//     // mark failed transaction if exists
-//     if (txn) {
-//       txn.status = "failed";
-//       await txn.save();
-//     }
- 
-//     return res.status(500).json({ message: "Server error" });
-//   }
-// };
- 
-// exports.transfer=async (req, res) => {
-//   try {
-//     const { amount, toAddress, pin } = req.body;
- 
-//     if (!amount || !toAddress || !pin) {
-//       return res.status(400).json({ message: "All fields required" });
-//     }
- 
-//     // Get sender user
-//     const user = await User.findById(req.userId);
-//     if (!user) return res.status(404).json({ message: "User not found" });
- 
-//     // Verify PIN
-//     const isMatch = await bcrypt.compare(pin, user.transactionPin);
-//     if (!isMatch) {
-//       return res.status(401).json({ message: "Invalid PIN" });
-//     }
- 
-//     // Get sender wallet
-//     const senderWallet = await Wallet.findOne({ userId: req.userId });
-//     if (!senderWallet) {
-//       return res.status(404).json({ message: "Sender wallet not found" });
-//     }
- 
-//     // Check balance
-//    const amt = Number(amount);
- 
-// if (isNaN(amt) || amt <= 0) {
-//   return res.status(400).json({ message: "Invalid amount" });
-// }
- 
-// if (senderWallet.balance < amt) {
-//   return res.status(400).json({ message: "Insufficient balance" });
-// }
- 
-//     // Get receiver wallet
-//    const receiverWallet = await Wallet.findOne({ walletAddress: toAddress });
-//     if (!receiverWallet) {
-//       return res.status(404).json({ message: "Receiver not found" });
-//     }
- 
-//     // Prevent self transfer
-//     if (senderWallet.walletAddress === receiverWallet.walletAddress){
-//       return res.status(400).json({ message: "Cannot transfer to self" });
-//     }
- 
-//     //  Update balances
-//   senderWallet.balance -= amt;
-//   receiverWallet.balance += amt;
- 
-//     await senderWallet.save();
-//     await receiverWallet.save();
- 
-//     // Save transaction
-//     const txn = new Transaction({
-//       from: senderWallet.walletAddress,
-//       to: receiverWallet.walletAddress,
-//       amount,
-//       status: "SUCCESS",
-//       date: new Date(),
-//     });
- 
-//     await txn.save();
- 
-//     // Response
-//     res.json({
-//       message: "Transfer successful",
-//       balance: senderWallet.balance,
-//     });
- 
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
  
  
 exports.transfer = async (req, res) => {
@@ -372,59 +99,7 @@ exports.transfer = async (req, res) => {
   }
 };
  
-// ================= SCAN QR =================
  
-// exports.scanQr = async (req, res) => {
-//   try {
-//     const { qrData } = req.body;
- 
-//     // 1. Check input
-//     if (!qrData) {
-//       return res.status(400).json({ message: "QR data required" });
-//     }
- 
-//     let walletAddress;
- 
-//     // 2. Support BOTH formats (important for compatibility)
-//     try {
-//       // If QR contains JSON
-//       const parsed = JSON.parse(qrData);
-//       walletAddress = parsed.walletAddress;
-//     } catch {
-//       // If QR is plain string (old format)
-//       walletAddress = qrData;
-//     }
- 
-//     // 3. Find wallet
-//     const wallet = await Wallet.findOne({ walletAddress });
- 
-//     if (!wallet) {
-//       return res.status(400).json({ message: "Invalid QR" });
-//     }
- 
-//     // 4. Check QR expiry
-//     if (wallet.qrExpiry && wallet.qrExpiry < Date.now()) {
-//       return res.status(400).json({ message: "QR expired" });
-//     }
- 
-//     // 5. Get user details
-//     const user = await User.findById(wallet.userId);
- 
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
- 
-//     // 6. Response
-//     return res.json({
-//       name: user.name,
-//       walletAddress: wallet.walletAddress
-//     });
- 
-//   } catch (err) {
-//     console.error("scanQr error:", err);
-//     return res.status(500).json({ message: "Server error" });
-//   }
-// };
 // ================= to check balance =================
  
 exports.getBalance=async (req, res) => {
@@ -470,11 +145,12 @@ exports.getTransactions = async (req, res) => {
           : null;
  
         return {
-          name: otherUser?.name || "Unknown",
-          amount: isSender ? -t.amount : t.amount,
-          status: t.status === "pending" ? "processing" : t.status,
-          createdAt: t.createdAt
-        };
+  id: t._id, //  ADD THIS LINE
+  name: otherUser?.name || "Unknown",
+  amount: isSender ? -t.amount : t.amount,
+  status: t.status === "pending" ? "processing" : t.status,
+  createdAt: t.createdAt
+};
       })
     );
  
@@ -492,77 +168,39 @@ exports.getTransactions = async (req, res) => {
      
 exports.transactionsById = async (req, res) => {
   try {
-    const transaction = await Transaction.findOne({
-      transactionId: req.params.transaction_id
-    });
+   const txn = await Transaction.findById(req.params.transaction_id);
  
-    if (!transaction) {
+    if (!txn) {
       return res.status(404).json({
-        status: "error",
         message: "Transaction not found"
       });
     }
  
+    // Get receiver user name
+    const receiverWallet = await Wallet.findOne({
+      walletAddress: txn.receiverWallet
+    });
+ 
+    const receiverUser = receiverWallet
+      ? await User.findById(receiverWallet.userId)
+      : null;
+ 
     res.json({
-      status: "success",
-      transaction
+      name: receiverUser?.name || "Unknown",
+      amount: txn.amount,
+      wallet: txn.receiverWallet,
+      id: txn.transactionId  
     });
  
   } catch (err) {
-    console.error(err); //  ADD THIS FOR DEBUG
-    res.status(500).json({
-      status: "error",
-      message: "Failed to get transaction"
-    });
+    res.status(500).json({ message: "Server error" });
   }
-};      
+};    
  
  // ================= generate qr address =================
  
  
  
-// exports.generateAddress = async (req, res) => {
-//   try {
-//     let wallet = await Wallet.findOne({ userId: req.userId });
- 
-//     // CREATE WALLET
-//     if (!wallet) {
-//       wallet = new Wallet({
-//         userId: req.userId,
-//         walletAddress: generateWalletAddress(),
-//         addressExpiry: Date.now() + 60 * 60 * 1000
-//       });
- 
-//       await wallet.save();
-//     }
- 
-//     // WALLET EXPIRY (60 min)
-//     if (!wallet.addressExpiry || wallet.addressExpiry <= Date.now()) {
-//       wallet.walletAddress = generateWalletAddress();
-//       wallet.addressExpiry = Date.now() + 60 * 60 * 1000;
-//     }
- 
-//     // QR EXPIRY (15 min)
-//     if (!wallet.qrToken || wallet.qrExpiry <= Date.now()) {
-//       wallet.qrToken = uuidv4();
-//       wallet.qrExpiry = Date.now() + 15 * 60 * 1000;
-//     }
- 
-//     await wallet.save();
- 
-//     const qrImage = await QRCode.toDataURL(wallet.qrToken);
- 
-//     return res.json({
-//       qr: qrImage,
-//       address: wallet.walletAddress,
-//       expiresIn: Math.floor((wallet.qrExpiry - Date.now()) / 1000),
-//     });
- 
-//   } catch (err) {
-//     console.log("QR ERROR:", err);
-//     res.status(500).json({ message: "Error generating QR" });
-//   }
-// };
  exports.generateAddress = async (req, res) => {
   try {
     let wallet = await Wallet.findOne({ userId: req.userId });
@@ -887,4 +525,90 @@ exports.getRecents = async (req, res) => {
     res.status(500).json({ message: "Error fetching recents" });
   }
 };
+//==============================get wallet dashboard=========================
+ 
+exports.walletDashboard=async (req, res) => {
+  try {
+    const wallet = await Wallet.findOne({ userId: req.userId });
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+ 
+    const user = await User.findById(req.userId);
+ 
+    // REFERRALS (optimized)
+    const referredUsers = await User.find({
+      referredBy: user.myReferralCode
+    });
+ 
+    const referredUserIds = referredUsers.map(u => u._id);
+ 
+    const wallets = await Wallet.find({ userId: { $in: referredUserIds } });
+ 
+    const walletAddresses = wallets.map(w => w.walletAddress);
+ 
+    const successfulTxns = await Transaction.find({
+      senderWallet: { $in: walletAddresses },
+      status: "success"
+    });
+ 
+    const uniqueSenders = new Set(
+      successfulTxns.map(t => t.senderWallet)
+    );
+ 
+    const successfulReferrals = uniqueSenders.size;
+ 
+    const rewardPerUser = 50;
+    const totalReferralRewards = successfulReferrals * rewardPerUser;
+ 
+    // LOCK LOGIC
+    const accountAge =
+      Date.now() - new Date(user.createdAt).getTime();
+ 
+    const daysSinceSignup =
+      accountAge / (1000 * 60 * 60 * 24);
+ 
+    const isLocked = daysSinceSignup < 3;
+    const daysUntilUnlock = isLocked
+      ? Math.ceil(3 - daysSinceSignup)
+      : 0;
+ 
+    // DAILY LIMIT
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+ 
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+ 
+    const todayTransactions = await Transaction.find({
+      userId: req.userId,
+      createdAt: { $gte: today, $lt: tomorrow },
+      status: "success"
+    });
+ 
+    const totalSentToday = todayTransactions.reduce(
+      (sum, txn) => sum + txn.amount,
+    );
+ 
+    const dailyLimit = 10000;
+ 
+    // FINAL RESPONSE (frontend compatible)
+    res.json({
+      id: wallet.walletAddress,
+      balance: wallet.balance,  
+ 
+      referralRewards: totalReferralRewards,
+      referralStatus: isLocked ? "Locked" : "Unlocked",
+      unlockInDays: daysUntilUnlock,
+ 
+      dailyUsed: totalSentToday,
+      dailyLimit: dailyLimit
+    });
+ 
+  } catch (err) {
+    console.error("Dashboard error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+   
  
