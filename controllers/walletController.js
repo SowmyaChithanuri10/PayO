@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const QRCode = require("qrcode");
 const { v4: uuidv4 } = require("uuid");
 const Recent = require("../models/Recents");
+const Bank = require("../models/Bank");
 
 // ================= get wallet =================
  
@@ -611,4 +612,63 @@ exports.walletDashboard=async (req, res) => {
   }
 };
    
- 
+ //=============================bank details ==============================
+
+
+//  Add Bank Account
+exports.addBank = async (req, res) => {
+  try {
+    const {
+      accountHolderName,
+      mobileNumber,
+      bankName,
+      accountNumber,
+      confirmAccountNumber,
+      ifscCode
+    } = req.body;
+
+    // Validations
+    if (
+      !accountHolderName ||
+      !mobileNumber ||
+      !bankName ||
+      !accountNumber ||
+      !confirmAccountNumber ||
+      !ifscCode
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (accountNumber !== confirmAccountNumber) {
+      return res.status(400).json({
+        message: "Account numbers do not match"
+      });
+    }
+
+    // Optional IFSC validation
+    const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+    if (!ifscRegex.test(ifscCode)) {
+      return res.status(400).json({
+        message: "Invalid IFSC code"
+      });
+    }
+
+    //  Save
+    const bank = await Bank.create({
+      userId: req.userId, // from auth middleware
+      accountHolderName,
+      mobileNumber,
+      bankName,
+      accountNumber,
+      ifscCode
+    });
+
+    res.status(201).json({
+      message: "Bank account added successfully",
+      bank
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
