@@ -162,7 +162,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, mobile: user.mobile },
       "mysecretkey",
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
  
     res.json({ message: "Login success", token });
@@ -231,7 +231,7 @@ exports.verifyOtp = async (req, res) => {
     await record.save();
  
     const token = jwt.sign({ mobile }, "mysecretkey", {
-      expiresIn: "1h",
+      expiresIn: "24h",
     });
  
     return res.json({ message: "OTP verified", token });
@@ -426,7 +426,7 @@ exports.verifyLoginOtp = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, mobile: user.mobile },
       "mysecretkey",
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
  
     // optional cleanup
