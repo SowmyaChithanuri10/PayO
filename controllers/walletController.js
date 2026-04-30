@@ -620,60 +620,80 @@ exports.walletDashboard=async (req, res) => {
 exports.addBank = async (req, res) => {
   try {
     const {
-      accountHolderName,
-      mobileNumber,
-      bankName,
-      accountNumber,
-      confirmAccountNumber,
-      ifscCode
+      name,
+      mobile,
+      bank,
+      account,
+      confirmAccount,
+      ifsc,
+      accountType
     } = req.body;
 
-    // Validations
+    //  Validations
     if (
-      !accountHolderName ||
-      !mobileNumber ||
-      !bankName ||
-      !accountNumber ||
-      !confirmAccountNumber ||
-      !ifscCode
+      !name ||
+      !mobile ||
+      !bank ||
+      !account ||
+      !confirmAccount ||
+      !ifsc ||
+      !accountType
     ) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({
+        message: "All fields are required"
+      });
     }
 
-    if (accountNumber !== confirmAccountNumber) {
+    // Account number match
+    if (account !== confirmAccount) {
       return res.status(400).json({
         message: "Account numbers do not match"
       });
     }
 
-    // Optional IFSC validation
+    //  Mobile validation
+    if (!/^[1-9]\d{9}$/.test(mobile)) {
+      return res.status(400).json({
+        message: "Invalid mobile number"
+      });
+    }
+
+    //  IFSC validation
     const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-    if (!ifscRegex.test(ifscCode)) {
+    if (!ifscRegex.test(ifsc)) {
       return res.status(400).json({
         message: "Invalid IFSC code"
       });
     }
-
-    //  Save
-    const bank = await Bank.create({
+if (account.length < 9 || account.length > 18) {
+  return res.status(400).json({
+    message: "Account number must be between 9 and 18 digits"
+  });
+}
+    //  Save to DB
+    const bankDetails = await Bank.create({
       userId: req.userId, // from auth middleware
-      accountHolderName,
-      mobileNumber,
-      bankName,
-      accountNumber,
-      ifscCode
+      accountHolderName: name,
+      mobileNumber: mobile,
+      bankName: bank,
+      accountNumber: account,
+      ifscCode: ifsc,
+      accountType: accountType
     });
 
+    // Response
     res.status(201).json({
-      message: "Bank account added successfully",
-      bank
+      message: "Bank details added successfully",
+      data: bankDetails
     });
 
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error(err);
+    res.status(500).json({
+      message: "Server error"
+    });
   }
 };
-
 
 // ================= CREATE =================
 exports.createNotification = async (req, res) => {

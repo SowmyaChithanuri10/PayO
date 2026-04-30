@@ -1,4 +1,3 @@
-// models/Bank.js
 const mongoose = require("mongoose");
 
 const bankSchema = new mongoose.Schema({
@@ -31,6 +30,10 @@ const bankSchema = new mongoose.Schema({
   ifscCode: {
     type: String,
     required: true
+  },
+
+  accountType: {  
+    type: String
   },
 
   isVerified: {
