@@ -222,9 +222,10 @@ exports.transactionsById = async (req, res) => {
     const receiverUser = receiverWallet
       ? await User.findById(receiverWallet.userId)
       : null;
+      
  
     res.json({
-      name: receiverUser?.name || "Unknown",
+      name: receiverUser?.name,
       amount: txn.amount,
       wallet: txn.receiverWallet,
       id: txn.transactionId  
