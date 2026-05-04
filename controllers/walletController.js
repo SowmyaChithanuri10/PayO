@@ -23,81 +23,117 @@ exports.getWallet = async (req, res) => {
  
  
 exports.transfer = async (req, res) => {
+  let txn;
+
   try {
     const { amount, toAddress, pin } = req.body;
- 
-    // 1. Validate input
-    if (!amount || !toAddress || !pin) {
-      return res.status(400).json({ message: "All fields required" });
-    }
- 
     const amt = Number(amount);
- 
-    if (isNaN(amt) || amt <= 0) {
-      return res.status(400).json({ message: "Invalid amount" });
+
+    // 1. Basic validation
+    if (!amt || amt <= 0 || !toAddress || !pin) {
+      return res.status(400).json({ message: "Invalid input" });
     }
- 
-    // 2. Get logged in user
+
+    // 2. Get user + wallet
     const user = await User.findById(req.userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
- 
-    // 3. Verify PIN
-    const isMatch = await bcrypt.compare(pin, user.transactionPin);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid PIN" });
-    }
- 
-    // 4. Get sender wallet
     const senderWallet = await Wallet.findOne({ userId: req.userId });
-    if (!senderWallet) {
-      return res.status(404).json({ message: "Sender wallet not found" });
+
+    if (!user || !senderWallet) {
+      return res.status(404).json({ message: "User/Wallet not found" });
     }
- 
-    // 5. Check balance
-    if (senderWallet.balance < amt) {
-      return res.status(400).json({ message: "Insufficient balance" });
-    }
- 
-    // 6. Get receiver wallet using scanned QR address
-    const receiverWallet = await Wallet.findOne({ walletAddress: toAddress });
-    if (!receiverWallet) {
-      return res.status(404).json({ message: "Receiver not found" });
-    }
- 
-    // 7. Prevent self-transfer
-    if (senderWallet.walletAddress === receiverWallet.walletAddress) {
-      return res.status(400).json({ message: "Cannot transfer to self" });
-    }
- 
-    // 8. Update balances
-    senderWallet.balance -= amt;
-    receiverWallet.balance += amt;
- 
-    await senderWallet.save();
-    await receiverWallet.save();
- 
-    // 9. Save transaction
-    const txn = new Transaction({
+
+    // 3. Create PENDING transaction first
+    txn = await Transaction.create({
       userId: req.userId,
       senderWallet: senderWallet.walletAddress,
-      receiverWallet: receiverWallet.walletAddress,
+      receiverWallet: toAddress,
       amount: amt,
-      status: "success",
+      status: "pending"
     });
- 
+
+    // 4. PIN check
+    const isMatch = await bcrypt.compare(pin, user.transactionPin);
+    if (!isMatch) {
+      txn.status = "failed";
+      txn.failureReason = "Invalid PIN";
+      await txn.save();
+
+      return res.status(401).json({
+        message: "Invalid PIN",
+        txnId: txn.transactionId
+      });
+    }
+
+    // 5. Receiver check
+    const receiverWallet = await Wallet.findOne({ walletAddress: toAddress });
+    if (!receiverWallet) {
+      txn.status = "failed";
+      txn.failureReason = "Receiver not found";
+      await txn.save();
+
+      return res.status(404).json({
+        message: "Receiver not found",
+        txnId: txn.transactionId
+      });
+    }
+
+    // 6. Self transfer check
+    if (senderWallet.walletAddress === receiverWallet.walletAddress) {
+      txn.status = "failed";
+      txn.failureReason = "Cannot transfer to self";
+      await txn.save();
+
+      return res.status(400).json({
+        message: "Cannot transfer to self",
+        txnId: txn.transactionId
+      });
+    }
+
+    // 7. Balance check
+    if (senderWallet.balance < amt) {
+      txn.status = "failed";
+      txn.failureReason = "Insufficient balance";
+      await txn.save();
+
+      return res.status(400).json({
+        message: "Insufficient balance",
+        txnId: txn.transactionId
+      });
+    }
+
+    // 8. Perform transfer
+    senderWallet.balance -= amt;
+    receiverWallet.balance += amt;
+
+    await senderWallet.save();
+    await receiverWallet.save();
+
+    // 9. Mark success
+    txn.receiverWallet = receiverWallet.walletAddress;
+    txn.status = "success";
     await txn.save();
- 
-    // 10. Send response
+
+    // 10. Response
     return res.json({
       message: "Transfer successful",
-      balance: senderWallet.balance,
+      txnId: txn.transactionId,
+      balance: senderWallet.balance
     });
- 
+
   } catch (err) {
     console.error("TRANSFER ERROR:", err);
-    return res.status(500).json({ message: err.message });
+
+    // 11. Handle unexpected error
+    if (txn) {
+      txn.status = "failed";
+      txn.failureReason = "Server error";
+      await txn.save();
+    }
+
+    return res.status(500).json({
+      message: "Something went wrong",
+      txnId: txn?.transactionId
+    });
   }
 };
  

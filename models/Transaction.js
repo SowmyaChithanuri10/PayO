@@ -22,6 +22,7 @@ const transactionSchema = new mongoose.Schema({
     enum: ["pending", "success", "failed"],
     default: "success"
   },
+  failureReason: String,
  
   createdAt: {
     type: Date,
