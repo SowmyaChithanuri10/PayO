@@ -206,35 +206,36 @@ exports.getTransactions = async (req, res) => {
      
 exports.transactionsById = async (req, res) => {
   try {
-   const txn = await Transaction.findById(req.params.transaction_id);
- 
+    const txn = await Transaction.findOne({
+      transactionId: req.params.transaction_id
+    });
+
     if (!txn) {
       return res.status(404).json({
         message: "Transaction not found"
       });
     }
- 
-    // Get receiver user name
+
     const receiverWallet = await Wallet.findOne({
       walletAddress: txn.receiverWallet
     });
- 
+
     const receiverUser = receiverWallet
       ? await User.findById(receiverWallet.userId)
       : null;
-      
- 
     res.json({
       name: receiverUser?.name,
       amount: txn.amount,
       wallet: txn.receiverWallet,
-      id: txn.transactionId  
+      id: txn.transactionId
     });
- 
+
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: "Server error" });
   }
-};    
+};
+
 //======================transaction count ========================
 exports.transactionCount = async (req, res) => {
   try {
@@ -875,5 +876,28 @@ exports.getIncomeOutcome = async (req, res) => {
   } catch (err) {
     console.error("Income/Outcome error:", err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+//======================profile api=====================
+
+exports.profile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({
+      message: "Profile fetched",
+      user
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error"
+    });
   }
 };
