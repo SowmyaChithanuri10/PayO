@@ -835,3 +835,44 @@ exports.getUnreadCount = async (req, res) => {
     res.status(500).json({ message: "Error" });
   }
 };
+
+
+// ================= INCOME & OUTCOME =================
+exports.getIncomeOutcome = async (req, res) => {
+  try {
+    const wallet = await Wallet.findOne({ userId: req.userId });
+
+    if (!wallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+
+    // Get all SUCCESS transactions of this user
+    const transactions = await Transaction.find({
+      status: "success",
+      $or: [
+        { senderWallet: wallet.walletAddress },
+        { receiverWallet: wallet.walletAddress }
+      ]
+    });
+
+    let income = 0;
+    let outcome = 0;
+
+    transactions.forEach(txn => {
+      if (txn.receiverWallet === wallet.walletAddress) {
+        income += txn.amount;   // money received
+      } else if (txn.senderWallet === wallet.walletAddress) {
+        outcome += txn.amount;  // money sent
+      }
+    });
+
+    res.json({
+      income,
+      outcome
+    });
+
+  } catch (err) {
+    console.error("Income/Outcome error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
