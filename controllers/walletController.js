@@ -198,25 +198,24 @@ exports.transactionsById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };    
+//======================transaction count ========================
+exports.transactionCount = async (req, res) => {
+  try {
+    const wallet = await Wallet.findOne({ userId: req.userId });
 
-
-exports.transactionCount = async(req, res) => {
-
-  try{
-  
-    const count = await Transaction.countDocuments({userId: req.userId});
-
-
-    res.status(200).json({
-      count
+    const count = await Transaction.countDocuments({
+      $or: [
+        { userId: req.userId },
+        { senderWallet: wallet.walletAddress },
+        { receiverWallet: wallet.walletAddress }
+      ]
     });
+
+    res.json({ count });
 
   } catch (error) {
-    res.status(500).json({
-      error: error.message
-    });
+    res.status(500).json({ error: error.message });
   }
-  
 };
 
 
