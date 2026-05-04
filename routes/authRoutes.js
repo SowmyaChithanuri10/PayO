@@ -13,4 +13,5 @@ router.post("/send-login-otp",authController.sendLoginOtp);
 router.post("/change-pin",auth,authController.changePin);
 router.post("/verify-login-otp",authController.verifyLoginOtp);
 router.post("/resend-login-otp",authController.resendLoginOtp);
+
 module.exports = router;

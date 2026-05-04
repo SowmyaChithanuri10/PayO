@@ -198,7 +198,28 @@ exports.transactionsById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };    
- 
+
+
+exports.transactionCount = async(req, res) => {
+
+  try{
+  
+    const count = await Transaction.countDocuments({userId: req.userId});
+
+
+    res.status(200).json({
+      count
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
+  }
+  
+};
+
+
  // ================= generate qr address =================
  
  

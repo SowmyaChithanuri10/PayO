@@ -24,6 +24,7 @@ router.get("/get-all", auth, walletController.getAllNotifications);
 router.put("/mark-read/:id", auth, walletController.markOneAsRead);
 router.put("/mark-all-read", auth, walletController.markAllAsRead);
 router.get("/get-unread-count", auth, walletController.getUnreadCount);
+router.get("/get-transaction-count", auth, walletController.transactionCount);
 
 module.exports = router;
  
