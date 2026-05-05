@@ -150,57 +150,70 @@ exports.getBalance=async (req, res) => {
  
  
 // ================= TRANSACTION HISTORY =================
+
 exports.getTransactions = async (req, res) => {
   try {
     const wallet = await Wallet.findOne({ userId: req.userId });
- 
+
     if (!wallet) {
       return res.status(404).json({ message: "Wallet not found" });
     }
- 
+
     const txs = await Transaction.find({
       $or: [
         { senderWallet: wallet.walletAddress },
         { receiverWallet: wallet.walletAddress }
       ]
     }).sort({ createdAt: -1 });
- 
-    const formatted = await Promise.all(
-      txs.map(async (t) => {
- 
-        const isSender = t.senderWallet === wallet.walletAddress;
- 
-        const otherAddress = isSender
-          ? t.receiverWallet
-          : t.senderWallet;
- 
-        const otherWallet = await Wallet.findOne({
-          walletAddress: otherAddress
-        });
- 
-        const otherUser = otherWallet
-          ? await User.findById(otherWallet.userId)
-          : null;
- 
-        return {
-  id: t._id, //  ADD THIS LINE
-  name: otherUser?.name || "Unknown",
-  amount: isSender ? -t.amount : t.amount,
-  status: t.status === "pending" ? "processing" : t.status,
-  createdAt: t.createdAt
-};
-      })
-    );
- 
-    res.json({
-      transactions: formatted
+
+    const addresses = [
+      ...new Set(
+        txs.flatMap(t => [t.senderWallet, t.receiverWallet])
+      )
+    ];
+
+    const wallets = await Wallet.find({
+      walletAddress: { $in: addresses }
     });
- 
+
+    const users = await User.find({
+      _id: { $in: wallets.map(w => w.userId) }
+    });
+
+    
+    const walletMap = {};
+    wallets.forEach(w => {
+      const user = users.find(
+        u => u._id.toString() === w.userId.toString()
+      );
+      walletMap[w.walletAddress] = user?.name;
+    });
+
+    const formatted = txs.map(t => {
+      const isSender = t.senderWallet === wallet.walletAddress;
+
+      const otherAddress = isSender
+        ? t.receiverWallet
+        : t.senderWallet;
+
+      return {
+        id: t.transactionId, 
+        name: walletMap[otherAddress] || "Unknown",
+        amount: isSender ? -t.amount : t.amount,
+        status:
+          t.status === "pending" ? "processing" : t.status,
+        createdAt: t.createdAt
+      };
+    });
+
+    res.json({ transactions: formatted });
+
   } catch (err) {
-    console.error("Transaction error:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
  //===============transactions history of particular user==================
  
      
@@ -216,18 +229,39 @@ exports.transactionsById = async (req, res) => {
       });
     }
 
+    const senderWallet = await Wallet.findOne({
+      walletAddress: txn.senderWallet
+    });
+
     const receiverWallet = await Wallet.findOne({
       walletAddress: txn.receiverWallet
     });
 
+    const senderUser = senderWallet
+      ? await User.findById(senderWallet.userId)
+      : null;
+
     const receiverUser = receiverWallet
       ? await User.findById(receiverWallet.userId)
       : null;
+
+    //  check current user role
+    const isSender =
+      senderWallet?.userId.toString() === req.userId;
+
+    const name = isSender
+      ? receiverUser?.name
+      : senderUser?.name;
+
+    const wallet = isSender
+      ? txn.receiverWallet
+      : txn.senderWallet;
+
     res.json({
-      name: receiverUser?.name,
-      amount: txn.amount,
-      wallet: txn.receiverWallet,
-      id: txn.transactionId
+      name: name || "Unknown",   
+      amount: txn.amount,        
+      wallet: wallet,            
+      id: txn.transactionId      
     });
 
   } catch (err) {
