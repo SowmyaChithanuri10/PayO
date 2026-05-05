@@ -528,3 +528,61 @@ exports.resendLoginOtp = async (req, res) => {
   }
 };
  
+
+//====================reset password==================
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { password, confirmPassword } = req.body;
+
+    
+    if (!password || !confirmPassword) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords mismatch" });
+    }
+
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          "Use 8+ chars with uppercase, lowercase, number & special character",
+      });
+    }
+
+    //  get user from middleware (BEST)
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    //  prevent same password reuse
+    const isSame = await bcrypt.compare(password, user.password);
+    if (isSame) {
+      return res.status(400).json({
+        message: "New password cannot be same as old password",
+      });
+    }
+
+    //  update password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    // optional: delete OTP (if you stored mobile in middleware)
+    if (req.mobile) {
+      await Otp.deleteOne({ mobile: req.mobile });
+    }
+
+    res.json({ message: "Password changed successfully" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
