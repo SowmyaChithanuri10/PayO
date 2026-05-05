@@ -222,22 +222,30 @@ exports.getTransactions = async (req, res) => {
       walletMap[w.walletAddress] = user?.name;
     });
 
-    const formatted = txs.map(t => {
-      const isSender = t.senderWallet === wallet.walletAddress;
+ const formatted = txs.map(t => {
+  const isSender = t.senderWallet === wallet.walletAddress;
 
-      const otherAddress = isSender
-        ? t.receiverWallet
-        : t.senderWallet;
+  const otherAddress = isSender
+    ? t.receiverWallet
+    : t.senderWallet;
 
-      return {
-        id: t.transactionId, 
-        name: walletMap[otherAddress] || "Unknown",
-        amount: isSender ? -t.amount : t.amount,
-        status:
-          t.status === "pending" ? "processing" : t.status,
-        createdAt: t.createdAt
-      };
-    });
+  return {
+    transactionId: t.transactionId,
+
+    otherPerson: {
+      name: walletMap[otherAddress] || "Unknown",
+      walletAddress: otherAddress
+    },
+
+    amount: isSender ? -t.amount : t.amount,
+    type: isSender ? "sent" : "received",
+
+    status:
+      t.status === "pending" ? "processing" : t.status,
+
+    createdAt: t.createdAt
+  };
+});
 
     res.json({ transactions: formatted });
 
@@ -262,7 +270,6 @@ exports.transactionsById = async (req, res) => {
       });
     }
 
-    // wallets
     const senderWallet = await Wallet.findOne({
       walletAddress: txn.senderWallet
     });
@@ -271,7 +278,6 @@ exports.transactionsById = async (req, res) => {
       walletAddress: txn.receiverWallet
     });
 
-    // users
     const senderUser = senderWallet
       ? await User.findById(senderWallet.userId)
       : null;
@@ -280,38 +286,25 @@ exports.transactionsById = async (req, res) => {
       ? await User.findById(receiverWallet.userId)
       : null;
 
-    //  identify current user role
     const isSender =
-      senderWallet &&
-      senderWallet.userId.toString() === req.userId;
+      senderWallet?.userId.toString() === req.userId;
 
-    let response;
+    
+    const otherUser = isSender ? receiverUser : senderUser;
+    const otherWallet = isSender
+      ? txn.receiverWallet
+      : txn.senderWallet;
 
-    // ================= SENT =================
-    if (isSender) {
-      response = {
-        type: "sent",
-        name: receiverUser?.name || "Unknown",
-        walletAddress: receiverWallet?.walletAddress,
-        amount: txn.amount,
-        transactionId: txn.transactionId,
-        canPay: true 
-      };
-    }
+    res.json({
+      transactionId: txn.transactionId,
+      amount: txn.amount,
 
-    // ================= RECEIVED =================
-    else {
-      response = {
-        type: "received",
-        name: senderUser?.name || "Unknown",
-        walletAddress: senderWallet?.walletAddress,
-        amount: txn.amount,
-        transactionId: txn.transactionId,
-        canPay: true 
-      };
-    }
-
-    res.json(response);
+      
+      otherPerson: {
+        name: otherUser?.name || "Unknown",
+        walletAddress: otherWallet
+      }
+    });
 
   } catch (err) {
     console.log(err);
@@ -880,7 +873,6 @@ exports.getAllNotifications = async (req, res) => {
   title: n.title,
   message: n.message,
   date: n.createdAt,
-  time: new Date(n.createdAt).toLocaleTimeString(),
   read: n.isRead   
 }));
 
