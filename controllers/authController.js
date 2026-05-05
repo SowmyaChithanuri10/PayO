@@ -7,6 +7,7 @@ const User = require("../models/User");
 const Otp = require("../models/Otp");
 const Wallet = require("../models/Wallet");
 const Transaction = require("../models/Transaction");
+const { sendNotification } = require("../utils/notify");
  
 const { generateWalletAddress, generateQR } = require("../utils/helpers");
 // ======================register========================
@@ -80,6 +81,12 @@ if (!emailRegex.test(email)) {
       myReferralCode: myReferral,
       isVerified: true
     });
+    await sendNotification({
+  userId: user._id,
+  title: "Welcome to PAYO",
+  message: "Your wallet is ready",
+  type: "SYSTEM"
+});
  
     // ================= CREATE WALLET =================
     const walletAddress = generateWalletAddress();
@@ -132,7 +139,12 @@ const wallet = await Wallet.create({
     type: "credit",
     message: "Referral bonus received"
   });
- 
+ await sendNotification({
+  userId: referrer._id,
+  title: "Referral Reward",
+  message: `You earned ${REFERRAL_BONUS} PAYO`,
+  type: "REWARD"
+});
 }
  
     // ================= CLEANUP =================
@@ -175,7 +187,12 @@ exports.login = async (req, res) => {
       "mysecretkey",
       { expiresIn: "24h" }
     );
- 
+ await sendNotification({
+  userId: user._id,
+  title: "Login Alert",
+  message: "You logged into your account",
+  type: "SECURITY"
+});
     res.json({ message: "Login success", token });
  
   } catch {

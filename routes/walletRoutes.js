@@ -19,14 +19,13 @@ router.post("/recent-toggle-add", auth, walletController.saveRecent);
 router.get("/recents-page",auth,walletController.getRecents);
 router.get("/getwalletdashboard",auth,walletController.walletDashboard);
 router.post("/add-bank", auth, walletController.addBank);
-router.post("/create", auth, walletController.createNotification);
-router.get("/get-all", auth, walletController.getAllNotifications);
-router.put("/mark-read/:id", auth, walletController.markOneAsRead);
-router.put("/mark-all-read", auth, walletController.markAllAsRead);
-router.get("/get-unread-count", auth, walletController.getUnreadCount);
 router.get("/get-transaction-count", auth, walletController.transactionCount);
 router.get("/income-outcome", auth, walletController.getIncomeOutcome);
 router.get("/profile",auth,walletController.profile);
+router.get("/notifications", auth, walletController.getAllNotifications);
+router.put("/notifications/:id/read", auth, walletController.markOneAsRead);
+router.put("/notifications/read-all", auth, walletController.markAllAsRead);
+router.get("/notifications/unread-count", auth, walletController.getUnreadCount);
 
 module.exports = router;
  

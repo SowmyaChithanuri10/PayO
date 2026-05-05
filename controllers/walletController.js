@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require("uuid");
 const Recent = require("../models/Recents");
 const Bank = require("../models/Bank");
 const Notification = require("../models/Notification");
+const { sendNotification } = require("../utils/notify");
 
 // ================= get wallet =================
  
@@ -57,7 +58,12 @@ exports.transfer = async (req, res) => {
       txn.status = "failed";
       txn.failureReason = "Invalid PIN";
       await txn.save();
-
+      await sendNotification({
+  userId: req.userId,
+  title: "Transaction Failed",
+  message: "Invalid PIN",
+  type: "SECURITY"
+});
       return res.status(401).json({
         message: "Invalid PIN",
         txnId: txn.transactionId
@@ -70,7 +76,12 @@ exports.transfer = async (req, res) => {
       txn.status = "failed";
       txn.failureReason = "Receiver not found";
       await txn.save();
-
+      await sendNotification({
+  userId: req.userId,
+  title: "Transaction Failed",
+  message: "Receiver not found",
+  type: "PAYMENT"
+});
       return res.status(404).json({
         message: "Receiver not found",
         txnId: txn.transactionId
@@ -94,7 +105,12 @@ exports.transfer = async (req, res) => {
       txn.status = "failed";
       txn.failureReason = "Insufficient balance";
       await txn.save();
-
+      await sendNotification({
+  userId: req.userId,
+  title: "Transaction Failed",
+  message: "Insufficient balance",
+  type: "PAYMENT"
+});
       return res.status(400).json({
         message: "Insufficient balance",
         txnId: txn.transactionId
@@ -113,6 +129,23 @@ exports.transfer = async (req, res) => {
     txn.status = "success";
     await txn.save();
 
+// notification
+
+//  Sender notification
+await sendNotification({
+  userId: req.userId,
+  title: "Payment Sent",
+  message: `You sent ${amt} PAYO`,
+  type: "PAYMENT"
+});
+
+// Receiver notification
+await sendNotification({
+  userId: receiverWallet.userId,
+  title: "Payment Received",
+  message: `You received ${amt} PAYO`,
+  type: "PAYMENT"
+});
     // 10. Response
     return res.json({
       message: "Transfer successful",
@@ -229,6 +262,7 @@ exports.transactionsById = async (req, res) => {
       });
     }
 
+    // wallets
     const senderWallet = await Wallet.findOne({
       walletAddress: txn.senderWallet
     });
@@ -237,6 +271,7 @@ exports.transactionsById = async (req, res) => {
       walletAddress: txn.receiverWallet
     });
 
+    // users
     const senderUser = senderWallet
       ? await User.findById(senderWallet.userId)
       : null;
@@ -245,24 +280,38 @@ exports.transactionsById = async (req, res) => {
       ? await User.findById(receiverWallet.userId)
       : null;
 
-    //  check current user role
+    //  identify current user role
     const isSender =
-      senderWallet?.userId.toString() === req.userId;
+      senderWallet &&
+      senderWallet.userId.toString() === req.userId;
 
-    const name = isSender
-      ? receiverUser?.name
-      : senderUser?.name;
+    let response;
 
-    const wallet = isSender
-      ? txn.receiverWallet
-      : txn.senderWallet;
+    // ================= SENT =================
+    if (isSender) {
+      response = {
+        type: "sent",
+        name: receiverUser?.name || "Unknown",
+        walletAddress: receiverWallet?.walletAddress,
+        amount: txn.amount,
+        transactionId: txn.transactionId,
+        canPay: true 
+      };
+    }
 
-    res.json({
-      name: name || "Unknown",   
-      amount: txn.amount,        
-      wallet: wallet,            
-      id: txn.transactionId      
-    });
+    // ================= RECEIVED =================
+    else {
+      response = {
+        type: "received",
+        name: senderUser?.name || "Unknown",
+        walletAddress: senderWallet?.walletAddress,
+        amount: txn.amount,
+        transactionId: txn.transactionId,
+        canPay: true 
+      };
+    }
+
+    res.json(response);
 
   } catch (err) {
     console.log(err);
@@ -685,6 +734,14 @@ exports.walletDashboard=async (req, res) => {
     );
  
     const dailyLimit = 10000;
+    if (totalSentToday >= dailyLimit) {
+  await sendNotification({
+    userId: req.userId,
+    title: "Limit Reached",
+    message: "You reached your daily limit",
+    type: "INFO"
+  });
+}
  
     // FINAL RESPONSE (frontend compatible)
     res.json({
@@ -818,7 +875,16 @@ exports.getAllNotifications = async (req, res) => {
       userId: req.userId
     }).sort({ createdAt: -1 });
 
-    res.json(data);
+    const formatted = data.map(n => ({
+  _id: n._id,
+  title: n.title,
+  message: n.message,
+  date: n.createdAt,
+  time: new Date(n.createdAt).toLocaleTimeString(),
+  read: n.isRead   
+}));
+
+res.json(formatted);
 
   } catch (err) {
     res.status(500).json({ message: "Error fetching notifications" });
