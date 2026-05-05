@@ -882,9 +882,10 @@ exports.getIncomeOutcome = async (req, res) => {
 
 exports.profile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId)
-      .populate("walletId") 
-      .select("-password -transactionPin -referralcode ");
+    // 1. Get user
+    const user = await User.findById(req.userId).select(
+      "name email mobile myReferralCode walletId"
+    );
 
     if (!user) {
       return res.status(404).json({
@@ -892,12 +893,38 @@ exports.profile = async (req, res) => {
       });
     }
 
+    // 2. Get wallet
+    const wallet = await Wallet.findById(user.walletId).select(
+      "walletAddress balance"
+    );
+
+    // 3. Transaction count
+    const txnCount = await Transaction.countDocuments({
+      $or: [
+        { senderWallet: wallet?.walletAddress },
+        { receiverWallet: wallet?.walletAddress }
+      ]
+    });
+
+    // 4. Final response (ONLY required fields)
     res.status(200).json({
       message: "Profile fetched",
-      user
+      data: {
+        name: user.name,
+        mobile: user.mobile,
+        email: user.email,
+        referralCode: user.myReferralCode,
+
+        walletId: user.walletId,
+        walletAddress: wallet?.walletAddress,
+        balance: wallet?.balance,
+
+        transactionCount: txnCount
+      }
     });
 
   } catch (err) {
+    console.error("Profile error:", err);
     res.status(500).json({
       message: "Server error"
     });
