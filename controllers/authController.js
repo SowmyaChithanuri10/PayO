@@ -36,7 +36,12 @@ const token = authHeader.split(" ")[1];
     if (!name || !email || !password || !confirmpassword) {
       return res.status(400).json({ message: "All fields required" });
     }
- 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+ if (!passwordRegex.test(password)) {
+  return res.status(400).json({
+    message: "Use 8+ chars with uppercase, lowercase, number & special character"
+  });
+}
     if (password !== confirmpassword) {
       return res.status(400).json({ message: "Passwords mismatch" });
     }
@@ -45,10 +50,16 @@ const token = authHeader.split(" ")[1];
     if (existEmail) {
       return res.status(400).json({ message: "Email already exists" });
     }
- 
+ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if (!emailRegex.test(email)) {
+  return res.status(400).json({
+    message: "Invalid email format. Example: user@gmail.com"
+  });
+}
     const existMobile = await User.findOne({ mobile });
     if (existMobile) {
-      return res.status(400).json({ message: "Mobile already exists" });
+      return res.status(400).json({ message: "Mobile number already exists" });
     }
  
     const otpRecord = await Otp.findOne({ mobile, isVerified: true });
