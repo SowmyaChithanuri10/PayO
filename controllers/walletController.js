@@ -256,54 +256,65 @@ exports.transactionsById = async (req, res) => {
     const txn = await Transaction.findOne({
       transactionId: req.params.transaction_id
     });
- 
+
     if (!txn) {
       return res.status(404).json({
         message: "Transaction not found"
       });
     }
- 
+
+    // get current user wallet
+    const myWallet = await Wallet.findOne({ userId: req.userId });
+
+    if (!myWallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+
+    // find both users
     const senderWallet = await Wallet.findOne({
       walletAddress: txn.senderWallet
     });
- 
+
     const receiverWallet = await Wallet.findOne({
       walletAddress: txn.receiverWallet
     });
- 
+
     const senderUser = senderWallet
       ? await User.findById(senderWallet.userId)
       : null;
- 
+
     const receiverUser = receiverWallet
       ? await User.findById(receiverWallet.userId)
       : null;
- 
-    //  check current user role
-    const isSender =
-      senderWallet?.userId.toString() === req.userId;
- 
-    const name = isSender
-      ? receiverUser?.name
-      : senderUser?.name;
- 
-    const wallet = isSender
-      ? txn.receiverWallet
-      : txn.senderWallet;
- 
+
+   
+    const isSender = txn.senderWallet === myWallet.walletAddress;
+
+
+    let otherUser, otherWallet;
+
+    if (isSender) {
+      // I sent → show receiver
+      otherUser = receiverUser;
+      otherWallet = txn.receiverWallet;
+    } else {
+      // I received → show sender
+      otherUser = senderUser;
+      otherWallet = txn.senderWallet;
+    }
+
     res.json({
-      name: name || "Unknown",  
-      amount: txn.amount,        
-      wallet: wallet,            
-      id: txn.transactionId      
+      name: otherUser?.name || "Unknown",
+      wallet: otherWallet,
+      amount: txn.amount,
+      id: txn.transactionId
     });
- 
+
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 //======================transaction count ========================
 exports.transactionCount = async (req, res) => {
   try {
