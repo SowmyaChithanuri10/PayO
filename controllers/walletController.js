@@ -882,7 +882,9 @@ exports.getIncomeOutcome = async (req, res) => {
 
 exports.profile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select("-password");
+    const user = await User.findById(req.userId)
+      .populate("walletId") 
+      .select("-password -transactionPin -referralcode ");
 
     if (!user) {
       return res.status(404).json({
