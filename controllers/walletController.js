@@ -233,6 +233,7 @@ exports.getTransactions = async (req, res) => {
         id: t.transactionId,
         name: walletMap[otherAddress] || "Unknown",
         amount: isSender ? -t.amount : t.amount,
+        type: isSender ? "sent" : "received",
         status:
           t.status === "pending" ? "processing" : t.status,
         createdAt: t.createdAt
