@@ -531,6 +531,10 @@ exports.previewTransfer = async (req, res) => {
  
     const senderWallet = await Wallet.findOne({ userId: req.userId });
     const receiverWallet = await Wallet.findOne({ walletAddress: toAddress });
+    const existing = await Recent.findOne({
+  userId: req.userId,
+  walletAddress: toAddress
+});
  
     if (!receiverWallet) {
       return res.status(404).json({ message: "Receiver not found" });
@@ -557,7 +561,8 @@ exports.previewTransfer = async (req, res) => {
         name: receiverUser.name
       },
       address: receiverWallet.walletAddress, // required
-      amount: amt
+      amount: amt,
+      isRecent: !!existing
     });
  
   } catch (err) {
@@ -694,9 +699,12 @@ exports.saveRecent = async (req, res) => {
       walletAddress,
     });
  
-    if (existing) {
-      return res.status(200).json({ message: "Already saved" });
-    }
+  if (existing) {
+  return res.status(200).json({
+    message: "Already saved",
+    isRecent: true   // already exists
+  });
+}
  
     const recent = new Recent({
       userId: req.userId,
@@ -706,13 +714,33 @@ exports.saveRecent = async (req, res) => {
  
     await recent.save();
  
-    res.status(201).json({ message: "Saved to recents" });
+    res.status(201).json({
+  message: "Saved to recents",
+  isRecent: true   
+});
  
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
- 
+ //==============================check recent (for toggle)=========================
+exports.checkRecent = async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+
+    const existing = await Recent.findOne({
+      userId: req.userId,
+      walletAddress
+    });
+
+    res.json({
+      isRecent: !!existing   // true or false
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
 //=================== recents page================
  
 exports.getRecents = async (req, res) => {

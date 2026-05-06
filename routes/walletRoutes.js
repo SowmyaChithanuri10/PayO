@@ -16,6 +16,7 @@ router.get("/transaction-list",auth,walletController.getTransactions);
 router.get("/refer", auth, walletController.getReferData);
 router.get("/transactionById/:transaction_id",auth,walletController.transactionsById);
 router.post("/recent-toggle-add", auth, walletController.saveRecent);
+router.get("/recent-check/:walletAddress", auth, walletController.checkRecent);
 router.get("/recents-page",auth,walletController.getRecents);
 router.get("/getwalletdashboard",auth,walletController.walletDashboard);
 router.post("/add-bank", auth, walletController.addBank);
