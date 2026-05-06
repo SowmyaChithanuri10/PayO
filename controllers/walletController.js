@@ -316,6 +316,65 @@ exports.transactionsById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+//=======================transaction of user history (in person)=================
+exports.getTransactionsWithUser = async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+
+    // 1. My wallet
+    const myWallet = await Wallet.findOne({ userId: req.userId });
+
+    if (!myWallet) {
+      return res.status(404).json({ message: "Wallet not found" });
+    }
+
+    // 2. Get all transactions between both wallets
+    const txs = await Transaction.find({
+      $or: [
+        {
+          senderWallet: myWallet.walletAddress,
+          receiverWallet: walletAddress
+        },
+        {
+          senderWallet: walletAddress,
+          receiverWallet: myWallet.walletAddress
+        }
+      ]
+    }).sort({ createdAt: -1 });
+
+    // 3. Get other user details
+    const otherWallet = await Wallet.findOne({ walletAddress });
+
+    const otherUser = otherWallet
+      ? await User.findById(otherWallet.userId)
+      : null;
+
+    // 4. Format response (frontend friendly)
+    const formatted = txs.map(t => {
+      const isSender = t.senderWallet === myWallet.walletAddress;
+
+      return {
+        id: t.transactionId,
+        type: isSender ? "sent" : "received",
+        amount: isSender ? -t.amount : t.amount,
+        status: t.status === "pending" ? "processing" : t.status,
+        date: t.createdAt
+      };
+    });
+
+    res.json({
+      name: otherUser?.name || "Unknown",
+      walletAddress,
+      transactions: formatted
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 //======================transaction count ========================
 exports.transactionCount = async (req, res) => {
   try {
