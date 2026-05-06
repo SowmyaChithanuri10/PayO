@@ -307,8 +307,7 @@ exports.transactionsById = async (req, res) => {
       name: otherUser?.name || "Unknown",
       wallet: otherWallet,
       amount: txn.amount,
-      id: txn.transactionId,
-      createdAt: t.createdAt
+      id: txn.transactionId
     });
 
   } catch (err) {
