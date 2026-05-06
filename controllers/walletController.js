@@ -307,6 +307,7 @@ exports.transactionsById = async (req, res) => {
     res.json({
       name: otherUser?.name || "Unknown",
       wallet: otherWallet,
+      type: isSender ? "sent" : "received",
       amount: txn.amount,
       id: txn.transactionId,
       timestamp: txn.createdAt
