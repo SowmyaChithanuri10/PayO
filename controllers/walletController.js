@@ -389,7 +389,7 @@ exports.transactionCount = async (req, res) => {
 };
  
  
-// ================= validating qr image(scanning qrtoken) =================
+// ================= validating qr image(scanning qrtoken) =========================
  
  exports.scan=async (req, res) => {
   try {
