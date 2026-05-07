@@ -309,8 +309,10 @@ exports.transactionsById = async (req, res) => {
       wallet: otherWallet,
       type: isSender ? "sent" : "received",
       amount: txn.amount,
+      status: txn.status,
       id: txn.transactionId,
       timestamp: txn.createdAt
+
     });
 
   } catch (err) {
