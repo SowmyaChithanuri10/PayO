@@ -817,6 +817,7 @@ exports.walletDashboard=async (req, res) => {
  
     const totalSentToday = todayTransactions.reduce(
       (sum, txn) => sum + txn.amount,
+      0
     );
  
     const dailyLimit = 10000;
