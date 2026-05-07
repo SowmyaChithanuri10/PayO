@@ -619,7 +619,7 @@ exports.confirmTransfer = async (req, res) => {
       to: receiverWallet.walletAddress,
       amount: amt,
       type: "TRANSFER",
-      status: "SUCCESS",
+      status: "success",
       date: new Date()
     });
  
