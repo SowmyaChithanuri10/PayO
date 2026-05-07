@@ -23,10 +23,6 @@ router.post("/add-bank", auth, walletController.addBank);
 router.get("/get-transaction-count", auth, walletController.transactionCount);
 router.get("/income-outcome", auth, walletController.getIncomeOutcome);
 router.get("/profile",auth,walletController.profile);
-router.get("/notifications", auth, walletController.getAllNotifications);
-router.put("/notifications/:id/read", auth, walletController.markOneAsRead);
-router.put("/notifications/read-all", auth, walletController.markAllAsRead);
-router.get("/notifications/unread-count", auth, walletController.getUnreadCount);
 router.get("/transactions/user/:walletAddress", auth, walletController.getTransactionsWithUser);
 
 module.exports = router;
