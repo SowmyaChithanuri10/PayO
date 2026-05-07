@@ -13,6 +13,6 @@ router.post("/send-login-otp",authController.sendLoginOtp);
 router.post("/change-pin",auth,authController.changePin);
 router.post("/verify-login-otp",authController.verifyLoginOtp);
 router.post("/resend-login-otp",authController.resendLoginOtp);
-router.post("/reset-passoword",auth,authController.resetPassword);
+router.post("/reset-password",auth,authController.resetPassword);
 
 module.exports = router;
