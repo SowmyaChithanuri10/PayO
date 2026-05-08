@@ -296,7 +296,7 @@ exports.sendOtp=async (req, res) => {
       expiresAt: Date.now() + 2 * 60 * 1000
     }
   },
-  { upsert: true, new: true }
+ { upsert: true, returnDocument: "after" }
 );
  
   console.log("OTP:", otp);
@@ -418,7 +418,7 @@ exports.sendLoginOtp = async (req, res) => {
       isVerified: false,
       expiresAt: Date.now() + 2 * 60 * 1000
     },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: "after" }
   );
  
   console.log("Login OTP:", otp);
@@ -511,7 +511,7 @@ exports.resendLoginOtp = async (req, res) => {
         isVerified: false,
         expiresAt: now + 2 * 60 * 1000 // 2 minutes
       },
-      { upsert: true, new: true }
+     { upsert: true, returnDocument: "after" }
     );
  
     console.log("Resent Login OTP:", otp);
