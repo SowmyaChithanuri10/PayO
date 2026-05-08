@@ -524,7 +524,7 @@ exports.transactionCount = async (req, res) => {
 exports.previewTransfer = async (req, res) => {
   try {
     const { toAddress, amount } = req.body;
- 
+    
     const amt = Number(amount);
  
     if (!toAddress || !amt || amt <= 0) {
