@@ -281,6 +281,13 @@ exports.sendOtp=async (req, res) => {
   if (!/^[0-9]{10}$/.test(mobile)) {
     return res.status(400).json({ message: "Invalid mobile" });
   }
+   const existingUser = await User.findOne({ mobile });
+
+  if (existingUser) {
+    return res.status(400).json({
+      message: "Mobile number already registered"
+    });
+  }
  
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
  
@@ -407,6 +414,7 @@ exports.sendLoginOtp = async (req, res) => {
   if (!user) {
     return res.status(400).json({ message: "User not registered" });
   }
+  
  
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
   const hashedOtp = await bcrypt.hash(otp, 10);
