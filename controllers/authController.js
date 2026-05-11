@@ -256,7 +256,7 @@ exports.verifyOtp = async (req, res) => {
     }
  
     record.isVerified = true;
-   await Otp.deleteOne({ mobile });
+    await record.save();
  
     const token = jwt.sign({ mobile }, "mysecretkey", {
       expiresIn: "24h",
@@ -617,7 +617,7 @@ exports.resetVerifyOtp = async (req, res) => {
     }
  
     record.isVerified = true;
-   await Otp.deleteOne({ mobile });
+    await record.save();
  
     const token = jwt.sign({ mobile }, "mysecretkey", {
       expiresIn: "24h",
