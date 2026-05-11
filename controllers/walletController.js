@@ -896,7 +896,7 @@ exports.walletDashboard=async (req, res) => {
     userId: req.userId,
     title: "Limit Reached",
     message: "You reached your daily limit",
-    type: "INFO"
+    type: "SYSTEM"
   });
 }
  
