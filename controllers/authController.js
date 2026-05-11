@@ -256,7 +256,7 @@ exports.verifyOtp = async (req, res) => {
     }
  
     record.isVerified = true;
-    await record.save();
+   await Otp.deleteOne({ mobile });
  
     const token = jwt.sign({ mobile }, "mysecretkey", {
       expiresIn: "24h",
@@ -550,7 +550,7 @@ exports.resetPassword = async (req, res) => {
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords mismatch" });
     }
-
+    
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
@@ -617,7 +617,7 @@ exports.resetVerifyOtp = async (req, res) => {
     }
  
     record.isVerified = true;
-    await record.save();
+   await Otp.deleteOne({ mobile });
  
     const token = jwt.sign({ mobile }, "mysecretkey", {
       expiresIn: "24h",
