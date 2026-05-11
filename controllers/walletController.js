@@ -99,7 +99,47 @@ exports.transfer = async (req, res) => {
         txnId: txn.transactionId
       });
     }
+// DAILY LIMIT CHECK
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
+
+const todayTransactions = await Transaction.find({
+  userId: req.userId,
+  status: "success",
+  createdAt: {
+    $gte: today,
+    $lt: tomorrow
+  }
+});
+
+const totalSentToday = todayTransactions.reduce(
+  (sum, txn) => sum + txn.amount,
+  0
+);
+
+const dailyLimit = 10000;
+
+if (totalSentToday + amt > dailyLimit) {
+  txn.status = "failed";
+  txn.failureReason = "Daily limit exceeded";
+  await txn.save();
+
+  await sendNotification({
+    userId: req.userId,
+    title: "Transaction Failed",
+    message: "Daily transaction limit reached",
+    type: "PAYMENT"
+  });
+
+  return res.status(400).json({
+    message: "Daily transaction limit exceeded",
+    remainingLimit: dailyLimit - totalSentToday,
+    txnId: txn.transactionId
+  });
+}
     // 7. Balance check
     if (senderWallet.balance < amt) {
       txn.status = "failed";
@@ -603,7 +643,35 @@ exports.confirmTransfer = async (req, res) => {
     if (senderWallet.walletAddress === receiverWallet.walletAddress) {
       return res.status(400).json({ message: "Self transfer not allowed" });
     }
- 
+ // DAILY LIMIT CHECK
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
+
+const todayTransactions = await Transaction.find({
+  senderWallet: senderWallet.walletAddress,
+  status: "success",
+  createdAt: {
+    $gte: today,
+    $lt: tomorrow
+  }
+});
+
+const totalSentToday = todayTransactions.reduce(
+  (sum, txn) => sum + txn.amount,
+  0
+);
+
+const dailyLimit = 10000;
+
+if (totalSentToday + amt > dailyLimit) {
+  return res.status(400).json({
+    message: "Daily transaction limit exceeded",
+    remainingLimit: dailyLimit - totalSentToday
+  });
+}
     if (senderWallet.balance < amt) {
       return res.status(400).json({ message: "Insufficient balance" });
     }
