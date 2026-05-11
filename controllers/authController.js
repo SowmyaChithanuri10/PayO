@@ -37,6 +37,19 @@ const token = authHeader.split(" ")[1];
     if (!name || !email || !password || !confirmpassword) {
       return res.status(400).json({ message: "All fields required" });
     }
+    // name validation
+if (typeof name !== "string") {
+  return res.status(400).json({
+    message: "Name must be a string"
+  });
+}
+
+if (name.trim().length < 3) {
+  return res.status(400).json({
+    message: "Name must contain minimum 3 characters"
+  });
+}
+
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
  if (!passwordRegex.test(password)) {
   return res.status(400).json({
