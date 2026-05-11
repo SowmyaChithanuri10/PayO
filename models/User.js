@@ -12,7 +12,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
     required: true
+  }, referredBy: {
+    type: String,
+    default: null
   },
+
 
   password: String,
 

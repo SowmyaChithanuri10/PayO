@@ -84,13 +84,25 @@ if (!emailRegex.test(email)) {
     // ================= CREATE USER =================
     const hash = await bcrypt.hash(password, 10);
     const myReferral = "PAYO" + uuidv4().slice(0, 6);
- 
+ let referrer = null;
+
+if (referralCode) {
+  referrer = await User.findOne({
+    myReferralCode: referralCode
+  });
+
+  if (!referrer) {
+    return res.status(400).json({
+      message: "Invalid referral code"
+    });
+  }
+}
     const user = await User.create({
       name,
       email,
       password: hash,
       mobile,
-      referralcode: referralCode || null,
+      referredBy: referralCode || null,
       myReferralCode: myReferral,
       isVerified: true
     });
