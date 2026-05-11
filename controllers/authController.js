@@ -279,7 +279,14 @@ exports.sendOtp=async (req, res) => {
  
   if (!/^[0-9]{10}$/.test(mobile)) {
     return res.status(400).json({ message: "Invalid mobile" });
-  }
+  }  
+   const existingUser = await User.findOne({ mobile });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Mobile number already registered. Please login"
+      });
+    }
  
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
  
@@ -585,4 +592,74 @@ exports.resetPassword = async (req, res) => {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
+};
+
+// ====================reset verify otp========================
+ 
+exports.resetVerifyOtp = async (req, res) => {
+  try {
+    const { mobile, otp } = req.body;
+ 
+    const record = await Otp.findOne({ mobile });
+ 
+    if (!record || !record.otp) {
+      return res.status(400).json({ message: "OTP not found" });
+    }
+ 
+    if (record.expiresAt < Date.now()) {
+      return res.status(400).json({ message: "Expired OTP" });
+    }
+ 
+    const isMatch = await bcrypt.compare(String(otp).trim(), record.otp);
+ 
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+ 
+    record.isVerified = true;
+    await record.save();
+ 
+    const token = jwt.sign({ mobile }, "mysecretkey", {
+      expiresIn: "24h",
+    });
+ 
+    return res.json({ message: "OTP verified", token });
+ 
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+ 
+
+ 
+// ======================send otp========================
+ 
+exports.resetSendOtp=async (req, res) => {
+  const { mobile } = req.body;
+ 
+  if (!/^[0-9]{10}$/.test(mobile)) {
+    return res.status(400).json({ message: "Invalid mobile" });
+  }  
+ 
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
+ 
+  // hash OTP
+  const hashedOtp = await bcrypt.hash(otp, 10);
+ 
+  await Otp.findOneAndUpdate(
+  { mobile },
+  {
+    $set: {
+      otp: hashedOtp,
+      isVerified: false,
+      expiresAt: Date.now() + 2 * 60 * 1000
+    }
+  },
+ { upsert: true, returnDocument: "after" }
+);
+ 
+  console.log("OTP:", otp);
+ 
+  res.json({ message: "OTP sent" ,otp});
 };
