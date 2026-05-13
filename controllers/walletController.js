@@ -763,7 +763,7 @@ exports.saveRecent = async (req, res) => {
   try {
     const { receiverName, walletAddress } = req.body;
  
-    //  check duplicate (optional but good)
+    //  check duplicate
     const existing = await Recent.findOne({
       userId: req.userId,
       walletAddress,
@@ -900,7 +900,7 @@ exports.walletDashboard=async (req, res) => {
   });
 }
  
-    // FINAL RESPONSE (frontend compatible)
+    // FINAL RESPONSE 
     res.json({
       id: wallet.walletAddress,
       balance: wallet.balance,  
@@ -978,7 +978,7 @@ if (account.length < 9 || account.length > 18) {
 }
     //  Save to DB
     const bankDetails = await Bank.create({
-      userId: req.userId, // from auth middleware
+      userId: req.userId, 
       accountHolderName: name,
       mobileNumber: mobile,
       bankName: bank,
