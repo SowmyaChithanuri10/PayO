@@ -1,3 +1,5 @@
+const WebSocket = require("ws");
+
 let latestPrices = {};
 
 function connectBinance() {
@@ -13,8 +15,6 @@ function connectBinance() {
 
   ws.on("message", (data) => {
     const parsed = JSON.parse(data);
-
-    console.log("Received:", parsed.length);
 
     parsed.forEach((coin) => {
       if (coin.s.endsWith("USDT")) {
@@ -38,6 +38,7 @@ function connectBinance() {
 
   ws.on("close", () => {
     console.log("Binance WebSocket closed");
+
     setTimeout(connectBinance, 3000);
   });
 
@@ -45,3 +46,17 @@ function connectBinance() {
     console.log("Binance error:", err.message);
   });
 }
+
+function getLatestPrices() {
+  return Object.values(latestPrices);
+}
+
+function getPrice(symbol) {
+  return latestPrices[symbol.toUpperCase()];
+}
+
+module.exports = {
+  connectBinance,
+  getLatestPrices,
+  getPrice
+};
