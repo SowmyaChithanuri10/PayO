@@ -29,7 +29,6 @@ const server = http.createServer(app);
 // Middleware
 app.use(helmet());
 app.use(cors());
-app.use(morgan("combined"));
 app.use(express.json());
 
 // Routes
