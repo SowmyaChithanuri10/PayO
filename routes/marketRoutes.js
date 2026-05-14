@@ -2,11 +2,12 @@ const express = require("express");
 
 const router = express.Router();
 
-const {markets} = require("../controllers/marketController");
+const {markets, singlePrice} = require("../controllers/marketController");
 
 
 
 router.get("/markets-dashboard", markets);
+router.get("/price/:symbol", singlePrice);
 
 
 
