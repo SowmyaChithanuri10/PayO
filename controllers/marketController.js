@@ -25,7 +25,7 @@ class MarketController {
 
       res.json({
         success: true,
-        data: marketData
+        data: marketData.marketData
       });
 
     } catch (error) {
