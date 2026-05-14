@@ -1,13 +1,10 @@
-const WebSocket = require("ws");
-
 let latestPrices = {};
 
 function connectBinance() {
-
   console.log("connectBinance STARTED");
 
   const ws = new WebSocket(
-    "wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/solusdt@ticker"
+    "wss://stream.binance.com:9443/ws/!ticker@arr"
   );
 
   ws.on("open", () => {
@@ -15,40 +12,36 @@ function connectBinance() {
   });
 
   ws.on("message", (data) => {
-
-    console.log("MESSAGE RECEIVED");
-
     const parsed = JSON.parse(data);
 
-    const coin = parsed.data;
+    console.log("Received:", parsed.length);
 
-    latestPrices[coin.s] = {
-      symbol: coin.s,
-      price: parseFloat(coin.c),
-      changePercent: parseFloat(coin.P),
-      high: parseFloat(coin.h),
-      low: parseFloat(coin.l),
-      volume: parseFloat(coin.v),
-      time: Date.now()
-    };
+    parsed.forEach((coin) => {
+      if (coin.s.endsWith("USDT")) {
+        latestPrices[coin.s] = {
+          symbol: coin.s,
+          price: parseFloat(coin.c),
+          changePercent: parseFloat(coin.P),
+          high: parseFloat(coin.h),
+          low: parseFloat(coin.l),
+          volume: parseFloat(coin.v),
+          time: Date.now()
+        };
+      }
+    });
 
-  });
-
-  ws.on("error", (err) => {
-    console.log("WS ERROR", err.message);
+    console.log(
+      "Stored coins:",
+      Object.keys(latestPrices).length
+    );
   });
 
   ws.on("close", () => {
-    console.log("WS CLOSED");
+    console.log("Binance WebSocket closed");
+    setTimeout(connectBinance, 3000);
   });
 
+  ws.on("error", (err) => {
+    console.log("Binance error:", err.message);
+  });
 }
-
-function getLatestPrices() {
-  return Object.values(latestPrices);
-}
-
-module.exports = {
-  connectBinance,
-  getLatestPrices
-};
