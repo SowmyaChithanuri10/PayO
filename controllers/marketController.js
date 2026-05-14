@@ -1,6 +1,6 @@
 const binanceService = require('../services/binanceService');
 const coingeckoService = require('../services/coingeckoService');
-const marketModel = require('../models/marketModel');
+const marketModel = require('../models/marketModels');
 const websocketManager = require('../utils/websocketManager');
 
 class MarketController {
