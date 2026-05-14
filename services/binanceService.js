@@ -14,7 +14,11 @@ function connectBinance() {
   });
 
   ws.on("message", (data) => {
+    //console.log("MESSAGE RECEIVED");
+
     const parsed = JSON.parse(data);
+
+    //console.log("Coins:", parsed.length);
 
     parsed.forEach((coin) => {
       if (coin.s.endsWith("USDT")) {
@@ -31,7 +35,7 @@ function connectBinance() {
     });
 
     console.log(
-      "Stored coins:",
+      "Stored:",
       Object.keys(latestPrices).length
     );
   });
