@@ -1,37 +1,46 @@
-const binanceService = require('../services/binanceService');
-const coingeckoService = require('../services/coingeckoService');
-const marketModel = require('../models/marketModels');
-const websocketManager = require('../utils/websocketManager');
+const binanceService = require("../services/binanceService");
+const coingeckoService = require("../services/coingeckoService");
+const marketModel = require("../models/marketModels");
 
 class MarketController {
-  // Get complete market overview
+
   async getMarketOverview(req, res) {
+
     try {
-      const cacheKey = 'market_overview';
+
+      const cacheKey = "market_overview";
+
       let marketData = marketModel.getCachedData(cacheKey);
-      
+
       if (!marketData) {
+
         marketData = await marketModel.prepareMarketOverview(
           binanceService,
           coingeckoService
         );
-        marketModel.setCachedData(cacheKey, marketData, 10); // Cache for 30 seconds
+
+        // cache for 60 seconds
+        marketModel.setCachedData(cacheKey, marketData, 60);
       }
-      
+
       res.json({
         success: true,
-        data: marketData.marketData
+        data: marketData
       });
+
     } catch (error) {
-      console.error('Market Overview Error:', error);
+
+      console.error(
+        "Market Overview Error:",
+        error.message
+      );
+
       res.status(500).json({
         success: false,
-        error: 'Failed to fetch market data',
-        message: error.message
+        message: "Failed to fetch market data"
       });
     }
   }
-
 }
 
 module.exports = new MarketController();

@@ -2,7 +2,7 @@ const NodeCache = require('node-cache');
 
 class MarketModel {
   constructor() {
-    this.cache = new NodeCache({ stdTTL: parseInt(process.env.CACHE_TTL) || 30 });
+    this.cache = new NodeCache({ stdTTL: parseInt(process.env.CACHE_TTL) || 60 });
   }
 
   // Format market data for API response
@@ -39,7 +39,7 @@ class MarketModel {
     return this.cache.get(key);
   }
 
-  setCachedData(key, data, ttl = 30) {
+  setCachedData(key, data, ttl =60) {
     this.cache.set(key, data, ttl);
   }
 
