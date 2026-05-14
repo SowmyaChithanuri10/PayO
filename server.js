@@ -12,6 +12,7 @@ app.use(cors());
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/wallet", require("./routes/walletRoutes"));
 app.use("/api/notifications",require("./routes/notificationRoutes"));
+app.use("/api/marketinfo",require("./routes/marketRoutes"));
  
 app.get('/', (req, res) => {
   res.send('Server is running');
