@@ -14,30 +14,31 @@ function connectBinance() {
   });
 
   ws.on("message", (data) => {
-    //console.log("MESSAGE RECEIVED");
+    try {
+      const parsed = JSON.parse(data);
 
-    const parsed = JSON.parse(data);
+      parsed.forEach((coin) => {
+        if (coin.s && coin.s.endsWith("USDT")) {
+          latestPrices[coin.s] = {
+            symbol: coin.s,
+            price: parseFloat(coin.c),
+            changePercent: parseFloat(coin.P),
+            high: parseFloat(coin.h),
+            low: parseFloat(coin.l),
+            volume: parseFloat(coin.v),
+            time: Date.now()
+          };
+        }
+      });
 
-    //console.log("Coins:", parsed.length);
+      console.log(
+        "Stored:",
+        Object.keys(latestPrices).length
+      );
 
-    parsed.forEach((coin) => {
-      if (coin.s.endsWith("USDT")) {
-        latestPrices[coin.s] = {
-          symbol: coin.s,
-          price: parseFloat(coin.c),
-          changePercent: parseFloat(coin.P),
-          high: parseFloat(coin.h),
-          low: parseFloat(coin.l),
-          volume: parseFloat(coin.v),
-          time: Date.now()
-        };
-      }
-    });
-
-    console.log(
-      "Stored:",
-      Object.keys(latestPrices).length
-    );
+    } catch (err) {
+      console.log("Parsing error:", err.message);
+    }
   });
 
   ws.on("close", () => {
