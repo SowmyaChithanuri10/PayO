@@ -1,5 +1,5 @@
 const NodeCache = require('node-cache');
-
+const marketCache = require("../cache/marketCache");
 class MarketModel {
   constructor() {
     this.cache = new NodeCache({ stdTTL: parseInt(process.env.CACHE_TTL) || 60 });
@@ -46,14 +46,14 @@ class MarketModel {
   // Prepare enhanced market overview
   async prepareMarketOverview(binanceService, coingeckoService) {
     try {
-      const [binanceData, coingeckoData, trending, globalData, topMovers] = await Promise.all([
-        binanceService.getSymbolsData(),
-        coingeckoService.getMarketData('usd', 50),
-        coingeckoService.getTrending(),
-        coingeckoService.getGlobalData(),
-        binanceService.getTopMovers(5)
-      ]);
-      
+    const [binanceData, topMovers] = await Promise.all([
+  binanceService.getSymbolsData(),
+  binanceService.getTopMovers(5)
+]);
+
+const coingeckoData = marketCache.market;
+const trending = marketCache.trending;
+const globalData = marketCache.global;
       const formattedData = this.formatMarketData(binanceData, coingeckoData);
       
       return {

@@ -19,10 +19,16 @@ const authRoutes = require("./routes/authRoutes");
 const walletRoutes = require("./routes/walletRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const marketRoutes = require("./routes/marketRoutes");
-
+const updateMarketCache = require("./services/marketUpdater");
 // connect database
 connectDB();
+// Initial fetch
+updateMarketCache();
 
+// Refresh every 5 minutes
+setInterval(() => {
+  updateMarketCache();
+}, 5 * 60 * 1000);
 const app = express();
 const server = http.createServer(app);
 
