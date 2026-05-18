@@ -10,39 +10,43 @@ const bankSchema = new mongoose.Schema(
 
     accountHolderName: {
       type: String,
-      required: true,
-      trim: true
+      required: true
     },
 
     mobileNumber: {
       type: String,
-      required: true,
-      trim: true
+      required: true
     },
 
     bankName: {
       type: String,
-      required: true,
-      trim: true
+      required: true
     },
 
     accountNumber: {
       type: String,
-      required: true,
-      trim: true
+      required: true
     },
 
     ifscCode: {
       type: String,
-      required: true,
-      uppercase: true,
-      trim: true
+      required: true
     },
 
     accountType: {
       type: String,
       enum: ["Savings", "Current"],
       required: true
+    },
+
+    tpin: {
+      type: String,
+      default: null
+    },
+
+    isTpinCreated: {
+      type: Boolean,
+      default: false
     },
 
     isVerified: {

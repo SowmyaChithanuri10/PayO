@@ -20,6 +20,7 @@ const walletRoutes = require("./routes/walletRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const marketRoutes = require("./routes/marketRoutes");
 const updateMarketCache = require("./services/marketUpdater");
+const bankRoutes=require("./routes/bankRoutes")
 // connect database
 connectDB();
 // Initial fetch
@@ -42,6 +43,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/market", marketRoutes);
+app.use("/api/bank",bankRoutes)
 
 // Root Route
 app.get("/", (req, res) => {

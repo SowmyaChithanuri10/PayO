@@ -23,8 +23,7 @@ router.get("/get-transaction-count", auth, walletController.transactionCount);
 router.get("/income-outcome", auth, walletController.getIncomeOutcome);
 router.get("/profile",auth,walletController.profile);
 router.get("/transactions/user/:walletAddress", auth, walletController.getTransactionsWithUser);
-router.post("/add-bank", auth, walletController.addBank);
-router.get("/all-banks", auth, walletController.getMyBank);
+
 
 module.exports = router;
  
