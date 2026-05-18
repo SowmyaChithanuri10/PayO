@@ -246,7 +246,7 @@ exports.verifyTpin = async (req, res) => {
 exports.getMyBank = async (req, res) => {
   try {
 
-    const bank = await Bank.findOne({
+    const bank = await Bank.find({
       userId: req.userId
     });
 
