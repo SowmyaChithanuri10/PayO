@@ -19,11 +19,12 @@ router.post("/recent-toggle-add", auth, walletController.saveRecent);
 router.get("/recent-check/:walletAddress", auth, walletController.checkRecent);
 router.get("/recents-page",auth,walletController.getRecents);
 router.get("/getwalletdashboard",auth,walletController.walletDashboard);
-router.post("/add-bank", auth, walletController.addBank);
 router.get("/get-transaction-count", auth, walletController.transactionCount);
 router.get("/income-outcome", auth, walletController.getIncomeOutcome);
 router.get("/profile",auth,walletController.profile);
 router.get("/transactions/user/:walletAddress", auth, walletController.getTransactionsWithUser);
+router.post("/add-bank", auth, walletController.addBank);
+router.get("/all-banks", auth, walletController.getMyBank);
 
 module.exports = router;
  

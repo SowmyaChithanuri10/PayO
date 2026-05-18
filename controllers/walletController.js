@@ -923,6 +923,8 @@ exports.walletDashboard=async (req, res) => {
 
 
 //  Add Bank Account
+
+
 exports.addBank = async (req, res) => {
   try {
     const {
@@ -935,7 +937,7 @@ exports.addBank = async (req, res) => {
       accountType
     } = req.body;
 
-    //  Validations
+    // Check required fields
     if (
       !name ||
       !mobile ||
@@ -946,61 +948,109 @@ exports.addBank = async (req, res) => {
       !accountType
     ) {
       return res.status(400).json({
+        success: false,
         message: "All fields are required"
       });
     }
 
-    // Account number match
-    if (account !== confirmAccount) {
-      return res.status(400).json({
-        message: "Account numbers do not match"
-      });
-    }
+    // Mobile validation
+    const mobileRegex = /^[1-9]\d{9}$/;
 
-    //  Mobile validation
-    if (!/^[1-9]\d{9}$/.test(mobile)) {
+    if (!mobileRegex.test(mobile)) {
       return res.status(400).json({
+        success: false,
         message: "Invalid mobile number"
       });
     }
 
-    //  IFSC validation
-    const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-    if (!ifscRegex.test(ifsc)) {
+    // Account number validation
+    const accountRegex = /^\d{9,18}$/;
+
+    if (!accountRegex.test(account)) {
       return res.status(400).json({
+        success: false,
+        message: "Account number must be 9 to 18 digits"
+      });
+    }
+
+    // Confirm account validation
+    if (account !== confirmAccount) {
+      return res.status(400).json({
+        success: false,
+        message: "Account numbers do not match"
+      });
+    }
+
+    // IFSC validation
+    const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+
+    if (!ifscRegex.test(ifsc.toUpperCase())) {
+      return res.status(400).json({
+        success: false,
         message: "Invalid IFSC code"
       });
     }
-if (account.length < 9 || account.length > 18) {
-  return res.status(400).json({
-    message: "Account number must be between 9 and 18 digits"
-  });
-}
-    //  Save to DB
+
+    // Save bank details
     const bankDetails = await Bank.create({
-      userId: req.userId, 
+      userId: req.userId,
       accountHolderName: name,
       mobileNumber: mobile,
       bankName: bank,
       accountNumber: account,
-      ifscCode: ifsc,
-      accountType: accountType
+      ifscCode: ifsc.toUpperCase(),
+      accountType
     });
 
-    // Response
-    res.status(201).json({
+    return res.status(201).json({
+      success: true,
       message: "Bank details added successfully",
       data: bankDetails
     });
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      message: "Server error"
+  } catch (error) {
+    console.error("Add Bank Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
     });
   }
 };
 
+//======================to get added banks=======================
+
+
+exports.getMyBank = async (req, res) => {
+  try {
+
+    const bank = await Bank.findOne({
+      userId: req.userId
+    });
+
+    // Check if bank exists
+    if (!bank) {
+      return res.status(404).json({
+        success: false,
+        message: "Bank details not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Bank details fetched successfully",
+      data: bank
+    });
+
+  } catch (error) {
+    console.error("Get Bank Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
 
 // ================= INCOME & OUTCOME =================
 exports.getIncomeOutcome = async (req, res) => {
