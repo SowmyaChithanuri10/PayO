@@ -3,7 +3,6 @@ const marketCache = require("../cache/marketCache");
 
 async function updateMarketCache() {
   try {
-    console.log("Updating CoinGecko cache...");
 
     const [market, trending, global] = await Promise.all([
       coingeckoService.getMarketData("usd", 50),
@@ -16,7 +15,7 @@ async function updateMarketCache() {
     marketCache.global = global;
     marketCache.lastUpdated = new Date();
 
-    console.log("CoinGecko cache updated");
+   
   } catch (error) {
     console.error(
       "CoinGecko cache update failed:",
