@@ -161,7 +161,7 @@ await sendNotification({
   userId: req.userId,
   title: "tpin added successfully",
   message: "Your transaction pin has been added successfully",
-  type: "SYSTEM"
+  type: "SECURITY"
 });
     return res.status(200).json({
       success: true,
@@ -179,67 +179,6 @@ await sendNotification({
   }
 };
 
-//====================verify tpin=================
-
-
-exports.verifyTpin = async (req, res) => {
-  try {
-
-    const { bankId, tpin } = req.body;
-
-    if (!bankId || !tpin) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required"
-      });
-    }
-
-    const bank = await Bank.findOne({
-      _id: bankId,
-      userId: req.userId
-    });
-
-    if (!bank) {
-      return res.status(404).json({
-        success: false,
-        message: "Bank not found"
-      });
-    }
-
-    if (!bank.tpin) {
-      return res.status(400).json({
-        success: false,
-        message: "TPIN not created"
-      });
-    }
-
-    const isMatch = await bcrypt.compare(
-      tpin,
-      bank.tpin
-    );
-
-    if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid TPIN"
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "TPIN verified successfully"
-    });
-
-  } catch (error) {
-
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error"
-    });
-  }
-};
 //======================to get added banks=======================
 
 
