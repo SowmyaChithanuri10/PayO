@@ -180,8 +180,7 @@ await sendNotification({
 };
 
 //====================verify tpin=================
-const bcrypt = require("bcrypt");
-const Bank = require("../models/Bank");
+
 
 exports.verifyTpin = async (req, res) => {
   try {
