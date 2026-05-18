@@ -47,11 +47,6 @@ const bankSchema = new mongoose.Schema(
     isTpinCreated: {
       type: Boolean,
       default: false
-    },
-
-    isVerified: {
-      type: Boolean,
-      default: false
     }
   },
   {
