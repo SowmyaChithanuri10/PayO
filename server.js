@@ -1,3 +1,4 @@
+// server.js (updated)
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -10,6 +11,8 @@ dotenv.config();
 
 const connectDB = require("./config/db");
 const websocketManager = require("./utils/websocketManager");
+const binanceWebSocket = require("./services/binanceWebSocketService");
+const realtimePriceCache = require("./cache/realtimePriceCache");
 
 // cron
 require("./cron/walletCron");
@@ -20,16 +23,31 @@ const walletRoutes = require("./routes/walletRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const marketRoutes = require("./routes/marketRoutes");
 const updateMarketCache = require("./services/marketUpdater");
-const bankRoutes=require("./routes/bankRoutes")
+const bankRoutes = require("./routes/bankRoutes");
+
 // connect database
 connectDB();
-// Initial fetch
+
+// Initial fetch of static data
 updateMarketCache();
 
-// Refresh every 5 minutes
+// Refresh static data every 5 minutes
 setInterval(() => {
   updateMarketCache();
 }, 5 * 60 * 1000);
+
+// Initialize Binance WebSocket for real-time prices
+binanceWebSocket.connect();
+
+// Connect WebSocket price updates to your cache and broadcast to clients
+binanceWebSocket.on('marketUpdate', (marketData) => {
+  // Update real-time price cache
+  realtimePriceCache.updatePrices(marketData);
+  
+  // Broadcast to all connected WebSocket clients
+  websocketManager.broadcastMarketData(marketData);
+});
+
 const app = express();
 const server = http.createServer(app);
 
@@ -43,7 +61,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/market", marketRoutes);
-app.use("/api/bank",bankRoutes)
+app.use("/api/bank", bankRoutes);
 
 // Root Route
 app.get("/", (req, res) => {
@@ -54,11 +72,13 @@ app.get("/", (req, res) => {
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "OK",
-    timestamp: new Date()
+    timestamp: new Date(),
+    websocketConnected: binanceWebSocket.isConnected,
+    realtimePricesCount: realtimePriceCache.getAllPrices().length
   });
 });
 
-// Initialize WebSocket Server
+// Initialize WebSocket Server for client connections
 const wss = new WebSocket.Server({ server });
 websocketManager.initialize(wss);
 
@@ -68,4 +88,5 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log("WebSocket server ready for live updates");
+  console.log("Binance WebSocket connecting for real-time prices...");
 });
