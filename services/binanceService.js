@@ -20,7 +20,7 @@ class BinanceService {
     }
   }
 
-  // Get specific symbols data
+  // Get specific symbols data  
   async getSymbolsData(symbols = null) {
   try {
     const allTickers = await this.get24hrTicker();
