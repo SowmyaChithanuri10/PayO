@@ -117,7 +117,7 @@ await sendNotification({
  
 //============================tpin================
 
-exports.createTpin = async (req, res) => {
+exports.createTpin = async (req, res) => {  
   try {
 
     const { bankId, tpin} = req.body;
