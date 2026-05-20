@@ -4,14 +4,22 @@ const router = express.Router();
 const tradingController = require('../controllers/tradingController');
 
 // Candlestick data endpoints
-router.get('/candles/:symbol/:timeframe?/:limit?', tradingController.getCandlestickData);
-router.get('/orderbook/:symbol/:limit?', tradingController.getOrderBookDepth);
+router.get('/candles/:symbol', tradingController.getCandlestickData);
 
+router.get('/candles/:symbol/:timeframe', tradingController.getCandlestickData);
+
+router.get('/candles/:symbol/:timeframe/:limit', tradingController.getCandlestickData);
 // Market overview
-router.get('/market/:symbol?', tradingController.getMarketOverviewWithIndicators);
+router.get('/market', tradingController.getMarketOverviewWithIndicators);
 
+router.get('/market/:symbol', tradingController.getMarketOverviewWithIndicators);
+router.get('/orderbook/:symbol', tradingController.getOrderBookDepth);
+
+router.get('/orderbook/:symbol/:limit', tradingController.getOrderBookDepth);
 // Technical analysis
-router.get('/analysis/:symbol/:timeframe?', tradingController.getTechnicalAnalysis);
+router.get('/analysis/:symbol', tradingController.getTechnicalAnalysis);
+
+router.get('/analysis/:symbol/:timeframe', tradingController.getTechnicalAnalysis);
 
 // Multiple symbols comparison
 router.post('/compare', async (req, res) => {
