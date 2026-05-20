@@ -126,6 +126,76 @@ class BinanceWebSocketService extends EventEmitter {
       this.ws.close();
     }
   }
+
+  // Subscribe to individual symbol depth stream
+  subscribeToDepth(symbol, level = 20) {
+    if (!this.ws || !this.isConnected) return;
+    
+    const subscribeMsg = {
+      method: 'SUBSCRIBE',
+      params: [`${symbol.toLowerCase()}usdt@depth${level}`],
+      id: Date.now()
+    };
+    this.ws.send(JSON.stringify(subscribeMsg));
+  }
+
+  // Subscribe to kline streams
+  subscribeToKline(symbol, interval = '1h') {
+    if (!this.ws || !this.isConnected) return;
+    
+    const subscribeMsg = {
+      method: 'SUBSCRIBE',
+      params: [`${symbol.toLowerCase()}usdt@kline_${interval}`],
+      id: Date.now()
+    };
+    this.ws.send(JSON.stringify(subscribeMsg));
+  }
+
+  // Subscribe to individual symbol ticker
+  subscribeToSymbolTicker(symbol) {
+    if (!this.ws || !this.isConnected) return;
+    
+    const subscribeMsg = {
+      method: 'SUBSCRIBE',
+      params: [`${symbol.toLowerCase()}usdt@ticker`],
+      id: Date.now()
+    };
+    this.ws.send(JSON.stringify(subscribeMsg));
+  }
+
+  // Process depth updates
+  processDepthUpdate(data) {
+    const symbol = data.s.replace('USDT', '');
+    const depthData = {
+      symbol: symbol,
+      bids: data.b.map(bid => [parseFloat(bid[0]), parseFloat(bid[1])]),
+      asks: data.a.map(ask => [parseFloat(ask[0]), parseFloat(ask[1])]),
+      lastUpdateId: data.U
+    };
+    
+    this.emit('depthUpdate', { symbol, depth: depthData });
+  }
+
+  // Process kline updates
+  processKlineUpdate(data) {
+    const kline = data.k;
+    const candleData = {
+      symbol: data.s.replace('USDT', ''),
+      interval: kline.i,
+      openTime: kline.t,
+      closeTime: kline.T,
+      open: parseFloat(kline.o),
+      high: parseFloat(kline.h),
+      low: parseFloat(kline.l),
+      close: parseFloat(kline.c),
+      volume: parseFloat(kline.v),
+      quoteVolume: parseFloat(kline.q),
+      isClosed: kline.x
+    };
+    
+    this.emit('klineUpdate', candleData);
+  }
 }
+
 
 module.exports = new BinanceWebSocketService();

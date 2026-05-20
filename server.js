@@ -24,6 +24,7 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const marketRoutes = require("./routes/marketRoutes");
 const updateMarketCache = require("./services/marketUpdater");
 const bankRoutes = require("./routes/bankRoutes");
+const tradingRoutes = require('./routes/tradingRoutes');
 
 // connect database
 connectDB();
@@ -62,6 +63,7 @@ app.use("/api/wallet", walletRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/market", marketRoutes);
 app.use("/api/bank", bankRoutes);
+app.use("/api/trading", tradingRoutes);
 
 // Root Route
 app.get("/", (req, res) => {

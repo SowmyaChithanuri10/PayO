@@ -20,6 +20,93 @@ class BinanceService {
     }
   }
 
+  // Get kline/candlestick data
+  async getKlines(symbol, interval = '1h', limit = 500) {
+    try {
+      const response = await this.client.get('/api/v3/klines', {
+        params: {
+          symbol: symbol.toUpperCase(),
+          interval: interval,
+          limit: limit
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching klines:', error);
+      throw error;
+    }
+  }
+
+  // Get order book
+  async getOrderBook(symbol, limit = 100) {
+    try {
+      const response = await this.client.get('/api/v3/depth', {
+        params: {
+          symbol: symbol.toUpperCase(),
+          limit: limit
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching order book:', error);
+      throw error;
+    }
+  }
+
+  // Get 24hr ticker for specific symbol
+  async get24hrTickerForSymbol(symbol) {
+    try {
+      const response = await this.client.get('/api/v3/ticker/24hr', {
+        params: { symbol: symbol.toUpperCase() }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching ticker:', error);
+      throw error;
+    }
+  }
+
+  // Get recent trades
+  async getRecentTrades(symbol, limit = 500) {
+    try {
+      const response = await this.client.get('/api/v3/trades', {
+        params: {
+          symbol: symbol.toUpperCase(),
+          limit: limit
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching recent trades:', error);
+      throw error;
+    }
+  }
+
+  // Get aggregate trades (compressed)
+  async getAggTrades(symbol, fromId = null, limit = 500) {
+    try {
+      const params = { symbol: symbol.toUpperCase(), limit: limit };
+      if (fromId) params.fromId = fromId;
+      
+      const response = await this.client.get('/api/v3/aggTrades', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching aggregate trades:', error);
+      throw error;
+    }
+  }
+
+  // Get exchange info
+  async getExchangeInfo() {
+    try {
+      const response = await this.client.get('/api/v3/exchangeInfo');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching exchange info:', error);
+      throw error;
+    }
+  }
+}
   // Get specific symbols data  
   async getSymbolsData(symbols = null) {
   try {
