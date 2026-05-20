@@ -106,7 +106,7 @@ class BinanceService {
       throw error;
     }
   }
-}
+
   // Get specific symbols data  
   async getSymbolsData(symbols = null) {
   try {
