@@ -20,7 +20,7 @@ router.get('/orderbook/:symbol/:limit', tradingController.getOrderBookDepth);
 router.get('/analysis/:symbol', tradingController.getTechnicalAnalysis);
 
 router.get('/analysis/:symbol/:timeframe', tradingController.getTechnicalAnalysis);
-
+router.get('/coin/:symbol',tradingController.getCoinScreenData);
 // Multiple symbols comparison
 router.post('/compare', async (req, res) => {
   try {

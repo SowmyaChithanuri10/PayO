@@ -218,6 +218,122 @@ class CoinGeckoService {
 console.error(error.message);
     }
   }
+  // Get full coin details by symbol
+async getCoinFullData(symbol) {
+  try {
+
+    // First get markets to find coin id
+    const markets = await this.getMarketData("usd", 250);
+
+    const coin = markets.find(
+      c => c.symbol.toLowerCase() === symbol.toLowerCase()
+    );
+
+    if (!coin) {
+      throw new Error("Coin not found");
+    }
+
+    const response = await this.client.get(`/coins/${coin.id}`, {
+      params: {
+        localization: false,
+        tickers: false,
+        market_data: true,
+        community_data: true,
+        developer_data: true,
+        sparkline: true
+      }
+    });
+
+    const data = response.data;
+
+    return {
+
+      id: data.id,
+
+      symbol: data.symbol.toUpperCase(),
+
+      name: data.name,
+
+      description:
+        data.description?.en?.replace(/<\/?[^>]+(>|$)/g, "") || "",
+
+      image: data.image?.large,
+
+      banner: data.image?.large,
+
+      hashingAlgorithm: data.hashing_algorithm,
+
+      genesisDate: data.genesis_date,
+
+      sentimentUp:
+        data.sentiment_votes_up_percentage || 0,
+
+      sentimentDown:
+        data.sentiment_votes_down_percentage || 0,
+
+      marketCapRank:
+        data.market_cap_rank,
+
+      marketCap:
+        data.market_data?.market_cap?.usd,
+
+      fullyDilutedValuation:
+        data.market_data?.fully_diluted_valuation?.usd,
+
+      totalVolume:
+        data.market_data?.total_volume?.usd,
+
+      circulatingSupply:
+        data.market_data?.circulating_supply,
+
+      totalSupply:
+        data.market_data?.total_supply,
+
+      maxSupply:
+        data.market_data?.max_supply,
+
+      ath:
+        data.market_data?.ath?.usd,
+
+      athChangePercentage:
+        data.market_data?.ath_change_percentage?.usd,
+
+      athDate:
+        data.market_data?.ath_date?.usd,
+
+      atl:
+        data.market_data?.atl?.usd,
+
+      atlDate:
+        data.market_data?.atl_date?.usd,
+
+      homepage:
+        data.links?.homepage?.[0],
+
+      twitter:
+        data.links?.twitter_screen_name,
+
+      telegram:
+        data.links?.telegram_channel_identifier,
+
+      github:
+        data.links?.repos_url?.github?.[0],
+
+      categories:
+        data.categories,
+
+      sparkline:
+        data.market_data?.sparkline_7d?.price || [],
+
+      lastUpdated:
+        data.last_updated
+    };
+
+  } catch (error) {
+    console.error("Coin full data error:", error.message);
+    throw error;
+  }
+}
 }
 
 module.exports = new CoinGeckoService();
