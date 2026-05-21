@@ -2,7 +2,7 @@
 const tradingDataModel = require('../models/tradingDataModel');
 const binanceService = require('../services/binanceService');
 const realtimePriceCache = require('../cache/realtimePriceCache');
-
+const coingeckoService = require('../services/coingeckoService');
 class TradingController {
   
   // Get candlestick data for a symbol
@@ -191,40 +191,77 @@ async getCoinScreenData(req, res) {
 
     const { symbol } = req.params;
 
+    // Binance symbol
+    const binanceSymbol =
+      symbol.toUpperCase();
+
+    // Coin symbol
+    const coinSymbol =
+      symbol
+        .replace("USDT", "")
+        .toLowerCase();
+
+    // CoinGecko mapping
+    const coinMap = {
+      btc: "bitcoin",
+      eth: "ethereum",
+      bnb: "binancecoin",
+      sol: "solana",
+      xrp: "ripple",
+      doge: "dogecoin",
+      ada: "cardano",
+      trx: "tron",
+      avax: "avalanche-2",
+      shib: "shiba-inu",
+      dot: "polkadot",
+      link: "chainlink",
+      matic: "matic-network"
+    };
+
+    const coinId =
+      coinMap[coinSymbol];
+
+    if (!coinId) {
+      return res.status(404).json({
+        success: false,
+        message: "Coin not supported"
+      });
+    }
+
     // Binance ticker
     const ticker =
       await binanceService.get24hrTickerForSymbol(
-        symbol.toUpperCase()
+        binanceSymbol
       );
 
-    // CoinGecko full details
+    // CoinGecko details
     const coinDetails =
       await coingeckoService.getCoinFullData(
-        symbol.replace("USDT", "")
+        coinId
       );
 
-    // 1 day candles
+    // Candles
     const candles =
       await binanceService.getKlines(
-        symbol.toUpperCase(),
+        binanceSymbol,
         "1h",
         24
       );
 
-    // format chart
-    const chartData = candles.map(c => ({
-      time: c[0],
-      open: parseFloat(c[1]),
-      high: parseFloat(c[2]),
-      low: parseFloat(c[3]),
-      close: parseFloat(c[4]),
-      volume: parseFloat(c[5])
-    }));
+    const chartData =
+      candles.map(c => ({
+        time: c[0],
+        open: parseFloat(c[1]),
+        high: parseFloat(c[2]),
+        low: parseFloat(c[3]),
+        close: parseFloat(c[4]),
+        volume: parseFloat(c[5])
+      }));
 
-    // orderbook
+    // Orderbook
     const orderBook =
       await binanceService.getOrderBook(
-        symbol.toUpperCase(),
+        binanceSymbol,
         20
       );
 
@@ -246,10 +283,12 @@ async getCoinScreenData(req, res) {
       totalBids + totalAsks;
 
     const buyPercentage =
-      ((totalBids / total) * 100).toFixed(2);
+      ((totalBids / total) * 100)
+        .toFixed(2);
 
     const sellPercentage =
-      ((totalAsks / total) * 100).toFixed(2);
+      ((totalAsks / total) * 100)
+        .toFixed(2);
 
     res.json({
 
@@ -258,9 +297,10 @@ async getCoinScreenData(req, res) {
       data: {
 
         symbol:
-          symbol.replace("USDT", ""),
+          coinSymbol.toUpperCase(),
 
-        fullSymbol: symbol,
+        fullSymbol:
+          binanceSymbol,
 
         name:
           coinDetails.name,
@@ -278,7 +318,9 @@ async getCoinScreenData(req, res) {
           parseFloat(ticker.priceChange),
 
         priceChangePercent:
-          parseFloat(ticker.priceChangePercent),
+          parseFloat(
+            ticker.priceChangePercent
+          ),
 
         high24h:
           parseFloat(ticker.highPrice),
@@ -332,26 +374,11 @@ async getCoinScreenData(req, res) {
         sparkline:
           coinDetails.sparkline,
 
-        links: {
-
-          homepage:
-            coinDetails.homepage,
-
-          twitter:
-            coinDetails.twitter,
-
-          telegram:
-            coinDetails.telegram,
-
-          github:
-            coinDetails.github
-        },
+        homepage:
+          coinDetails.homepage,
 
         categories:
           coinDetails.categories,
-
-        genesisDate:
-          coinDetails.genesisDate,
 
         lastUpdated:
           coinDetails.lastUpdated
@@ -362,16 +389,19 @@ async getCoinScreenData(req, res) {
 
     console.error(
       "Coin screen error:",
+      error.response?.data ||
       error.message
     );
 
     res.status(500).json({
       success: false,
-      message: "Failed to fetch coin details"
+      message:
+        error.message,
+      details:
+        error.response?.data || null
     });
   }
 }
-
   generateTradingSignals(candles, movingAverages, indicators) {
     const signals = {
       buy: [],
