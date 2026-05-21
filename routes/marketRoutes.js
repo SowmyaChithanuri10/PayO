@@ -3,9 +3,9 @@ const router = express.Router();
 const marketController = require('../controllers/marketController');
 
 // Main dashboard endpoint - returns ALL data shown in your images
-router.get('/dashboard', controllerFunction);
+router.get('/dashboard', marketController.getDashboardData);
 
-router.get('/dashboard/:symbol', controllerFunction);
+router.get('/dashboard/:symbol', marketController.getDashboardData);
 
 // Get all coins with descriptions (for market list)
 router.get('/all-coins', marketController.getAllCoinsWithDescriptions);
