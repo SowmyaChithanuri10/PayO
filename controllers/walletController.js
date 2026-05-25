@@ -11,7 +11,6 @@ const Notification = require("../models/Notification");
 const { sendNotification } = require("../utils/notify");
 
 // ================= get wallet =================
- 
 exports.getWallet = async (req, res) => {  
  
     const wallet = await Wallet.findOne({ userId: req.userId });
