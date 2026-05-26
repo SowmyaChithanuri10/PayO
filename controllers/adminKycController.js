@@ -28,8 +28,7 @@ const approveKyc = async (req, res) => {
     const userId = req.params.id;
 
     await User.findByIdAndUpdate(userId, {
-      "status": "APPROVED",
-      "kyc.approvedAt": new Date()
+      status: "APPROVED"
     });
 
     res.json({
@@ -55,8 +54,8 @@ const rejectKyc = async (req, res) => {
     const { reason } = req.body;
 
     await User.findByIdAndUpdate(userId, {
-      "status": "REJECTED",
-      "kyc.rejectionReason": reason
+      status: "REJECTED",
+      rejectionReason: reason
     });
 
     res.json({
