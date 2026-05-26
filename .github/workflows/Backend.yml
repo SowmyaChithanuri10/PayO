@@ -194,7 +194,7 @@ jobs:
 
                 echo "=========================================="
 
-                echo "🎉 DEPLOYMENT successfully added! 🎉"
+                echo "🎉 DEPLOYMENT SUCCESSFUL! 🎉"
 
                 echo "=========================================="
 
@@ -269,4 +269,3 @@ jobs:
             echo "✅ Production API: http://payo-app.duckdns.org:3001/health"
 
             echo "=========================================="
- 
