@@ -194,7 +194,7 @@ jobs:
 
                 echo "=========================================="
 
-                echo "🎉 DEPLOYMENT successfully! 🎉"
+                echo "🎉 DEPLOYMENT successfully added! 🎉"
 
                 echo "=========================================="
 
