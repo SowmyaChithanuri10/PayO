@@ -6,10 +6,14 @@ const kycSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true, // one KYC per user
+      unique: true,
     },
 
     fullName: String,
+
+    documentType: {
+      type: String,
+    },
 
     aadhaarNumber: {
       type: String,
@@ -23,14 +27,14 @@ const kycSchema = new mongoose.Schema(
 
     dob: Date,
 
-    idProofImage: String, // uploaded file path
+    idProofImage: String,
 
-    selfieImage: String, // selfie verification
+    selfieImage: String,
 
     status: {
       type: String,
-      enum: ["pending", "verified", "rejected"],
-      default: "pending",
+      enum: ["UNDER_REVIEW", "APPROVED", "REJECTED"],
+      default: "UNDER_REVIEW",
     },
 
     rejectionReason: String,

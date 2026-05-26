@@ -4,7 +4,7 @@ const getPendingUsers = async (req, res) => {
   try {
 
     const users = await User.find({
-      "kyc.status": "UNDER_REVIEW"
+      status: "UNDER_REVIEW"
     });
 
     res.json({
@@ -28,7 +28,7 @@ const approveKyc = async (req, res) => {
     const userId = req.params.id;
 
     await User.findByIdAndUpdate(userId, {
-      "kyc.status": "APPROVED",
+      "status": "APPROVED",
       "kyc.approvedAt": new Date()
     });
 
@@ -55,7 +55,7 @@ const rejectKyc = async (req, res) => {
     const { reason } = req.body;
 
     await User.findByIdAndUpdate(userId, {
-      "kyc.status": "REJECTED",
+      "status": "REJECTED",
       "kyc.rejectionReason": reason
     });
 
