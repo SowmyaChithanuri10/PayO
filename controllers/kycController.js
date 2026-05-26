@@ -3,7 +3,7 @@ const User = require("../models/Kyc");
 const submitKyc = async (req, res) => {
   try {
 
-    const userId = req.user.id;
+    const userId = req.userId;
 
     const { documentType } = req.body;
 
@@ -14,15 +14,13 @@ const submitKyc = async (req, res) => {
       req.files["selfieImage"]?.[0]?.path || "";
 
     await User.findByIdAndUpdate(userId, {
-      kyc: {
-        documentType,
-        documentImage,
-        selfieImage,
+      documentType,
 
-        status: "UNDER_REVIEW",
+      idProofImage: documentImage,
 
-        submittedAt: new Date()
-      }
+      selfieImage,
+
+      status: "UNDER_REVIEW"
     });
 
     res.json({
@@ -39,7 +37,6 @@ const submitKyc = async (req, res) => {
 
   }
 };
-
 module.exports = {
   submitKyc
 };
