@@ -2,36 +2,63 @@ const Kyc = require("../models/Kyc");
 
 
 // Upload KYC
+const Kyc = require("../models/Kyc");
+
+
+// Upload KYC
 const uploadKyc = async (req, res) => {
+
   try {
 
     const { documentType } = req.body;
 
-    if (!req.file) {
+    // document image
+    const documentFile = req.files.document;
+
+    // selfie image
+    const selfieFile = req.files.selfieImage;
+
+
+    if (!documentFile || !selfieFile) {
+
       return res.status(400).json({
         success: false,
-        message: "Document image required"
+        message: "Both document and selfie image required"
       });
+
     }
+
 
     // check existing kyc
     const existing = await Kyc.findOne({
       user: req.userId
     });
 
+
     if (existing) {
+
       return res.status(400).json({
         success: false,
         message: "KYC already submitted"
       });
+
     }
 
+
     const kyc = await Kyc.create({
+
       user: req.userId,
+
       documentType,
-      documentImage: req.file.path,
+
+      documentImage: documentFile[0].path,
+
+      selfieImage: selfieFile[0].path,
+
       status: "PENDING"
+
     });
+
 
     res.status(201).json({
       success: true,
@@ -39,7 +66,9 @@ const uploadKyc = async (req, res) => {
       data: kyc
     });
 
-  } catch (error) {
+  }
+
+  catch (error) {
 
     res.status(500).json({
       success: false,
@@ -47,6 +76,7 @@ const uploadKyc = async (req, res) => {
     });
 
   }
+
 };
 
 

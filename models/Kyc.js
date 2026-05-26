@@ -17,7 +17,10 @@ const kycSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-
+selfieImage: {
+  type: String,
+  required: true
+},
   status: {
     type: String,
     enum: ["PENDING", "APPROVED", "REJECTED"],

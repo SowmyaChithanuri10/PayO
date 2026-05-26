@@ -14,9 +14,12 @@ const {
 
 // Upload KYC
 router.post(
-  "/upload",
+  "/aadhar-upload",
   auth,
-  upload.single("document"),
+  upload.fields([
+  { name: "document", maxCount: 1 },
+  { name: "selfieImage", maxCount: 1 }
+]),
   uploadKyc
 );
 
