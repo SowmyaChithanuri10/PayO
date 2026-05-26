@@ -25,6 +25,9 @@ const marketRoutes = require("./routes/marketRoutes");
 const updateMarketCache = require("./services/marketUpdater");
 const bankRoutes = require("./routes/bankRoutes");
 const tradingRoutes = require('./routes/tradingRoutes');
+const kycRoutes = require("./routes/kycRoutes");
+const adminRoutes = require("./routes/AdminRoutes");
+
 
 // connect database
 connectDB();
@@ -56,6 +59,7 @@ const server = http.createServer(app);
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -64,6 +68,9 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/market", marketRoutes);
 app.use("/api/bank", bankRoutes);
 app.use("/api/trading", tradingRoutes);
+app.use("/api/kyc", kycRoutes);
+app.use("/api/admin/kyc", adminRoutes);
+
 
 // Root Route
 app.get("/", (req, res) => {
