@@ -12,7 +12,7 @@ on:
  
 jobs:
 
-  # ========== CI JOB (Testing) ============
+  # ========== CI JOB (Testing) ===========
 
   ci:
 
