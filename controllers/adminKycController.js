@@ -1,11 +1,13 @@
-const User = require("../models/Kyc");
+const Kyc = require("../models/Kyc");
 
-const getPendingUsers = async (req, res) => {
+
+// Get pending KYC users
+const getPendingKyc = async (req, res) => {
   try {
 
-    const users = await User.find({
-      status: "UNDER_REVIEW"
-    });
+    const users = await Kyc.find({
+      status: "PENDING"
+    }).populate("user", "name mobile email");
 
     res.json({
       success: true,
@@ -22,18 +24,25 @@ const getPendingUsers = async (req, res) => {
   }
 };
 
+
+// Approve KYC
 const approveKyc = async (req, res) => {
   try {
 
-    const userId = req.params.id;
+    const { id } = req.params;
 
-    await User.findByIdAndUpdate(userId, {
-      status: "APPROVED"
-    });
+    const kyc = await Kyc.findByIdAndUpdate(
+      id,
+      {
+        status: "APPROVED"
+      },
+      { new: true }
+    );
 
     res.json({
       success: true,
-      message: "KYC Approved"
+      message: "KYC Approved",
+      data: kyc
     });
 
   } catch (error) {
@@ -46,21 +55,28 @@ const approveKyc = async (req, res) => {
   }
 };
 
+
+// Reject KYC
 const rejectKyc = async (req, res) => {
   try {
 
-    const userId = req.params.id;
+    const { id } = req.params;
 
     const { reason } = req.body;
 
-    await User.findByIdAndUpdate(userId, {
-      status: "REJECTED",
-      rejectionReason: reason
-    });
+    const kyc = await Kyc.findByIdAndUpdate(
+      id,
+      {
+        status: "REJECTED",
+        rejectionReason: reason
+      },
+      { new: true }
+    );
 
     res.json({
       success: true,
-      message: "KYC Rejected"
+      message: "KYC Rejected",
+      data: kyc
     });
 
   } catch (error) {
@@ -74,7 +90,7 @@ const rejectKyc = async (req, res) => {
 };
 
 module.exports = {
-  getPendingUsers,
+  getPendingKyc,
   approveKyc,
   rejectKyc
 };

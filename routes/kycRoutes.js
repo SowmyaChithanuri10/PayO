@@ -2,28 +2,30 @@ const express = require("express");
 
 const router = express.Router();
 
+const auth = require("../middleware/auth");
+
 const upload = require("../middleware/uploadMiddleware");
 
-const authMiddleware = require("../middleware/auth");
-
 const {
-  submitKyc
+  uploadKyc,
+  getMyKyc
 } = require("../controllers/kycController");
 
+
+// Upload KYC
 router.post(
-  "/submit",
-  authMiddleware,
-  upload.fields([
-    {
-      name: "documentImage",
-      maxCount: 1
-    },
-    {
-      name: "selfieImage",
-      maxCount: 1
-    }
-  ]),
-  submitKyc
+  "/upload",
+  auth,
+  upload.single("document"),
+  uploadKyc
+);
+
+
+// Get KYC Status
+router.get(
+  "/me",
+  auth,
+  getMyKyc
 );
 
 module.exports = router;

@@ -1,31 +1,42 @@
-const User = require("../models/Kyc");
+const Kyc = require("../models/Kyc");
 
-const submitKyc = async (req, res) => {
+
+// Upload KYC
+const uploadKyc = async (req, res) => {
   try {
-
-    const userId = req.userId;
 
     const { documentType } = req.body;
 
-    const documentImage =
-      req.files["documentImage"]?.[0]?.path || "";
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Document image required"
+      });
+    }
 
-    const selfieImage =
-      req.files["selfieImage"]?.[0]?.path || "";
-
-    await User.findByIdAndUpdate(userId, {
-      documentType,
-
-      idProofImage: documentImage,
-
-      selfieImage,
-
-      status: "UNDER_REVIEW"
+    // check existing kyc
+    const existing = await Kyc.findOne({
+      user: req.userId
     });
 
-    res.json({
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: "KYC already submitted"
+      });
+    }
+
+    const kyc = await Kyc.create({
+      user: req.userId,
+      documentType,
+      documentImage: req.file.path,
+      status: "PENDING"
+    });
+
+    res.status(201).json({
       success: true,
-      message: "KYC Submitted Successfully"
+      message: "KYC submitted successfully",
+      data: kyc
     });
 
   } catch (error) {
@@ -37,6 +48,32 @@ const submitKyc = async (req, res) => {
 
   }
 };
+
+
+// Get my KYC status
+const getMyKyc = async (req, res) => {
+  try {
+
+    const kyc = await Kyc.findOne({
+      user: req.userId
+    });
+
+    res.json({
+      success: true,
+      data: kyc
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
 module.exports = {
-  submitKyc
+  uploadKyc,
+  getMyKyc
 };
