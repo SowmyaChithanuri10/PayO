@@ -4,7 +4,7 @@ const router = express.Router();
 
 const upload = require("../middleware/uploadMiddleware");
 
-const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware = require("../middleware/auth");
 
 const {
   submitKyc
