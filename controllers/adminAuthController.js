@@ -13,7 +13,7 @@ const User   = require("../models/User");
 const adminLogin = async (req, res) => {
   try {
     const { mobile, email, password } = req.body;
-    console.log("Admin login attempt:", { email, mobile }); // Debug log
+    console.log("Admin login attempt:", { email, mobile, password: password ? "provided" : "missing" });
 
     if (!password || (!mobile && !email)) {
       return res.status(400).json({
@@ -22,9 +22,10 @@ const adminLogin = async (req, res) => {
       });
     }
     
-    // SUPER ADMIN LOGIN FROM .env
+    // ✅ CHECK SUPER ADMIN FIRST (BEFORE database lookup)
+    // Super admin login from .env
     if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-      console.log("Super admin login successful"); // Debug log
+      console.log("✅ Super admin login successful");
       
       const token = jwt.sign(
         {
@@ -44,14 +45,15 @@ const adminLogin = async (req, res) => {
         admin: {
           name: "Super Admin",
           email: process.env.ADMIN_EMAIL,
-          mobile: process.env.ADMIN_MOBILE,
+          mobile: process.env.ADMIN_MOBILE || "9000000000",
           role: "admin",
           superAdmin: true,
         },
       });
     }
 
-    // Find regular admin user by mobile or email
+    // ✅ ONLY THEN CHECK FOR REGULAR ADMIN IN DATABASE
+    // Find user by mobile or email
     const user = await User.findOne(
       mobile ? { mobile } : { email }
     );
@@ -92,11 +94,11 @@ const adminLogin = async (req, res) => {
       message: "Admin login successful",
       token,
       admin: {
-        id:     user._id,
-        name:   user.name,
-        email:  user.email,
+        id: user._id,
+        name: user.name,
+        email: user.email,
         mobile: user.mobile,
-        role:   user.role,
+        role: user.role,
       },
     });
   } catch (err) {
