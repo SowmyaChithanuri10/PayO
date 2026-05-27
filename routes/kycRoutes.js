@@ -43,7 +43,7 @@ router.get("/verification-status", getVerificationStatus);
 /**
  * SCREEN 1 — Aadhar selected
  * POST /api/kyc/upload-aadhar-documents
- * Body (multipart/form-data): aadharFront, aadharBack, selfie
+ * Body (multipart/form-data): aadharFront,selfie
  */
 router.post(
   "/upload-aadhar-documents",
@@ -54,7 +54,7 @@ router.post(
 /**
  * SCREEN 2 — PAN Card selected
  * POST /api/kyc/upload-pan-documents
- * Body (multipart/form-data): panCard, selfie
+ * Body (multipart/form-data): panCard
  */
 router.post(
   "/upload-pan-documents",
@@ -65,7 +65,7 @@ router.post(
 /**
  * SCREEN 3 — Passport selected
  * POST /api/kyc/upload-passport-documents
- * Body (multipart/form-data): passport, selfie
+ * Body (multipart/form-data): passport
  */
 router.post(
   "/upload-passport-documents",

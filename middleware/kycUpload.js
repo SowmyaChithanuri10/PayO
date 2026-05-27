@@ -38,20 +38,18 @@ const upload = multer({
 /** Screen 1 — Aadhar: front + back + selfie */
 const uploadAadhar = upload.fields([
   { name: "aadharFront", maxCount: 1 },
-  { name: "aadharBack",  maxCount: 1 },
   { name: "selfie",      maxCount: 1 },
 ]);
  
 /** Screen 2 — PAN Card: card image + selfie */
 const uploadPan = upload.fields([
   { name: "panCard", maxCount: 1 },
-  { name: "selfie",  maxCount: 1 },
 ]);
  
 /** Screen 3 — Passport: passport image + selfie */
 const uploadPassport = upload.fields([
   { name: "passport", maxCount: 1 },
-  { name: "selfie",   maxCount: 1 },
+  
 ]);
  
 module.exports = { uploadAadhar, uploadPan, uploadPassport };
