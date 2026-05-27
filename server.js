@@ -25,7 +25,7 @@ const marketRoutes = require("./routes/marketRoutes");
 const updateMarketCache = require("./services/marketUpdater");
 const bankRoutes = require("./routes/bankRoutes");
 const tradingRoutes = require('./routes/tradingRoutes');
-const kycRoutes= require("./routes/kycroutes");
+const kycRoutes= require("./routes/kycRoutes");
 const adminKycRoutes = require("./routes/adminKycRoutes");   
 
 
