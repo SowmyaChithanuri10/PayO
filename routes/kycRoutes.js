@@ -9,7 +9,7 @@ const {
   getVerificationStatus,
   uploadAadharDocuments,
   uploadPanDocuments,
-  uploadPassportDocuments,
+  uploadPassportDocuments,  
   submitForReview,
   getReviewPipelineStatus,
   getApprovalConfirmation,

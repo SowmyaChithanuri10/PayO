@@ -18,6 +18,35 @@ const adminLogin = async (req, res) => {
         message: "Password and mobile or email are required",
       });
     }
+        // SUPER ADMIN LOGIN FROM .env
+    if (
+      (email === process.env.ADMIN_EMAIL ||
+        mobile === process.env.ADMIN_MOBILE) &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+
+      const token = jwt.sign(
+        {
+          role: "admin",
+          superAdmin: true,
+          email: process.env.ADMIN_EMAIL,
+        },
+        "mysecretkey",
+        { expiresIn: "12h" }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Super admin login successful",
+        token,
+        admin: {
+          name: "Super Admin",
+          email: process.env.ADMIN_EMAIL,
+          mobile: process.env.ADMIN_MOBILE,
+          role: "admin",
+        },
+      });
+    }
  
     // Find user by mobile or email
     const user = await User.findOne(

@@ -36,7 +36,22 @@ const userSchema = new mongoose.Schema({
 },
 transactionPin:{
   type:String,
-}
+},
+ role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
+ 
+  kycVerified: {
+    type: Boolean,
+    default: false,
+  },
+ 
+  walletActivated: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);
