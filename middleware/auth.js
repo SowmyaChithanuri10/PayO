@@ -5,15 +5,31 @@ module.exports = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token or invalid format" });
+    return res.status(401).json({
+      success: false,
+      message: "No token or invalid format",
+    });
   }
 
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, "mysecretkey");
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "mysecretkey"
+    );
 
-    //  support both id and mobiles
+    //  SUPER ADMIN SUPPORT
+    if (decoded.superAdmin) {
+      req.userId = "super_admin";
+      req.mobile = process.env.ADMIN_MOBILE;
+      req.userRole = "admin";
+      req.superAdmin = true;
+
+      return next();
+    }
+
+    // NORMAL USERS / ADMINS
     let user;
 
     if (decoded.id) {
@@ -21,20 +37,31 @@ module.exports = async (req, res, next) => {
     } else if (decoded.mobile) {
       user = await User.findOne({ mobile: decoded.mobile });
     } else {
-      return res.status(401).json({ message: "Invalid token payload" });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token payload",
+      });
     }
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     req.userId = user._id;
     req.mobile = user.mobile;
+    req.userRole = user.role;
 
     next();
 
   } catch (err) {
     console.error("Auth error:", err);
-    res.status(401).json({ message: "Invalid token" });
+
+    res.status(401).json({
+      success: false,
+      message: "Invalid token",
+    });
   }
 };
