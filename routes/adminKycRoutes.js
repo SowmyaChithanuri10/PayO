@@ -16,7 +16,7 @@ const {
   searchUserKyc,
   deleteKycRecord,
   getAuditLog,
-} = require("../controllers/Adminkyccontroller");
+} = require("../controllers/adminKycController");
  
 // ─────────────────────────────────────────────────────────────────────────────
 // ALL admin routes require:
