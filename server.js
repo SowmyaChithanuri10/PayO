@@ -61,7 +61,7 @@ const server = http.createServer(app);
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use("/kyc-docs", express.static(path.join(__dirname, "kyc-docs"),  {
+app.use("/kyc-docs", express.static(path.join(__dirname, "uploads"), {
   maxAge: "1d",
   dotfiles: "deny",
 }));
@@ -80,7 +80,7 @@ app.use("/api/admin/kyc",adminKycRoutes);
 
 // ── Admin routes ──────────────────────────────────────────────────────────────
 app.use("/api/admin/auth",    adminAuthRoutes);    // login, create admin ← NEW
-app.use("/api/admin/kyc",     adminKycRoutes);     // KYC management
+
 
 // Root Route
 app.get("/", (req, res) => {

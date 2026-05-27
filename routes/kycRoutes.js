@@ -15,10 +15,6 @@ const {
   getApprovalConfirmation,
   getRejectionDetails,
   resetAndRetry,
-  // Admin flows
-  listPendingReviews,
-  approveKyc,
-  rejectKyc,
 } = require("../controllers/kycController");
  
 // ─────────────────────────────────────────────────────────────────────────────
@@ -47,7 +43,7 @@ router.get("/verification-status", getVerificationStatus);
 /**
  * SCREEN 1 — Aadhar selected
  * POST /api/kyc/upload-aadhar-documents
- * Body (multipart/form-data): aadharFront, aadharBack, selfie
+ * Body (multipart/form-data): aadharFront,selfie
  */
 router.post(
   "/upload-aadhar-documents",
@@ -58,7 +54,7 @@ router.post(
 /**
  * SCREEN 2 — PAN Card selected
  * POST /api/kyc/upload-pan-documents
- * Body (multipart/form-data): panCard, selfie
+ * Body (multipart/form-data): panCard
  */
 router.post(
   "/upload-pan-documents",
@@ -69,7 +65,7 @@ router.post(
 /**
  * SCREEN 3 — Passport selected
  * POST /api/kyc/upload-passport-documents
- * Body (multipart/form-data): passport, selfie
+ * Body (multipart/form-data): passport
  */
 router.post(
   "/upload-passport-documents",
@@ -111,28 +107,6 @@ router.get("/rejection-details", getRejectionDetails);
  * Deletes the rejected KYC record so the user can start fresh.
  */
 router.delete("/reset-and-retry", resetAndRetry);
- 
-// ══════════════════════════════════════════════════════════════
-//  ADMIN KYC ROUTES  (add your own admin-auth middleware here)
-// ══════════════════════════════════════════════════════════════
- 
-/**
- * ADMIN — List all pending KYC submissions
- * GET /api/kyc/admin/pending-reviews
- */
-router.get("/admin/pending-reviews", listPendingReviews);
- 
-/**
- * ADMIN — Approve a KYC submission (Screen 4 → Screen 5 for user)
- * PATCH /api/kyc/admin/approve-kyc/:kycId
- */
-router.patch("/admin/approve-kyc/:kycId", approveKyc);
- 
-/**
- * ADMIN — Reject a KYC submission (Screen 4 → Screen 6 for user)
- * PATCH /api/kyc/admin/reject-kyc/:kycId
- * Body: { reason: "..." }
- */
-router.patch("/admin/reject-kyc/:kycId", rejectKyc);
+
  
 module.exports = router;
