@@ -1,20 +1,15 @@
-# Base image
-FROM node:18-alpine
+FROM node:alpine
  
-# Create app directory
 WORKDIR /app
  
-# Copy package files
 COPY package*.json ./
+RUN npm install
  
-# Install dependencies (from your package.json)
-RUN npm ci --only=production
- 
-# Copy all code
 COPY . .
  
-# Expose port (checking your package.json - need to find port)
+# Create upload directories
+RUN mkdir -p /app/uploads/kyc && chmod -R 777 /app/uploads
+ 
 EXPOSE 3001
  
-# Start the app
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
