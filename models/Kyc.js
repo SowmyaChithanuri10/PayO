@@ -1,61 +1,91 @@
 const mongoose = require("mongoose");
- 
+
 const kycSchema = new mongoose.Schema(
   {
+    // ───────────────────────────────
+    // USER REFERENCE
+    // ───────────────────────────────
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
       unique: true,
+      index: true,
     },
- 
-    // Screen 1/2/3 — Document Type Selection
+
+    // ───────────────────────────────
+    // DOCUMENT TYPE (screen selection)
+    // ───────────────────────────────
     documentType: {
       type: String,
       enum: ["Aadhar", "PANCard", "Passport"],
       default: null,
+      index: true,
     },
- 
-    // Screen 1 — Aadhar upload + selfie
+
+    // ───────────────────────────────
+    // FILES (uploaded docs)
+    // ───────────────────────────────
     aadharFrontUrl: { type: String, default: null },
-    aadharBackUrl:  { type: String, default: null },
- 
-    // Screen 2 — PAN Card upload
+    aadharBackUrl: { type: String, default: null },
+
     panCardUrl: { type: String, default: null },
- 
-    // Screen 3 — Passport upload
+
     passportUrl: { type: String, default: null },
- 
-    // Selfie (shared across all document types)
+
     selfieUrl: { type: String, default: null },
- 
-    // KYC pipeline status
+
+    // ───────────────────────────────
+    // PIPELINE STATUS
+    // ───────────────────────────────
     status: {
       type: String,
       enum: [
-        "not_started",      // User hasn't begun
-        "documents_uploaded", // Screen 3 — submitted, awaiting review
-        "under_review",     // Screen 4 — admin is checking
-        "approved",         // Screen 5 — KYC passed
-        "rejected",         // Screen 6 — verification failed
+        "not_started",
+        "documents_uploaded",
+        "under_review",
+        "approved",
+        "rejected",
       ],
       default: "not_started",
+      index: true,
     },
- 
-    // Admin fields
+
+    // ───────────────────────────────
+    // ADMIN FIELDS
+    // ───────────────────────────────
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },
-    rejectionReason: { type: String, default: null },
-    reviewedAt: { type: Date, default: null },
- 
-    // Track submission count (for retry logic)
-    submissionCount: { type: Number, default: 0 },
+
+    rejectionReason: {
+      type: String,
+      default: null,
+    },
+
+    reviewedAt: {
+      type: Date,
+      default: null,
+    },
+
+    // ───────────────────────────────
+    // TRACKING / AUDIT
+    // ───────────────────────────────
+    submissionCount: {
+      type: Number,
+      default: 1,
+    },
+
+    lastStatusChangeAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
- 
+
 module.exports = mongoose.model("Kyc", kycSchema);
- 

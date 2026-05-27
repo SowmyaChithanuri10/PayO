@@ -73,7 +73,7 @@ const uploadAadharDocuments = async (req, res) => {
       aadharFrontUrl: toPublicUrl(req, files.aadharFront[0].path),
       selfieUrl:      toPublicUrl(req, files.selfie[0].path),
       status:         "documents_uploaded",
-      submissionCount: 1,
+      submissionCount: (kyc?.submissionCount || 0) + 1,
     });
  
     return res.status(201).json({
@@ -110,7 +110,7 @@ const uploadPanDocuments = async (req, res) => {
       documentType: "PANCard",
       panCardUrl:   toPublicUrl(req, files.panCard[0].path),
       status:       "documents_uploaded",
-      submissionCount: 1,
+      submissionCount: (kyc?.submissionCount || 0) + 1,
     });
  
     return res.status(201).json({
@@ -147,7 +147,7 @@ const uploadPassportDocuments = async (req, res) => {
       documentType: "Passport",
       passportUrl:  toPublicUrl(req, files.passport[0].path),
       status:       "documents_uploaded",
-      submissionCount: 1,
+      submissionCount: (kyc?.submissionCount || 0) + 1,
     });
  
     return res.status(201).json({
