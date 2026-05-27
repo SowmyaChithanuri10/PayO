@@ -27,7 +27,6 @@ const kycSchema = new mongoose.Schema(
     // FILES (uploaded docs)
     // ───────────────────────────────
     aadharFrontUrl: { type: String, default: null },
-    aadharBackUrl: { type: String, default: null },
 
     panCardUrl: { type: String, default: null },
 

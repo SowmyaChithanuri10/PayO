@@ -15,10 +15,6 @@ const {
   getApprovalConfirmation,
   getRejectionDetails,
   resetAndRetry,
-  // Admin flows
-  listPendingReviews,
-  approveKyc,
-  rejectKyc,
 } = require("../controllers/kycController");
  
 // ─────────────────────────────────────────────────────────────────────────────
@@ -111,28 +107,6 @@ router.get("/rejection-details", getRejectionDetails);
  * Deletes the rejected KYC record so the user can start fresh.
  */
 router.delete("/reset-and-retry", resetAndRetry);
- 
-// ══════════════════════════════════════════════════════════════
-//  ADMIN KYC ROUTES  (add your own admin-auth middleware here)
-// ══════════════════════════════════════════════════════════════
- 
-/**
- * ADMIN — List all pending KYC submissions
- * GET /api/kyc/admin/pending-reviews
- */
-router.get("/admin/pending-reviews", listPendingReviews);
- 
-/**
- * ADMIN — Approve a KYC submission (Screen 4 → Screen 5 for user)
- * PATCH /api/kyc/admin/approve-kyc/:kycId
- */
-router.patch("/admin/approve-kyc/:kycId", approveKyc);
- 
-/**
- * ADMIN — Reject a KYC submission (Screen 4 → Screen 6 for user)
- * PATCH /api/kyc/admin/reject-kyc/:kycId
- * Body: { reason: "..." }
- */
-router.patch("/admin/reject-kyc/:kycId", rejectKyc);
+
  
 module.exports = router;

@@ -65,16 +65,19 @@ const uploadAadharDocuments = async (req, res) => {
     }
  
     // Wipe any previous KYC (retry flow)
-    await Kyc.deleteOne({ userId: req.userId });
+   const existing = await Kyc.findOne({ userId: req.userId });
+
+await Kyc.deleteOne({ userId: req.userId });
+
+const kyc = await Kyc.create({
+  userId: req.userId,
+  documentType: "Aadhar",
+  aadharFrontUrl: toPublicUrl(req, files.aadharFront[0].path),
+  selfieUrl: toPublicUrl(req, files.selfie[0].path),
+  status: "documents_uploaded",
+  submissionCount: (existing?.submissionCount || 0) + 1,
+});
  
-    const kyc = await Kyc.create({
-      userId:       req.userId,
-      documentType: "Aadhar",
-      aadharFrontUrl: toPublicUrl(req, files.aadharFront[0].path),
-      selfieUrl:      toPublicUrl(req, files.selfie[0].path),
-      status:         "documents_uploaded",
-      submissionCount: (kyc?.submissionCount || 0) + 1,
-    });
  
     return res.status(201).json({
       success: true,
@@ -102,15 +105,18 @@ const uploadPanDocuments = async (req, res) => {
         message: "PAN card image and selfie are required",
       });
     }
- 
-    await Kyc.deleteOne({ userId: req.userId });
+ const existing = await Kyc.findOne({ userId: req.userId });
+
+await Kyc.deleteOne({ userId: req.userId });
+
+
  
     const kyc = await Kyc.create({
       userId:       req.userId,
       documentType: "PANCard",
       panCardUrl:   toPublicUrl(req, files.panCard[0].path),
       status:       "documents_uploaded",
-      submissionCount: (kyc?.submissionCount || 0) + 1,
+      submissionCount: (existing?.submissionCount || 0) + 1,
     });
  
     return res.status(201).json({
@@ -139,15 +145,15 @@ const uploadPassportDocuments = async (req, res) => {
         message: "Passport image and selfie are required",
       });
     }
- 
-    await Kyc.deleteOne({ userId: req.userId });
- 
+const existing = await Kyc.findOne({ userId: req.userId });
+
+await Kyc.deleteOne({ userId: req.userId });
     const kyc = await Kyc.create({
       userId:       req.userId,
       documentType: "Passport",
       passportUrl:  toPublicUrl(req, files.passport[0].path),
       status:       "documents_uploaded",
-      submissionCount: (kyc?.submissionCount || 0) + 1,
+        submissionCount: (existing?.submissionCount || 0) + 1,
     });
  
     return res.status(201).json({
@@ -332,108 +338,7 @@ const resetAndRetry = async (req, res) => {
   }
 };
  
-// ════════════════════════════════════════════════════════════════════════════
-// ── ADMIN APIs ──────────────────────────────────────────────────────────────
-// ════════════════════════════════════════════════════════════════════════════
- 
-// ADMIN — LIST ALL PENDING KYC  →  GET /api/kyc/admin/pending-reviews
-const listPendingReviews = async (req, res) => {
-  try {
-    const pendingKycs = await Kyc.find({ status: "under_review" })
-      .populate("userId", "name mobile email")
-      .sort({ createdAt: 1 }); // oldest first
- 
-    return res.status(200).json({
-      success: true,
-      count: pendingKycs.length,
-      kycs: pendingKycs,
-    });
-  } catch (err) {
-    console.error("listPendingReviews error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
- 
-// ADMIN — APPROVE KYC  →  PATCH /api/kyc/admin/approve-kyc/:kycId
-// On approval: marks KYC approved and activates user's wallet.
-const approveKyc = async (req, res) => {
-  try {
-    const { kycId } = req.params;
- 
-    const kyc = await Kyc.findById(kycId);
-    if (!kyc) {
-      return res.status(404).json({ success: false, message: "KYC record not found" });
-    }
- 
-    if (kyc.status !== "under_review") {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot approve. Current status: ${kyc.status}`,
-      });
-    }
- 
-    kyc.status       = "approved";
-    kyc.reviewedBy   = req.userId;
-    kyc.reviewedAt   = new Date();
-    kyc.rejectionReason = null;
-    await kyc.save();
- 
-    // Optionally activate wallet on User model
-    await User.findByIdAndUpdate(kyc.userId, { kycVerified: true, walletActivated: true });
- 
-    return res.status(200).json({
-      success: true,
-      message: "KYC approved and wallet activated",
-      kycId:  kyc._id,
-      userId: kyc.userId,
-    });
-  } catch (err) {
-    console.error("approveKyc error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
- 
-// ADMIN — REJECT KYC  →  PATCH /api/kyc/admin/reject-kyc/:kycId
-// On rejection: data stays for audit; user must hit /reset-and-retry to restart.
-const rejectKyc = async (req, res) => {
-  try {
-    const { kycId } = req.params;
-    const { reason } = req.body;
- 
-    if (!reason) {
-      return res.status(400).json({ success: false, message: "Rejection reason is required" });
-    }
- 
-    const kyc = await Kyc.findById(kycId);
-    if (!kyc) {
-      return res.status(404).json({ success: false, message: "KYC record not found" });
-    }
- 
-    if (kyc.status !== "under_review") {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot reject. Current status: ${kyc.status}`,
-      });
-    }
- 
-    kyc.status          = "rejected";
-    kyc.reviewedBy      = req.userId;
-    kyc.reviewedAt      = new Date();
-    kyc.rejectionReason = reason;
-    await kyc.save();
- 
-    return res.status(200).json({
-      success: true,
-      message: "KYC rejected. User will be prompted to retry.",
-      kycId:  kyc._id,
-      userId: kyc.userId,
-      reason,
-    });
-  } catch (err) {
-    console.error("rejectKyc error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
+
  
 module.exports = {
   // User flows
@@ -446,8 +351,5 @@ module.exports = {
   getApprovalConfirmation,
   getRejectionDetails,
   resetAndRetry,
-  // Admin flows
-  listPendingReviews,
-  approveKyc,
-  rejectKyc,
+  
 };
