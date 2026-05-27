@@ -1,34 +1,138 @@
 const express = require("express");
-
-const router = express.Router();
-
-const auth = require("../middleware/auth");
-
-const upload = require("../middleware/uploadMiddleware");
-
+const router  = express.Router();
+ 
+const auth = require("../middleware/auth");           // your existing JWT middleware
+const { uploadAadhar, uploadPan, uploadPassport } = require("../middleware/kycUpload");
+ 
 const {
-  uploadKyc,
-  getMyKyc
-} = require("../controllers/kycController");
-
-
-// Upload KYC
+  // User flows (match all 6 screens)
+  getVerificationStatus,
+  uploadAadharDocuments,
+  uploadPanDocuments,
+  uploadPassportDocuments,
+  submitForReview,
+  getReviewPipelineStatus,
+  getApprovalConfirmation,
+  getRejectionDetails,
+  resetAndRetry,
+  // Admin flows
+  listPendingReviews,
+  approveKyc,
+  rejectKyc,
+} = require("../controllers/kyccontroller");
+ 
+// ─────────────────────────────────────────────────────────────────────────────
+// ALL routes require a valid JWT (Bearer token)
+// ─────────────────────────────────────────────────────────────────────────────
+router.use(auth);
+ 
+// ══════════════════════════════════════════════════════════════
+//  USER KYC ROUTES
+// ══════════════════════════════════════════════════════════════
+ 
+/**
+ * SCREEN 1 (on app load)
+ * GET /api/kyc/verification-status
+ * Returns the user's current KYC status so the app routes to the correct screen.
+ *
+ * Response statuses:
+ *   not_started        → show Screen 1 (choose document type)
+ *   documents_uploaded → show Screen 4 (under review) — or re-submit
+ *   under_review       → show Screen 4 (polling pipeline)
+ *   approved           → show Screen 5 (approved)
+ *   rejected           → show Screen 6 (failed)
+ */
+router.get("/verification-status", getVerificationStatus);
+ 
+/**
+ * SCREEN 1 — Aadhar selected
+ * POST /api/kyc/upload-aadhar-documents
+ * Body (multipart/form-data): aadharFront, aadharBack, selfie
+ */
 router.post(
-  "/aadhar-upload",
-  auth,
-  upload.fields([
-  { name: "document", maxCount: 1 },
-  { name: "selfieImage", maxCount: 1 }
-]),
-  uploadKyc
+  "/upload-aadhar-documents",
+  uploadAadhar,
+  uploadAadharDocuments
 );
-
-
-// Get KYC Status
-router.get(
-  "/me",
-  auth,
-  getMyKyc
+ 
+/**
+ * SCREEN 2 — PAN Card selected
+ * POST /api/kyc/upload-pan-documents
+ * Body (multipart/form-data): panCard, selfie
+ */
+router.post(
+  "/upload-pan-documents",
+  uploadPan,
+  uploadPanDocuments
 );
-
+ 
+/**
+ * SCREEN 3 — Passport selected
+ * POST /api/kyc/upload-passport-documents
+ * Body (multipart/form-data): passport, selfie
+ */
+router.post(
+  "/upload-passport-documents",
+  uploadPassport,
+  uploadPassportDocuments
+);
+ 
+/**
+ * SCREEN 3 → SCREEN 4  (Submit button tap)
+ * POST /api/kyc/submit-for-review
+ * No body required. Transitions status: documents_uploaded → under_review
+ */
+router.post("/submit-for-review", submitForReview);
+ 
+/**
+ * SCREEN 4 — Under Review polling
+ * GET /api/kyc/review-pipeline-status
+ * Poll every ~5 s to animate the checklist and detect admin decision.
+ */
+router.get("/review-pipeline-status", getReviewPipelineStatus);
+ 
+/**
+ * SCREEN 5 — KYC Approved
+ * GET /api/kyc/approval-confirmation
+ * Returns approval details + wallet activation confirmation.
+ */
+router.get("/approval-confirmation", getApprovalConfirmation);
+ 
+/**
+ * SCREEN 6 — Verification Failed
+ * GET /api/kyc/rejection-details
+ * Returns rejection reason + retry tips.
+ */
+router.get("/rejection-details", getRejectionDetails);
+ 
+/**
+ * SCREEN 6 — Retry button tap
+ * DELETE /api/kyc/reset-and-retry
+ * Deletes the rejected KYC record so the user can start fresh.
+ */
+router.delete("/reset-and-retry", resetAndRetry);
+ 
+// ══════════════════════════════════════════════════════════════
+//  ADMIN KYC ROUTES  (add your own admin-auth middleware here)
+// ══════════════════════════════════════════════════════════════
+ 
+/**
+ * ADMIN — List all pending KYC submissions
+ * GET /api/kyc/admin/pending-reviews
+ */
+router.get("/admin/pending-reviews", listPendingReviews);
+ 
+/**
+ * ADMIN — Approve a KYC submission (Screen 4 → Screen 5 for user)
+ * PATCH /api/kyc/admin/approve-kyc/:kycId
+ */
+router.patch("/admin/approve-kyc/:kycId", approveKyc);
+ 
+/**
+ * ADMIN — Reject a KYC submission (Screen 4 → Screen 6 for user)
+ * PATCH /api/kyc/admin/reject-kyc/:kycId
+ * Body: { reason: "..." }
+ */
+router.patch("/admin/reject-kyc/:kycId", rejectKyc);
+ 
 module.exports = router;

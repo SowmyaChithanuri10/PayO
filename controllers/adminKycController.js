@@ -1,183 +1,481 @@
-const Kyc = require("../models/Kyc");
-
-// Get pending KYC users
-const getPendingKyc = async (req, res) => {
+const Kyc  = require("../models/Kyc");
+const User = require("../models/User");
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — DASHBOARD OVERVIEW
+// GET /api/admin/kyc/dashboard-stats
+// Returns counts per status for an admin dashboard summary card.
+// ════════════════════════════════════════════════════════════════════════════
+const getDashboardStats = async (req, res) => {
   try {
-    const users = await Kyc.find({ status: "PENDING" })
-      .populate("user", "name mobile email")
-      .sort({ createdAt: -1 }); // Show newest first
-
-    res.json({
+    const [
+      totalSubmissions,
+      notStarted,
+      docsUploaded,
+      underReview,
+      approved,
+      rejected,
+    ] = await Promise.all([
+      Kyc.countDocuments(),
+      Kyc.countDocuments({ status: "not_started" }),
+      Kyc.countDocuments({ status: "documents_uploaded" }),
+      Kyc.countDocuments({ status: "under_review" }),
+      Kyc.countDocuments({ status: "approved" }),
+      Kyc.countDocuments({ status: "rejected" }),
+    ]);
+ 
+    return res.status(200).json({
       success: true,
-      count: users.length,
-      data: users
+      stats: {
+        totalSubmissions,
+        notStarted,
+        docsUploaded,
+        underReview,
+        approved,
+        rejected,
+      },
     });
-  } catch (error) {
-    console.error("Get Pending KYC Error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch pending KYC requests"
-    });
+  } catch (err) {
+    console.error("getDashboardStats error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-// Approve KYC
-const approveKyc = async (req, res) => {
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — LIST ALL KYC SUBMISSIONS (with filters)
+// GET /api/admin/kyc/all-submissions
+// Query params:
+//   status  — filter by status (optional)
+//   page    — page number (default: 1)
+//   limit   — results per page (default: 20)
+// ════════════════════════════════════════════════════════════════════════════
+const getAllSubmissions = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    // Check if KYC exists
-    const existingKyc = await Kyc.findById(id);
-    if (!existingKyc) {
-      return res.status(404).json({
-        success: false,
-        message: "KYC application not found"
-      });
+    const { status, page = 1, limit = 20 } = req.query;
+ 
+    const filter = {};
+    if (status) filter.status = status;
+ 
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+ 
+    const [kycs, total] = await Promise.all([
+      Kyc.find(filter)
+        .populate("userId", "name mobile email")
+        .populate("reviewedBy", "name email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Kyc.countDocuments(filter),
+    ]);
+ 
+    return res.status(200).json({
+      success: true,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+      kycs,
+    });
+  } catch (err) {
+    console.error("getAllSubmissions error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — LIST PENDING KYC SUBMISSIONS
+// GET /api/admin/kyc/pending-reviews
+// Returns all KYC records with status "under_review", oldest first so admin
+// processes them in order of submission.
+// ════════════════════════════════════════════════════════════════════════════
+const listPendingReviews = async (req, res) => {
+  try {
+    const pendingKycs = await Kyc.find({ status: "under_review" })
+      .populate("userId", "name mobile email")
+      .sort({ createdAt: 1 }); // oldest first — FIFO queue
+ 
+    return res.status(200).json({
+      success: true,
+      count: pendingKycs.length,
+      kycs: pendingKycs,
+    });
+  } catch (err) {
+    console.error("listPendingReviews error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — GET SINGLE KYC DETAILS
+// GET /api/admin/kyc/submission-details/:kycId
+// Returns the full KYC record including all document URLs for admin review.
+// ════════════════════════════════════════════════════════════════════════════
+const getSubmissionDetails = async (req, res) => {
+  try {
+    const { kycId } = req.params;
+ 
+    const kyc = await Kyc.findById(kycId)
+      .populate("userId", "name mobile email createdAt")
+      .populate("reviewedBy", "name email");
+ 
+    if (!kyc) {
+      return res.status(404).json({ success: false, message: "KYC record not found" });
     }
-
-    // Check if already approved or rejected
-    if (existingKyc.status !== "PENDING") {
+ 
+    return res.status(200).json({
+      success: true,
+      kyc,
+    });
+  } catch (err) {
+    console.error("getSubmissionDetails error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — APPROVE KYC
+// PATCH /api/admin/kyc/approve-verification/:kycId
+// Approves the KYC record and activates the user's wallet.
+// User will see Screen 5 (Approved) on next poll.
+// ════════════════════════════════════════════════════════════════════════════
+const approveVerification = async (req, res) => {
+  try {
+    const { kycId } = req.params;
+ 
+    const kyc = await Kyc.findById(kycId);
+ 
+    if (!kyc) {
+      return res.status(404).json({ success: false, message: "KYC record not found" });
+    }
+ 
+    if (kyc.status !== "under_review") {
       return res.status(400).json({
         success: false,
-        message: `Cannot approve KYC that is already ${existingKyc.status.toLowerCase()}`
+        message: `Cannot approve. Current status is "${kyc.status}"`,
       });
     }
-
-    const kyc = await Kyc.findByIdAndUpdate(
-      id,
-      {
-        status: "APPROVED",
-        rejectionReason: null // Clear any previous rejection reason
-      },
-      { new: true }
-    ).populate("user", "name email mobile");
-
-    res.json({
+ 
+    // Update KYC record
+    kyc.status          = "approved";
+    kyc.reviewedBy      = req.userId;
+    kyc.reviewedAt      = new Date();
+    kyc.rejectionReason = null;
+    await kyc.save();
+ 
+    // Activate wallet on the User record
+    await User.findByIdAndUpdate(kyc.userId, {
+      kycVerified:     true,
+      walletActivated: true,
+    });
+ 
+    return res.status(200).json({
       success: true,
-      message: "KYC approved successfully",
-      data: kyc
+      message: "KYC approved. User wallet has been activated.",
+      kycId:      kyc._id,
+      userId:     kyc.userId,
+      approvedBy: req.adminUser?.name || req.userId,
+      approvedAt: kyc.reviewedAt,
     });
-  } catch (error) {
-    console.error("Approve KYC Error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to approve KYC"
-    });
+  } catch (err) {
+    console.error("approveVerification error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-// Reject KYC
-const rejectKyc = async (req, res) => {
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — REJECT KYC
+// PATCH /api/admin/kyc/reject-verification/:kycId
+// Rejects the KYC with a reason. User sees Screen 6 on next poll.
+// Their data stays for audit; they must hit /reset-and-retry to try again.
+// Body: { reason: "string" }
+// ════════════════════════════════════════════════════════════════════════════
+const rejectVerification = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { kycId } = req.params;
     const { reason } = req.body;
-
-    // Validate rejection reason
+ 
     if (!reason || reason.trim() === "") {
       return res.status(400).json({
         success: false,
-        message: "Rejection reason is required"
+        message: "A rejection reason is required",
       });
     }
-
-    // Check if KYC exists
-    const existingKyc = await Kyc.findById(id);
-    if (!existingKyc) {
-      return res.status(404).json({
-        success: false,
-        message: "KYC application not found"
-      });
+ 
+    const kyc = await Kyc.findById(kycId);
+ 
+    if (!kyc) {
+      return res.status(404).json({ success: false, message: "KYC record not found" });
     }
-
-    // Check if already approved or rejected
-    if (existingKyc.status !== "PENDING") {
+ 
+    if (kyc.status !== "under_review") {
       return res.status(400).json({
         success: false,
-        message: `Cannot reject KYC that is already ${existingKyc.status.toLowerCase()}`
+        message: `Cannot reject. Current status is "${kyc.status}"`,
       });
     }
-
-    const kyc = await Kyc.findByIdAndUpdate(
-      id,
-      {
-        status: "REJECTED",
-        rejectionReason: reason.trim()
-      },
-      { new: true }
-    ).populate("user", "name email mobile");
-
-    res.json({
+ 
+    kyc.status          = "rejected";
+    kyc.reviewedBy      = req.userId;
+    kyc.reviewedAt      = new Date();
+    kyc.rejectionReason = reason.trim();
+    await kyc.save();
+ 
+    return res.status(200).json({
       success: true,
-      message: "KYC rejected successfully",
-      data: kyc
+      message: "KYC rejected. User will be prompted to retry.",
+      kycId:      kyc._id,
+      userId:     kyc.userId,
+      reason:     kyc.rejectionReason,
+      rejectedBy: req.adminUser?.name || req.userId,
+      rejectedAt: kyc.reviewedAt,
     });
-  } catch (error) {
-    console.error("Reject KYC Error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to reject KYC"
-    });
+  } catch (err) {
+    console.error("rejectVerification error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-// Get KYC by ID (optional utility function)
-const getKycById = async (req, res) => {
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — BULK APPROVE
+// PATCH /api/admin/kyc/bulk-approve
+// Body: { kycIds: ["id1", "id2", ...] }
+// Approves multiple KYC submissions in one call.
+// ════════════════════════════════════════════════════════════════════════════
+const bulkApprove = async (req, res) => {
   try {
-    const { id } = req.params;
-    const kyc = await Kyc.findById(id).populate("user", "name email mobile");
-
-    if (!kyc) {
+    const { kycIds } = req.body;
+ 
+    if (!Array.isArray(kycIds) || kycIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "kycIds must be a non-empty array",
+      });
+    }
+ 
+    const kycs = await Kyc.find({
+      _id:    { $in: kycIds },
+      status: "under_review",
+    });
+ 
+    if (kycs.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "KYC application not found"
+        message: "No under-review KYC records found for the provided IDs",
       });
     }
-
-    res.json({
+ 
+    const now       = new Date();
+    const userIds   = kycs.map((k) => k.userId);
+    const approvedIds = kycs.map((k) => k._id);
+ 
+    // Bulk update KYC records
+    await Kyc.updateMany(
+      { _id: { $in: approvedIds } },
+      {
+        $set: {
+          status:     "approved",
+          reviewedBy: req.userId,
+          reviewedAt: now,
+          rejectionReason: null,
+        },
+      }
+    );
+ 
+    // Bulk activate wallets
+    await User.updateMany(
+      { _id: { $in: userIds } },
+      { $set: { kycVerified: true, walletActivated: true } }
+    );
+ 
+    return res.status(200).json({
       success: true,
-      data: kyc
+      message: `${approvedIds.length} KYC record(s) approved and wallets activated`,
+      approvedCount: approvedIds.length,
+      approvedKycIds: approvedIds,
     });
-  } catch (error) {
-    console.error("Get KYC By ID Error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch KYC"
-    });
+  } catch (err) {
+    console.error("bulkApprove error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-// Get all KYC applications (with filter)
-const getAllKyc = async (req, res) => {
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — BULK REJECT
+// PATCH /api/admin/kyc/bulk-reject
+// Body: { kycIds: ["id1", "id2", ...], reason: "string" }
+// ════════════════════════════════════════════════════════════════════════════
+const bulkReject = async (req, res) => {
   try {
-    const { status } = req.query;
-    const filter = {};
-    
-    if (status && ["PENDING", "APPROVED", "REJECTED"].includes(status)) {
-      filter.status = status;
+    const { kycIds, reason } = req.body;
+ 
+    if (!Array.isArray(kycIds) || kycIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "kycIds must be a non-empty array",
+      });
     }
-
-    const kycs = await Kyc.find(filter)
-      .populate("user", "name email mobile")
+ 
+    if (!reason || reason.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "A rejection reason is required for bulk reject",
+      });
+    }
+ 
+    const result = await Kyc.updateMany(
+      { _id: { $in: kycIds }, status: "under_review" },
+      {
+        $set: {
+          status:          "rejected",
+          reviewedBy:      req.userId,
+          reviewedAt:      new Date(),
+          rejectionReason: reason.trim(),
+        },
+      }
+    );
+ 
+    return res.status(200).json({
+      success: true,
+      message: `${result.modifiedCount} KYC record(s) rejected`,
+      rejectedCount: result.modifiedCount,
+      reason: reason.trim(),
+    });
+  } catch (err) {
+    console.error("bulkReject error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — SEARCH KYC BY USER
+// GET /api/admin/kyc/search-user?query=<mobile|email|name>
+// Search for a specific user's KYC by their mobile, email, or name.
+// ════════════════════════════════════════════════════════════════════════════
+const searchUserKyc = async (req, res) => {
+  try {
+    const { query } = req.query;
+ 
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        message: "Query param is required (mobile, email, or name)",
+      });
+    }
+ 
+    // Find matching users first
+    const users = await User.find({
+      $or: [
+        { mobile: { $regex: query, $options: "i" } },
+        { email:  { $regex: query, $options: "i" } },
+        { name:   { $regex: query, $options: "i" } },
+      ],
+    }).select("_id name mobile email");
+ 
+    if (users.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No users found matching the search query",
+      });
+    }
+ 
+    const userIds = users.map((u) => u._id);
+ 
+    const kycs = await Kyc.find({ userId: { $in: userIds } })
+      .populate("userId", "name mobile email")
+      .populate("reviewedBy", "name email")
       .sort({ createdAt: -1 });
-
-    res.json({
+ 
+    return res.status(200).json({
       success: true,
       count: kycs.length,
-      data: kycs
+      kycs,
     });
-  } catch (error) {
-    console.error("Get All KYC Error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch KYC applications"
-    });
+  } catch (err) {
+    console.error("searchUserKyc error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — DELETE KYC RECORD (hard delete for data cleanup)
+// DELETE /api/admin/kyc/delete-record/:kycId
+// Only allowed for rejected records. Approved records are audit-safe and
+// should never be deleted.
+// ════════════════════════════════════════════════════════════════════════════
+const deleteKycRecord = async (req, res) => {
+  try {
+    const { kycId } = req.params;
+ 
+    const kyc = await Kyc.findById(kycId);
+ 
+    if (!kyc) {
+      return res.status(404).json({ success: false, message: "KYC record not found" });
+    }
+ 
+    if (kyc.status === "approved") {
+      return res.status(403).json({
+        success: false,
+        message: "Approved KYC records cannot be deleted (audit trail must be preserved)",
+      });
+    }
+ 
+    await Kyc.deleteOne({ _id: kycId });
+ 
+    return res.status(200).json({
+      success: true,
+      message: "KYC record deleted successfully",
+      deletedKycId: kycId,
+    });
+  } catch (err) {
+    console.error("deleteKycRecord error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN — AUDIT LOG (recent admin actions)
+// GET /api/admin/kyc/audit-log
+// Returns recently reviewed KYC records with who reviewed them and when.
+// Query params: page, limit
+// ════════════════════════════════════════════════════════════════════════════
+const getAuditLog = async (req, res) => {
+  try {
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+ 
+    const [logs, total] = await Promise.all([
+      Kyc.find({ reviewedBy: { $ne: null } })
+        .populate("userId",     "name mobile email")
+        .populate("reviewedBy", "name email")
+        .select("status rejectionReason reviewedBy reviewedAt submissionCount documentType userId")
+        .sort({ reviewedAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Kyc.countDocuments({ reviewedBy: { $ne: null } }),
+    ]);
+ 
+    return res.status(200).json({
+      success: true,
+      total,
+      page:       parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+      logs,
+    });
+  } catch (err) {
+    console.error("getAuditLog error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+ 
 module.exports = {
-  getPendingKyc,
-  approveKyc,
-  rejectKyc,
-  getKycById,
-  getAllKyc
+  getDashboardStats,
+  getAllSubmissions,
+  listPendingReviews,
+  getSubmissionDetails,
+  approveVerification,
+  rejectVerification,
+  bulkApprove,
+  bulkReject,
+  searchUserKyc,
+  deleteKycRecord,
+  getAuditLog,
 };
