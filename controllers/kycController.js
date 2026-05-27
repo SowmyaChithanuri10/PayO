@@ -57,7 +57,7 @@ const uploadAadharDocuments = async (req, res) => {
   try {
     const files = req.files;
  
-    if (!files?.aadharFront?.[0] || !files?.aadharBack?.[0] || !files?.selfie?.[0]) {
+    if (!files?.aadharFront?.[0] || !files?.selfie?.[0]) {
       return res.status(400).json({
         success: false,
         message: "Aadhar front, back, and selfie are all required",
@@ -71,7 +71,6 @@ const uploadAadharDocuments = async (req, res) => {
       userId:       req.userId,
       documentType: "Aadhar",
       aadharFrontUrl: toPublicUrl(req, files.aadharFront[0].path),
-      aadharBackUrl:  toPublicUrl(req, files.aadharBack[0].path),
       selfieUrl:      toPublicUrl(req, files.selfie[0].path),
       status:         "documents_uploaded",
       submissionCount: 1,
@@ -97,7 +96,7 @@ const uploadPanDocuments = async (req, res) => {
   try {
     const files = req.files;
  
-    if (!files?.panCard?.[0] || !files?.selfie?.[0]) {
+    if (!files?.panCard?.[0]) {
       return res.status(400).json({
         success: false,
         message: "PAN card image and selfie are required",
@@ -110,7 +109,6 @@ const uploadPanDocuments = async (req, res) => {
       userId:       req.userId,
       documentType: "PANCard",
       panCardUrl:   toPublicUrl(req, files.panCard[0].path),
-      selfieUrl:    toPublicUrl(req, files.selfie[0].path),
       status:       "documents_uploaded",
       submissionCount: 1,
     });
@@ -135,7 +133,7 @@ const uploadPassportDocuments = async (req, res) => {
   try {
     const files = req.files;
  
-    if (!files?.passport?.[0] || !files?.selfie?.[0]) {
+    if (!files?.passport?.[0]) {
       return res.status(400).json({
         success: false,
         message: "Passport image and selfie are required",
@@ -148,7 +146,6 @@ const uploadPassportDocuments = async (req, res) => {
       userId:       req.userId,
       documentType: "Passport",
       passportUrl:  toPublicUrl(req, files.passport[0].path),
-      selfieUrl:    toPublicUrl(req, files.selfie[0].path),
       status:       "documents_uploaded",
       submissionCount: 1,
     });
