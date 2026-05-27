@@ -35,21 +35,23 @@ const upload = multer({
  
 // ─── Named field sets per document type ─────────────────────────────────────
  
-/** Screen 1 — Aadhar: front + back + selfie */
+// In kycUpload.js
+
+/** Screen 1 — Aadhar: front only + selfie (NO back) */
 const uploadAadhar = upload.fields([
   { name: "aadharFront", maxCount: 1 },
-  { name: "selfie",      maxCount: 1 },
+  { name: "selfie", maxCount: 1 },
+  // NO aadharBack field
 ]);
- 
-/** Screen 2 — PAN Card: card image + selfie */
+
+/** Screen 2 — PAN Card: card image only */
 const uploadPan = upload.fields([
   { name: "panCard", maxCount: 1 },
 ]);
- 
-/** Screen 3 — Passport: passport image + selfie */
+
+/** Screen 3 — Passport: passport image only */
 const uploadPassport = upload.fields([
   { name: "passport", maxCount: 1 },
-  
 ]);
  
 module.exports = { uploadAadhar, uploadPan, uploadPassport };

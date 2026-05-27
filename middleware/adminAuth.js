@@ -1,12 +1,18 @@
 const User = require("../models/User");
- 
-/**
- * adminAuth middleware
- * Must be used AFTER the regular `auth` middleware so req.userId is available.
- * Blocks any non-admin user from reaching admin routes.
- */
+
 module.exports = async (req, res, next) => {
   try {
+    // Check if it's super admin (no user record)
+    if (req.userId === "super_admin") {
+      req.adminUser = {
+        _id: "super_admin",
+        name: "Super Admin",
+        role: "admin",
+        superAdmin: true
+      };
+      return next();
+    }
+
     const user = await User.findById(req.userId);
  
     if (!user) {
@@ -20,11 +26,10 @@ module.exports = async (req, res, next) => {
       });
     }
  
-    req.adminUser = user; // attach admin user to request for use in controllers
+    req.adminUser = user;
     next();
   } catch (err) {
     console.error("adminAuth error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
- 

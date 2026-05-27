@@ -8,10 +8,14 @@ const path  = require("path");
  * Build a public-accessible URL for a saved file.
  * req.file.path is the absolute disk path; we expose it as /kyc-docs/<userId>/filename
  */
+// In kycController.js, update the toPublicUrl function:
 const toPublicUrl = (req, filePath) => {
   if (!filePath) return null;
-  const rel = path.relative(path.join(__dirname, "../uploads"), filePath);
-  return `${req.protocol}://${req.get("host")}/kyc-docs/${rel.replace(/\\/g, "/")}`;
+  // Get relative path from uploads folder
+  const relativePath = path.relative(path.join(__dirname, "../uploads"), filePath);
+  // Convert Windows backslashes to forward slashes
+  const normalizedPath = relativePath.replace(/\\/g, "/");
+  return `${req.protocol}://${req.get("host")}/kyc-docs/${normalizedPath}`;
 };
  
 // ════════════════════════════════════════════════════════════════════════════
@@ -56,33 +60,34 @@ const getVerificationStatus = async (req, res) => {
 const uploadAadharDocuments = async (req, res) => {
   try {
     const files = req.files;
- 
+    
+    console.log("Files received:", Object.keys(files));
+
+    // Only Aadhar front and selfie required (NO back)
     if (!files?.aadharFront?.[0] || !files?.selfie?.[0]) {
       return res.status(400).json({
         success: false,
-        message: "Aadhar front, back, and selfie are all required",
+        message: "Aadhar front and selfie are required",
       });
     }
- 
-    // Wipe any previous KYC (retry flow)
-   const existing = await Kyc.findOne({ userId: req.userId });
 
-await Kyc.deleteOne({ userId: req.userId });
+    const existing = await Kyc.findOne({ userId: req.userId });
+    await Kyc.deleteOne({ userId: req.userId });
 
-const kyc = await Kyc.create({
-  userId: req.userId,
-  documentType: "Aadhar",
-  aadharFrontUrl: toPublicUrl(req, files.aadharFront[0].path),
-  selfieUrl: toPublicUrl(req, files.selfie[0].path),
-  status: "documents_uploaded",
-  submissionCount: (existing?.submissionCount || 0) + 1,
-});
- 
- 
+    const kyc = await Kyc.create({
+      userId: req.userId,
+      documentType: "Aadhar",
+      aadharFrontUrl: toPublicUrl(req, files.aadharFront[0].path),
+      // aadharBackUrl: NOT saved (not required)
+      selfieUrl: toPublicUrl(req, files.selfie[0].path),
+      status: "documents_uploaded",
+      submissionCount: (existing?.submissionCount || 0) + 1,
+    });
+
     return res.status(201).json({
       success: true,
       message: "Aadhar documents uploaded successfully",
-      kycId:  kyc._id,
+      kycId: kyc._id,
       status: kyc.status,
     });
   } catch (err) {
@@ -98,31 +103,33 @@ const kyc = await Kyc.create({
 const uploadPanDocuments = async (req, res) => {
   try {
     const files = req.files;
- 
+    
+    console.log("Files received:", Object.keys(files));
+
+    // Only PAN card required, NO selfie
     if (!files?.panCard?.[0]) {
       return res.status(400).json({
         success: false,
-        message: "PAN card image and selfie are required",
+        message: "PAN card image is required",
       });
     }
- const existing = await Kyc.findOne({ userId: req.userId });
 
-await Kyc.deleteOne({ userId: req.userId });
+    const existing = await Kyc.findOne({ userId: req.userId });
+    await Kyc.deleteOne({ userId: req.userId });
 
-
- 
     const kyc = await Kyc.create({
-      userId:       req.userId,
+      userId: req.userId,
       documentType: "PANCard",
-      panCardUrl:   toPublicUrl(req, files.panCard[0].path),
-      status:       "documents_uploaded",
+      panCardUrl: toPublicUrl(req, files.panCard[0].path),
+      // selfieUrl: NOT saved for PAN
+      status: "documents_uploaded",
       submissionCount: (existing?.submissionCount || 0) + 1,
     });
- 
+
     return res.status(201).json({
       success: true,
-      message: "PAN card documents uploaded successfully",
-      kycId:  kyc._id,
+      message: "PAN card uploaded successfully",
+      kycId: kyc._id,
       status: kyc.status,
     });
   } catch (err) {
@@ -135,31 +142,37 @@ await Kyc.deleteOne({ userId: req.userId });
 // SCREEN 3 — UPLOAD PASSPORT  →  POST /api/kyc/upload-passport-documents
 // Accepts: passport (file), selfie (file)
 // ════════════════════════════════════════════════════════════════════════════
+// In kycController.js - Update uploadPassportDocuments
 const uploadPassportDocuments = async (req, res) => {
   try {
     const files = req.files;
- 
+    
+    console.log("Files received:", Object.keys(files));
+
+    // Only Passport required, NO selfie
     if (!files?.passport?.[0]) {
       return res.status(400).json({
         success: false,
-        message: "Passport image and selfie are required",
+        message: "Passport image is required",
       });
     }
-const existing = await Kyc.findOne({ userId: req.userId });
 
-await Kyc.deleteOne({ userId: req.userId });
+    const existing = await Kyc.findOne({ userId: req.userId });
+    await Kyc.deleteOne({ userId: req.userId });
+
     const kyc = await Kyc.create({
-      userId:       req.userId,
+      userId: req.userId,
       documentType: "Passport",
-      passportUrl:  toPublicUrl(req, files.passport[0].path),
-      status:       "documents_uploaded",
-        submissionCount: (existing?.submissionCount || 0) + 1,
+      passportUrl: toPublicUrl(req, files.passport[0].path),
+      // selfieUrl: NOT saved for Passport
+      status: "documents_uploaded",
+      submissionCount: (existing?.submissionCount || 0) + 1,
     });
- 
+
     return res.status(201).json({
       success: true,
-      message: "Passport documents uploaded successfully",
-      kycId:  kyc._id,
+      message: "Passport uploaded successfully",
+      kycId: kyc._id,
       status: kyc.status,
     });
   } catch (err) {
@@ -167,8 +180,7 @@ await Kyc.deleteOne({ userId: req.userId });
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
- 
-// ════════════════════════════════════════════════════════════════════════════
+//════════════════════════════════════════════════════════════════════════════
 // SCREEN 3 → SCREEN 4  —  SUBMIT FOR REVIEW  →  POST /api/kyc/submit-for-review
 // Marks the KYC as "under_review". Call this after uploading documents to
 // trigger the "Under Review" screen (Screen 4).

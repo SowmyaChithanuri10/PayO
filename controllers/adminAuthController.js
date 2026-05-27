@@ -8,30 +8,32 @@ const User   = require("../models/User");
 // POST /api/admin/auth/login
 // Same as user login but verifies the role is "admin" before issuing token.
 // ════════════════════════════════════════════════════════════════════════════
+
+// ADMIN LOGIN
 const adminLogin = async (req, res) => {
   try {
     const { mobile, email, password } = req.body;
- 
+    console.log("Admin login attempt:", { email, mobile }); // Debug log
+
     if (!password || (!mobile && !email)) {
       return res.status(400).json({
         success: false,
         message: "Password and mobile or email are required",
       });
     }
-        // SUPER ADMIN LOGIN FROM .env
-    if (
-      (email === process.env.ADMIN_EMAIL ||
-        mobile === process.env.ADMIN_MOBILE) &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
-
+    
+    // SUPER ADMIN LOGIN FROM .env
+    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+      console.log("Super admin login successful"); // Debug log
+      
       const token = jwt.sign(
         {
+          id: "super_admin",
           role: "admin",
           superAdmin: true,
           email: process.env.ADMIN_EMAIL,
         },
-        "mysecretkey",
+        process.env.JWT_SECRET || "mysecretkey",
         { expiresIn: "12h" }
       );
 
@@ -44,30 +46,31 @@ const adminLogin = async (req, res) => {
           email: process.env.ADMIN_EMAIL,
           mobile: process.env.ADMIN_MOBILE,
           role: "admin",
+          superAdmin: true,
         },
       });
     }
- 
-    // Find user by mobile or email
+
+    // Find regular admin user by mobile or email
     const user = await User.findOne(
       mobile ? { mobile } : { email }
     );
- 
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "No account found with these credentials",
       });
     }
- 
-    // Check role BEFORE checking password (fail fast)
+
+    // Check role
     if (user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Access denied. This account does not have admin privileges.",
       });
     }
- 
+
     // Verify password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -76,14 +79,14 @@ const adminLogin = async (req, res) => {
         message: "Incorrect password",
       });
     }
- 
-    // Generate admin JWT (longer expiry than user token)
+
+    // Generate admin JWT
     const token = jwt.sign(
       { id: user._id, role: "admin" },
       process.env.JWT_SECRET || "mysecretkey",
       { expiresIn: "12h" }
     );
- 
+
     return res.status(200).json({
       success: true,
       message: "Admin login successful",
@@ -101,6 +104,8 @@ const adminLogin = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+// ... rest of your existing controller functions remain the same
  
 // ════════════════════════════════════════════════════════════════════════════
 // CREATE SUB-ADMIN  (only a super admin can do this)

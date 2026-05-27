@@ -202,7 +202,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, mobile: user.mobile },
       "mysecretkey",
-      { expiresIn: "24h" }
+      { expiresIn: "24h" } 
     );
 
     await sendNotification({

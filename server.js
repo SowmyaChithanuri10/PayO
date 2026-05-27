@@ -61,12 +61,11 @@ const server = http.createServer(app);
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use("/kyc-docs", express.static(path.join(__dirname, "kyc-docs"), {
+// server.js - Update the static files middleware
+app.use("/kyc-docs", express.static(path.join(__dirname, "uploads"), {
   maxAge: "1d",
   dotfiles: "deny",
 }));
- 
-
 
 // Routes
 app.use("/api/auth", authRoutes);
