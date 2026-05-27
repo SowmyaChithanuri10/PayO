@@ -19,7 +19,7 @@ const {
   listPendingReviews,
   approveKyc,
   rejectKyc,
-} = require("../controllers/kyccontroller");
+} = require("../controllers/kycController");
  
 // ─────────────────────────────────────────────────────────────────────────────
 // ALL routes require a valid JWT (Bearer token)
