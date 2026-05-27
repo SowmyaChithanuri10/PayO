@@ -6,6 +6,7 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 const http = require("http");
 const WebSocket = require("ws");
+const path = require("path");
 
 dotenv.config();
 
@@ -26,7 +27,8 @@ const updateMarketCache = require("./services/marketUpdater");
 const bankRoutes = require("./routes/bankRoutes");
 const tradingRoutes = require('./routes/tradingRoutes');
 const kycRoutes= require("./routes/kycRoutes");
-const adminKycRoutes = require("./routes/adminKycRoutes");   
+const adminKycRoutes = require("./routes/adminKycRoutes");
+const adminAuthRoutes     = require("./routes/adminAuthRoutes"); 
 
 
 // connect database
@@ -59,6 +61,11 @@ const server = http.createServer(app);
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use("/kyc-docs", express.static(path.join(__dirname, "uploads"), {
+  maxAge: "1d",
+  dotfiles: "deny",
+}));
+ 
 
 
 // Routes
@@ -70,6 +77,10 @@ app.use("/api/bank", bankRoutes);
 app.use("/api/trading", tradingRoutes);
 app.use("/api/kyc",kycRoutes);
 app.use("/api/admin/kyc",adminKycRoutes);
+
+// ── Admin routes ──────────────────────────────────────────────────────────────
+app.use("/api/admin/auth",    adminAuthRoutes);    // login, create admin ← NEW
+app.use("/api/admin/kyc",     adminKycRoutes);     // KYC management
 
 // Root Route
 app.get("/", (req, res) => {
