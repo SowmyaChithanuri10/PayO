@@ -60,10 +60,9 @@ const getVerificationStatus = async (req, res) => {
 const uploadAadharDocuments = async (req, res) => {
   try {
     const files = req.files;
-    
+
     console.log("Files received:", Object.keys(files));
 
-    // Only Aadhar front and selfie required (NO back)
     if (!files?.aadharFront?.[0] || !files?.selfie?.[0]) {
       return res.status(400).json({
         success: false,
@@ -71,28 +70,46 @@ const uploadAadharDocuments = async (req, res) => {
       });
     }
 
-    const existing = await Kyc.findOne({ userId: req.userId });
-    await Kyc.deleteOne({ userId: req.userId });
+    // FIND EXISTING KYC
+    let kyc = await Kyc.findOne({ userId: req.userId });
 
-    const kyc = await Kyc.create({
-      userId: req.userId,
-      documentType: "Aadhar",
-      aadharFrontUrl: toPublicUrl(req, files.aadharFront[0].path),
-      // aadharBackUrl: NOT saved (not required)
-      selfieUrl: toPublicUrl(req, files.selfie[0].path),
-      status: "documents_uploaded",
-      submissionCount: (existing?.submissionCount || 0) + 1,
-    });
+    // CREATE IF NOT EXISTS
+    if (!kyc) {
+      kyc = new Kyc({
+        userId: req.userId,
+        submissionCount: 1,
+      });
+    }
+
+    // UPDATE FIELDS
+    kyc.documentType = "Aadhar";
+    kyc.aadharFrontUrl = toPublicUrl(
+      req,
+      files.aadharFront[0].path
+    );
+
+    kyc.selfieUrl = toPublicUrl(
+      req,
+      files.selfie[0].path
+    );
+
+    kyc.status = "documents_uploaded";
+
+    await kyc.save();
 
     return res.status(201).json({
       success: true,
-      message: "Aadhar documents uploaded successfully",
+      message: "Aadhar uploaded successfully",
       kycId: kyc._id,
-      status: kyc.status,
     });
+
   } catch (err) {
     console.error("uploadAadharDocuments error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
  
@@ -103,10 +120,9 @@ const uploadAadharDocuments = async (req, res) => {
 const uploadPanDocuments = async (req, res) => {
   try {
     const files = req.files;
-    
+
     console.log("Files received:", Object.keys(files));
 
-    // Only PAN card required, NO selfie
     if (!files?.panCard?.[0]) {
       return res.status(400).json({
         success: false,
@@ -114,27 +130,38 @@ const uploadPanDocuments = async (req, res) => {
       });
     }
 
-    const existing = await Kyc.findOne({ userId: req.userId });
-    await Kyc.deleteOne({ userId: req.userId });
+    // FIND EXISTING KYC
+    let kyc = await Kyc.findOne({ userId: req.userId });
 
-    const kyc = await Kyc.create({
-      userId: req.userId,
-      documentType: "PANCard",
-      panCardUrl: toPublicUrl(req, files.panCard[0].path),
-      // selfieUrl: NOT saved for PAN
-      status: "documents_uploaded",
-      submissionCount: (existing?.submissionCount || 0) + 1,
-    });
+    // CREATE IF NOT EXISTS
+    if (!kyc) {
+      kyc = new Kyc({
+        userId: req.userId,
+        submissionCount: 1,
+      });
+    }
+
+    // UPDATE PAN
+    kyc.panCardUrl = toPublicUrl(
+      req,
+      files.panCard[0].path
+    );
+
+    await kyc.save();
 
     return res.status(201).json({
       success: true,
-      message: "PAN card uploaded successfully",
+      message: "PAN uploaded successfully",
       kycId: kyc._id,
-      status: kyc.status,
     });
+
   } catch (err) {
     console.error("uploadPanDocuments error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
  
@@ -146,10 +173,9 @@ const uploadPanDocuments = async (req, res) => {
 const uploadPassportDocuments = async (req, res) => {
   try {
     const files = req.files;
-    
+
     console.log("Files received:", Object.keys(files));
 
-    // Only Passport required, NO selfie
     if (!files?.passport?.[0]) {
       return res.status(400).json({
         success: false,
@@ -157,27 +183,38 @@ const uploadPassportDocuments = async (req, res) => {
       });
     }
 
-    const existing = await Kyc.findOne({ userId: req.userId });
-    await Kyc.deleteOne({ userId: req.userId });
+    // FIND EXISTING KYC
+    let kyc = await Kyc.findOne({ userId: req.userId });
 
-    const kyc = await Kyc.create({
-      userId: req.userId,
-      documentType: "Passport",
-      passportUrl: toPublicUrl(req, files.passport[0].path),
-      // selfieUrl: NOT saved for Passport
-      status: "documents_uploaded",
-      submissionCount: (existing?.submissionCount || 0) + 1,
-    });
+    // CREATE IF NOT EXISTS
+    if (!kyc) {
+      kyc = new Kyc({
+        userId: req.userId,
+        submissionCount: 1,
+      });
+    }
+
+    // UPDATE PASSPORT
+    kyc.passportUrl = toPublicUrl(
+      req,
+      files.passport[0].path
+    );
+
+    await kyc.save();
 
     return res.status(201).json({
       success: true,
       message: "Passport uploaded successfully",
       kycId: kyc._id,
-      status: kyc.status,
     });
+
   } catch (err) {
     console.error("uploadPassportDocuments error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 //════════════════════════════════════════════════════════════════════════════
