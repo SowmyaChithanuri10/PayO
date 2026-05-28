@@ -16,6 +16,7 @@ const {
   searchUserKyc,
   deleteKycRecord,
   getAuditLog,
+  getAllKycIds
 } = require("../controllers/adminKycController");
  
 // ─────────────────────────────────────────────────────────────────────────────
@@ -120,6 +121,8 @@ router.patch("/bulk-reject", bulkReject);
  * Query params: ?page=1&limit=20
  */
 router.get("/audit-log", getAuditLog);
+// Add route
+router.get("/debug-list-ids", getAllKycIds);
  
 module.exports = router;
  
