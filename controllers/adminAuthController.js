@@ -13,7 +13,7 @@ const User   = require("../models/User");
 const adminLogin = async (req, res) => {
   try {
     const { mobile, email, password } = req.body;
-    console.log("Admin login attempt:", { email, mobile, password: password ? "provided" : "missing" });
+  
 
     if (!password || (!mobile && !email)) {
       return res.status(400).json({
