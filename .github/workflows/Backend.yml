@@ -167,7 +167,7 @@ jobs:
  
             else
               echo ""
-              echo "=========================================="
+              echo "============================================"
               echo "Health check FAILED - Not deploying!"
               echo "=========================================="
               echo "Keeping existing production container running"
