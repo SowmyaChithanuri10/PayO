@@ -12,16 +12,10 @@ const kycSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
-
-    // ───────────────────────────────
-    // DOCUMENT TYPE (screen selection)
-    // ───────────────────────────────
-    documentType: {
-      type: String,
-      enum: ["Aadhar", "PANCard", "Passport"],
-      default: null,
-      index: true,
-    },
+fullName: {
+    type: String,
+    default: null,
+  },
 
     // ───────────────────────────────
     // FILES (uploaded docs)

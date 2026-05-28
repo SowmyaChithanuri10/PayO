@@ -61,7 +61,7 @@ const uploadAadharDocuments = async (req, res) => {
   try {
     const files = req.files;
 
-    console.log("Files received:", Object.keys(files));
+   
 
     if (!files?.aadharFront?.[0] || !files?.selfie?.[0]) {
       return res.status(400).json({
@@ -72,6 +72,7 @@ const uploadAadharDocuments = async (req, res) => {
 
     // FIND EXISTING KYC
     let kyc = await Kyc.findOne({ userId: req.userId });
+    const user = await User.findById(req.userId);
 
     // CREATE IF NOT EXISTS
     if (!kyc) {
@@ -82,7 +83,6 @@ const uploadAadharDocuments = async (req, res) => {
     }
 
     // UPDATE FIELDS
-    kyc.documentType = "Aadhar";
     kyc.aadharFrontUrl = toPublicUrl(
       req,
       files.aadharFront[0].path
@@ -93,8 +93,11 @@ const uploadAadharDocuments = async (req, res) => {
       files.selfie[0].path
     );
 
-    kyc.status = "documents_uploaded";
-
+  if (kyc.aadharFrontUrl && kyc.selfieUrl) {
+  kyc.status = "documents_uploaded";
+}
+kyc.fullName = user.name;
+kyc.submissionCount = (kyc.submissionCount || 0) + 1;
     await kyc.save();
 
     return res.status(201).json({
@@ -121,7 +124,7 @@ const uploadPanDocuments = async (req, res) => {
   try {
     const files = req.files;
 
-    console.log("Files received:", Object.keys(files));
+   
 
     if (!files?.panCard?.[0]) {
       return res.status(400).json({
@@ -132,6 +135,12 @@ const uploadPanDocuments = async (req, res) => {
 
     // FIND EXISTING KYC
     let kyc = await Kyc.findOne({ userId: req.userId });
+    if (!kyc || !kyc.aadharFrontUrl) {
+  return res.status(400).json({
+    success: false,
+    message: "Please upload Aadhar first",
+  });
+}
 
     // CREATE IF NOT EXISTS
     if (!kyc) {
@@ -174,8 +183,7 @@ const uploadPassportDocuments = async (req, res) => {
   try {
     const files = req.files;
 
-    console.log("Files received:", Object.keys(files));
-
+  
     if (!files?.passport?.[0]) {
       return res.status(400).json({
         success: false,
@@ -185,6 +193,12 @@ const uploadPassportDocuments = async (req, res) => {
 
     // FIND EXISTING KYC
     let kyc = await Kyc.findOne({ userId: req.userId });
+    if (!kyc || !kyc.aadharFrontUrl) {
+  return res.status(400).json({
+    success: false,
+    message: "Please upload Aadhar first",
+  });
+}
 
     // CREATE IF NOT EXISTS
     if (!kyc) {
@@ -374,7 +388,16 @@ const resetAndRetry = async (req, res) => {
  
     // Store count before deleting
     const previousCount = kyc.submissionCount;
-    await Kyc.deleteOne({ userId: req.userId });
+  kyc.status = "not_started";
+
+kyc.aadharFrontUrl = null;
+kyc.panCardUrl = null;
+kyc.passportUrl = null;
+kyc.selfieUrl = null;
+
+kyc.rejectionReason = null;
+
+await kyc.save();
  
     return res.status(200).json({
       success: true,
