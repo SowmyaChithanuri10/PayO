@@ -138,10 +138,10 @@ const getSubmissionDetails = async (req, res) => {
 // User will see Screen 5 (Approved) on next poll.
 // ════════════════════════════════════════════════════════════════════════════
 // controllers/adminKycController.js - FIXED version
+// controllers/adminKycController.js - FIXED approveVerification
 const approveVerification = async (req, res) => {
   try {
     const { kycId } = req.params;
-    
     
     const kyc = await Kyc.findById(kycId);
     
@@ -156,17 +156,32 @@ const approveVerification = async (req, res) => {
       });
     }
     
-    // FIX: Use adminUser._id instead of userId
-    const reviewerId = req.adminUser ? req.adminUser._id : req.userId;
+    // ✅ FIX: Handle super admin (string) vs regular admin (ObjectId)
+    let reviewerId = null;
+    let reviewerName = "Admin";
+    
+    if (req.adminUser) {
+      if (req.adminUser.superAdmin) {
+        // Super admin from .env - don't set reviewedBy (or set to null)
+        reviewerId = null;
+        reviewerName = "Super Admin";
+      } else {
+        // Regular admin from database
+        reviewerId = req.adminUser._id;
+        reviewerName = req.adminUser.name;
+      }
+    }
     
     // Update KYC record
     kyc.status = "approved";
-    kyc.reviewedBy = reviewerId;  // Now this will work
+    if (reviewerId) {
+      kyc.reviewedBy = reviewerId;  // Only set if it's a real ObjectId
+    }
     kyc.reviewedAt = new Date();
     kyc.rejectionReason = null;
     await kyc.save();
     
-    // Activate wallet on the User record
+    // Activate wallet
     await User.findByIdAndUpdate(kyc.userId, {
       kycVerified: true,
       walletActivated: true,
@@ -177,17 +192,16 @@ const approveVerification = async (req, res) => {
       message: "KYC approved. User wallet has been activated.",
       kycId: kyc._id,
       userId: kyc.userId,
-      approvedBy: req.adminUser?.name || "Admin",  // This will work now
+      approvedBy: reviewerName,
       approvedAt: kyc.reviewedAt,
     });
     
   } catch (err) {
     console.error("approveVerification error:", err);
-    console.error("Error stack:", err.stack);
     res.status(500).json({ 
       success: false, 
       message: "Server error",
-      error: err.message  // TEMP for debugging
+      error: err.message 
     });
   }
 };
@@ -223,11 +237,24 @@ const rejectVerification = async (req, res) => {
       });
     }
     
-    // FIX: Use adminUser._id
-    const reviewerId = req.adminUser ? req.adminUser._id : req.userId;
+    // ✅ FIX: Handle super admin
+    let reviewerId = null;
+    let reviewerName = "Admin";
+    
+    if (req.adminUser) {
+      if (req.adminUser.superAdmin) {
+        reviewerId = null;
+        reviewerName = "Super Admin";
+      } else {
+        reviewerId = req.adminUser._id;
+        reviewerName = req.adminUser.name;
+      }
+    }
     
     kyc.status = "rejected";
-    kyc.reviewedBy = reviewerId;
+    if (reviewerId) {
+      kyc.reviewedBy = reviewerId;
+    }
     kyc.reviewedAt = new Date();
     kyc.rejectionReason = reason.trim();
     await kyc.save();
@@ -238,7 +265,7 @@ const rejectVerification = async (req, res) => {
       kycId: kyc._id,
       userId: kyc.userId,
       reason: kyc.rejectionReason,
-      rejectedBy: req.adminUser?.name || "Admin",
+      rejectedBy: reviewerName,
       rejectedAt: kyc.reviewedAt,
     });
   } catch (err) {
@@ -256,49 +283,54 @@ const rejectVerification = async (req, res) => {
 const bulkApprove = async (req, res) => {
   try {
     const { kycIds } = req.body;
- 
+    
     if (!Array.isArray(kycIds) || kycIds.length === 0) {
       return res.status(400).json({
         success: false,
         message: "kycIds must be a non-empty array",
       });
     }
- 
+    
     const kycs = await Kyc.find({
-      _id:    { $in: kycIds },
+      _id: { $in: kycIds },
       status: "under_review",
     });
- 
+    
     if (kycs.length === 0) {
       return res.status(404).json({
         success: false,
         message: "No under-review KYC records found for the provided IDs",
       });
     }
- 
-    const now       = new Date();
-    const userIds   = kycs.map((k) => k.userId);
+    
+    const now = new Date();
+    const userIds = kycs.map((k) => k.userId);
     const approvedIds = kycs.map((k) => k._id);
- 
+    
+    // ✅ FIX: Handle super admin for bulk operations
+    const updateData = {
+      status: "approved",
+      reviewedAt: now,
+      rejectionReason: null,
+    };
+    
+    // Only add reviewedBy if it's a real admin (not super admin)
+    if (req.adminUser && !req.adminUser.superAdmin) {
+      updateData.reviewedBy = req.adminUser._id;
+    }
+    
     // Bulk update KYC records
     await Kyc.updateMany(
       { _id: { $in: approvedIds } },
-      {
-        $set: {
-          status:     "approved",
-          reviewedBy: req.userId,
-          reviewedAt: now,
-          rejectionReason: null,
-        },
-      }
+      { $set: updateData }
     );
- 
+    
     // Bulk activate wallets
     await User.updateMany(
       { _id: { $in: userIds } },
       { $set: { kycVerified: true, walletActivated: true } }
     );
- 
+    
     return res.status(200).json({
       success: true,
       message: `${approvedIds.length} KYC record(s) approved and wallets activated`,

@@ -71,8 +71,18 @@ const uploadAadharDocuments = async (req, res) => {
     }
 
     // FIND EXISTING KYC
-    let kyc = await Kyc.findOne({ userId: req.userId });
-    const user = await User.findById(req.userId);
+let kyc = await Kyc.findOne({ userId: req.userId });
+const user = await User.findById(req.userId);
+
+// CREATE NEW KYC IF NOT EXISTS
+if (!kyc) {
+  kyc = await Kyc.create({
+    userId: req.userId,
+    fullName: user.name,
+    status: "not_started",
+    submissionCount: 0,
+  });
+}
 
    
     // UPDATE FIELDS
@@ -86,11 +96,15 @@ const uploadAadharDocuments = async (req, res) => {
       files.selfie[0].path
     );
 
-  if (kyc.aadharFrontUrl && kyc.selfieUrl) {
+if (
+  kyc.aadharFrontUrl &&
+  kyc.selfieUrl &&
+  (kyc.panCardUrl || kyc.passportUrl)
+) {
   kyc.status = "documents_uploaded";
-}
+} 
 kyc.fullName = user.name;
-kyc.submissionCount = (kyc.submissionCount || 0) + 1;
+
     await kyc.save();
 
     return res.status(201).json({
@@ -142,6 +156,13 @@ const uploadPanDocuments = async (req, res) => {
       req,
       files.panCard[0].path
     );
+    if (
+  kyc.aadharFrontUrl &&
+  kyc.selfieUrl &&
+  (kyc.panCardUrl || kyc.passportUrl)
+) {
+  kyc.status = "documents_uploaded";
+}
 
     await kyc.save();
 
@@ -194,6 +215,13 @@ const uploadPassportDocuments = async (req, res) => {
       req,
       files.passport[0].path
     );
+    if (
+  kyc.aadharFrontUrl &&
+  kyc.selfieUrl &&
+  (kyc.panCardUrl || kyc.passportUrl)
+) {
+  kyc.status = "documents_uploaded";
+}
 
     await kyc.save();
 
@@ -236,6 +264,7 @@ const submitForReview = async (req, res) => {
     }
  
     kyc.status = "under_review";
+    kyc.submissionCount = (kyc.submissionCount || 0) + 1;
     await kyc.save();
  
     return res.status(200).json({
