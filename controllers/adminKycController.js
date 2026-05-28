@@ -137,50 +137,60 @@ const getSubmissionDetails = async (req, res) => {
 // Approves the KYC record and activates the user's wallet.
 // User will see Screen 5 (Approved) on next poll.
 // ════════════════════════════════════════════════════════════════════════════
+// controllers/adminKycController.js - FIXED version
 const approveVerification = async (req, res) => {
   try {
     const { kycId } = req.params;
- 
+    
+    
     const kyc = await Kyc.findById(kycId);
- 
+    
     if (!kyc) {
       return res.status(404).json({ success: false, message: "KYC record not found" });
     }
- 
+    
     if (kyc.status !== "under_review") {
       return res.status(400).json({
         success: false,
         message: `Cannot approve. Current status is "${kyc.status}"`,
       });
     }
- 
+    
+    // FIX: Use adminUser._id instead of userId
+    const reviewerId = req.adminUser ? req.adminUser._id : req.userId;
+    
     // Update KYC record
-    kyc.status          = "approved";
-    kyc.reviewedBy      = req.userId;
-    kyc.reviewedAt      = new Date();
+    kyc.status = "approved";
+    kyc.reviewedBy = reviewerId;  // Now this will work
+    kyc.reviewedAt = new Date();
     kyc.rejectionReason = null;
     await kyc.save();
- 
+    
     // Activate wallet on the User record
     await User.findByIdAndUpdate(kyc.userId, {
-      kycVerified:     true,
+      kycVerified: true,
       walletActivated: true,
     });
- 
+    
     return res.status(200).json({
       success: true,
       message: "KYC approved. User wallet has been activated.",
-      kycId:      kyc._id,
-      userId:     kyc.userId,
-      approvedBy: req.adminUser?.name || req.userId,
+      kycId: kyc._id,
+      userId: kyc.userId,
+      approvedBy: req.adminUser?.name || "Admin",  // This will work now
       approvedAt: kyc.reviewedAt,
     });
+    
   } catch (err) {
     console.error("approveVerification error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("Error stack:", err.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error",
+      error: err.message  // TEMP for debugging
+    });
   }
 };
- 
 // ════════════════════════════════════════════════════════════════════════════
 // ADMIN — REJECT KYC
 // PATCH /api/admin/kyc/reject-verification/:kycId
@@ -192,40 +202,43 @@ const rejectVerification = async (req, res) => {
   try {
     const { kycId } = req.params;
     const { reason } = req.body;
- 
+    
     if (!reason || reason.trim() === "") {
       return res.status(400).json({
         success: false,
         message: "A rejection reason is required",
       });
     }
- 
+    
     const kyc = await Kyc.findById(kycId);
- 
+    
     if (!kyc) {
       return res.status(404).json({ success: false, message: "KYC record not found" });
     }
- 
+    
     if (kyc.status !== "under_review") {
       return res.status(400).json({
         success: false,
         message: `Cannot reject. Current status is "${kyc.status}"`,
       });
     }
- 
-    kyc.status          = "rejected";
-    kyc.reviewedBy      = req.userId;
-    kyc.reviewedAt      = new Date();
+    
+    // FIX: Use adminUser._id
+    const reviewerId = req.adminUser ? req.adminUser._id : req.userId;
+    
+    kyc.status = "rejected";
+    kyc.reviewedBy = reviewerId;
+    kyc.reviewedAt = new Date();
     kyc.rejectionReason = reason.trim();
     await kyc.save();
- 
+    
     return res.status(200).json({
       success: true,
       message: "KYC rejected. User will be prompted to retry.",
-      kycId:      kyc._id,
-      userId:     kyc.userId,
-      reason:     kyc.rejectionReason,
-      rejectedBy: req.adminUser?.name || req.userId,
+      kycId: kyc._id,
+      userId: kyc.userId,
+      reason: kyc.rejectionReason,
+      rejectedBy: req.adminUser?.name || "Admin",
       rejectedAt: kyc.reviewedAt,
     });
   } catch (err) {

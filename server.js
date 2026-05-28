@@ -78,7 +78,7 @@ app.use("/api/kyc",kycRoutes);
 app.use("/api/admin/kyc",adminKycRoutes);
 
 // ── Admin routes ──────────────────────────────────────────────────────────────
-app.use("/api/admin/auth",    adminAuthRoutes);    // login, create admin ← NEW
+app.use("/api/admin/auth",adminAuthRoutes);    // login, create admin ← NEW
 
 
 // Root Route

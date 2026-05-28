@@ -74,14 +74,7 @@ const uploadAadharDocuments = async (req, res) => {
     let kyc = await Kyc.findOne({ userId: req.userId });
     const user = await User.findById(req.userId);
 
-    // CREATE IF NOT EXISTS
-    if (!kyc) {
-      kyc = new Kyc({
-        userId: req.userId,
-        submissionCount: 1,
-      });
-    }
-
+   
     // UPDATE FIELDS
     kyc.aadharFrontUrl = toPublicUrl(
       req,
@@ -142,13 +135,7 @@ const uploadPanDocuments = async (req, res) => {
   });
 }
 
-    // CREATE IF NOT EXISTS
-    if (!kyc) {
-      kyc = new Kyc({
-        userId: req.userId,
-        submissionCount: 1,
-      });
-    }
+    
 
     // UPDATE PAN
     kyc.panCardUrl = toPublicUrl(
@@ -200,13 +187,7 @@ const uploadPassportDocuments = async (req, res) => {
   });
 }
 
-    // CREATE IF NOT EXISTS
-    if (!kyc) {
-      kyc = new Kyc({
-        userId: req.userId,
-        submissionCount: 1,
-      });
-    }
+ 
 
     // UPDATE PASSPORT
     kyc.passportUrl = toPublicUrl(
