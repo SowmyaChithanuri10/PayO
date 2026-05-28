@@ -115,59 +115,59 @@ jobs:
               docker stop test-container
               docker rm test-container
  
-              # Backup existing container
-              if docker ps -a --format '{{.Names}}' | grep -q "^payo-app$"; then
+              # Backup existing container (corrected name)
+              if docker ps -a --format '{{.Names}}' | grep -q "^payo-app-prod$"; then
                 echo "Backing up current production..."
-                docker tag payo-app payo-app:backup
-                docker stop payo-app
-                docker rm payo-app
+                docker tag payo-app-prod payo-app-prod:backup
+                docker stop payo-app-prod
+                docker rm payo-app-prod
               fi
  
-              # Run new container WITH VOLUME for persistent KYC uploads
+              # Run new container WITH VOLUME for persistent KYC uploads (corrected name)
               echo "Starting new production container with volume..."
               docker run -d \
-                --name payo-app \
+                --name payo-app-prod \
                 --restart always \
-                -p 3000:3000 \
+                -p 3001:3001 \
                 -v payo_uploads:/app/uploads \
                 -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
                 payo-app:new
  
               sleep 5
  
-              # Final health check
-              if curl -f http://localhost:3000/health; then
+              # Final health check (corrected port)
+              if curl -f http://localhost:3001/health; then
                 echo ""
                 echo "=========================================="
                 echo "DEPLOYMENT SUCCESSFUL!"
                 echo "=========================================="
                 echo "Volume: payo_uploads"
                 echo "KYC uploads will persist across deployments"
-                docker ps | grep payo-app
+                docker ps | grep payo-app-prod
                 # Verify volume is mounted
                 echo ""
                 echo "Verifying volume mount..."
-                docker inspect payo-app | grep -A 5 "Mounts" || echo "Volume mounted successfully"
+                docker inspect payo-app-prod | grep -A 5 "Mounts" || echo "Volume mounted successfully"
               else
                 echo "New container failed! Rolling back..."
  
-                docker stop payo-app
-                docker rm payo-app
+                docker stop payo-app-prod
+                docker rm payo-app-prod
  
                 docker run -d \
-                  --name payo-app \
+                  --name payo-app-prod \
                   --restart always \
-                  -p 3000:3000 \
+                  -p 3001:3001 \
                   -v payo_uploads:/app/uploads \
                   -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
-                  payo-app:backup
+                  payo-app-prod:backup
  
                 echo "Rollback complete - Previous version restored"
               fi
  
             else
               echo ""
-              echo "============================================"
+              echo "=========================================="
               echo "Health check FAILED - Not deploying!"
               echo "=========================================="
               echo "Keeping existing production container running"
@@ -200,4 +200,5 @@ jobs:
             echo "=========================================="
             echo "Recent Logs:"
             echo "=========================================="
-            docker logs payo-app --tail 20
+            docker logs payo-app-prod --tail 20
+ 
