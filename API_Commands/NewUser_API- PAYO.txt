@@ -1,0 +1,445 @@
+# Complete API Flow (Localhost)
+
+From **New User Registration → KYC Pending → Verified**
+
+Base URL:
+
+```txt id="t1"
+http://localhost:3001
+```
+
+---
+
+# JWT TOKEN (Use This in Authorization)
+
+```txt id="t2"
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2JpbGUiOiI4MzI4MTY5MzM5IiwiaWF0IjoxNzc5OTQ2NjY3LCJleHAiOjE3ODAwMzMwNjd9.M5PnseY82lZ3H4XnlpYbX1yfnhnP1nz-EocO5f_jp_o
+```
+
+---
+
+# 1. Send OTP (New User)
+
+### API
+
+```txt id="t3"
+POST /api/auth/send-otp
+```
+
+### Full URL
+
+```txt id="t4"
+http://localhost:3001/api/auth/send-otp
+```
+
+### Headers
+
+```txt id="t5"
+Content-Type: application/json
+```
+
+### Body (raw JSON)
+
+```json id="t6"
+{
+  "mobile": "8328169339"
+}
+```
+
+### Response
+
+```json id="t7"
+{
+  "message": "OTP sent",
+  "otp": "1234"
+}
+```
+
+---
+
+# 2. Verify OTP
+
+### API
+
+```txt id="t8"
+POST /api/auth/verify-otp
+```
+
+### Full URL
+
+```txt id="t9"
+http://localhost:3001/api/auth/verify-otp
+```
+
+### Headers
+
+```txt id="t10"
+Content-Type: application/json
+```
+
+### Body
+
+```json id="t11"
+{
+  "mobile": "8328169339",
+  "otp": "1234"
+}
+```
+
+### Response
+
+```json id="t12"
+{
+  "message": "OTP verified",
+  "token": "JWT_TOKEN"
+}
+```
+
+---
+
+# 3. Register User
+
+### API
+
+```txt id="t13"
+POST /api/auth/register
+```
+
+### Full URL
+
+```txt id="t14"
+http://localhost:3001/api/auth/register
+```
+
+### Headers
+
+```txt id="t15"
+Content-Type: application/json
+Authorization: Bearer eyJhbGc...
+```
+
+### Body
+
+```json id="t16"
+{
+  "name": "N1thin",
+  "email": "n1thin@gmail.com",
+  "password": "Password@123",
+  "confirmpassword": "Password@123"
+}
+```
+
+### Response
+
+```json id="t17"
+{
+  "message": "Registered successfully. Please complete KYC to access the app.",
+  "myReferralCode": "PAYO7085ee",
+  "kycRequired": true
+}
+```
+
+---
+
+# 4. Login
+
+### API
+
+```txt id="t18"
+POST /api/auth/login
+```
+
+### Full URL
+
+```txt id="t19"
+http://localhost:3001/api/auth/login
+```
+
+### Headers
+
+```txt id="t20"
+Content-Type: application/json
+```
+
+### Body
+
+```json id="t21"
+{
+  "mobile": "8328169339",
+  "password": "Password@123"
+}
+```
+
+### Response
+
+```json id="t22"
+{
+  "message": "Login success",
+  "token": "LOGIN_TOKEN",
+  "kycStatus": "not_started",
+  "redirectTo": "kyc_upload"
+}
+```
+
+---
+
+# 5A. Upload PAN KYC
+
+### API
+
+```txt id="t23"
+POST /api/kyc/upload-pan-documents
+```
+
+### Full URL
+
+```txt id="t24"
+http://localhost:3001/api/kyc/upload-pan-documents
+```
+
+### Authorization
+
+```txt id="t25"
+Bearer eyJhbGc...
+```
+
+### Body → form-data
+
+| KEY     | TYPE | VALUE                |
+| ------- | ---- | -------------------- |
+| panCard | File | Upload PAN image/pdf |
+
+### Response
+
+```json id="t26"
+{
+  "success": true,
+  "message": "PAN card uploaded successfully",
+  "status": "documents_uploaded"
+}
+```
+
+---
+
+# 5B. Upload Aadhar KYC
+
+### API
+
+```txt id="t27"
+POST /api/kyc/upload-aadhar-documents
+```
+
+### Full URL
+
+```txt id="t28"
+http://localhost:3001/api/kyc/upload-aadhar-documents
+```
+
+### Authorization
+
+```txt id="t29"
+Bearer eyJhbGc...
+```
+
+### Body → form-data
+
+| KEY         | TYPE | VALUE                   |
+| ----------- | ---- | ----------------------- |
+| aadharFront | File | Upload Aadhar image/pdf |
+| selfie      | File | Upload Selfie image     |
+
+### Response
+
+```json id="t30"
+{
+  "success": true,
+  "message": "Aadhar uploaded successfully",
+  "status": "documents_uploaded"
+}
+```
+
+---
+
+# 5C. Upload Passport KYC
+
+### API
+
+```txt id="t31"
+POST /api/kyc/upload-passport-documents
+```
+
+### Full URL
+
+```txt id="t32"
+http://localhost:3001/api/kyc/upload-passport-documents
+```
+
+### Authorization
+
+```txt id="t33"
+Bearer eyJhbGc...
+```
+
+### Body → form-data
+
+| KEY      | TYPE | VALUE                     |
+| -------- | ---- | ------------------------- |
+| passport | File | Upload Passport image/pdf |
+
+### Response
+
+```json id="t34"
+{
+  "success": true,
+  "message": "Passport uploaded successfully",
+  "status": "documents_uploaded"
+}
+```
+
+---
+
+# 6. Submit KYC For Review
+
+### API
+
+```txt id="t35"
+POST /api/kyc/submit-for-review
+```
+
+### Full URL
+
+```txt id="t36"
+http://localhost:3001/api/kyc/submit-for-review
+```
+
+### Authorization
+
+```txt id="t37"
+Bearer eyJhbGc...
+```
+
+### Body
+
+No body required.
+
+### Response
+
+```json id="t38"
+{
+  "success": true,
+  "message": "KYC submitted for review successfully",
+  "status": "under_review",
+  "pipeline": {
+    "accountCreated": "Completed",
+    "documentsUploaded": "Completed",
+    "kycVerification": "Pending",
+    "walletActivated": "Pending"
+  }
+}
+```
+
+This means:
+
+✅ Pending Status
+✅ Waiting For Admin Approval
+✅ Figma Review Screen Active
+
+---
+
+# 7. Check Verification Status
+
+### API
+
+```txt id="t39"
+GET /api/kyc/verification-status
+```
+
+### Full URL
+
+```txt id="t40"
+http://localhost:3001/api/kyc/verification-status
+```
+
+### Authorization
+
+```txt id="t41"
+Bearer eyJhbGc...
+```
+
+### Response
+
+```json id="t42"
+{
+  "status": "under_review"
+}
+```
+
+---
+
+# 8. Review Pipeline Status
+
+### API
+
+```txt id="t43"
+GET /api/kyc/review-pipeline-status
+```
+
+### Full URL
+
+```txt id="t44"
+http://localhost:3001/api/kyc/review-pipeline-status
+```
+
+### Authorization
+
+```txt id="t45"
+Bearer eyJhbGc...
+```
+
+### Response
+
+```json id="t46"
+{
+  "pipeline": {
+    "accountCreated": "Completed",
+    "documentsUploaded": "Completed",
+    "kycVerification": "Pending",
+    "walletActivated": "Pending"
+  }
+}
+```
+
+---
+
+# 9. KYC Approved Status (After Admin Approval)
+
+Admin changes:
+
+```txt id="t47"
+under_review → approved
+```
+
+Then login response becomes:
+
+```json id="t48"
+{
+  "message": "Login success",
+  "kycStatus": "approved",
+  "redirectTo": "home"
+}
+```
+
+MongoDB user document updates:
+
+```json id="t49"
+{
+  "kycVerified": true,
+  "walletActivated": true
+}
+```
+
+Final Result:
+
+✅ KYC Verified
+✅ Wallet Activated
+✅ User Gets Full App Access

@@ -1,0 +1,157 @@
+Here are all the Admin APIs to test:
+
+---
+
+## 1 — Admin Login
+**Method:** `POST`
+**URL:** `http://localhost:3001/api/admin/auth/login`
+**Body:**
+```json
+{
+  "email": "admin@payo.com",
+  "password": "Admin@123"
+}
+```
+
+---
+
+## 2 — Create Sub Admin
+**Method:** `POST`
+**URL:** `http://localhost:3001/api/admin/auth/create-admin`
+**Headers:** `Authorization: Bearer <super_admin_token>`
+**Body:**
+```json
+{
+  "name": "Admin One",
+  "mobile": "9111111111",
+  "email": "admin1@payo.com",
+  "password": "Admin@123"
+}
+```
+
+---
+
+## 3 — Get All Admins
+**Method:** `GET`
+**URL:** `http://localhost:3001/api/admin/auth/all-admins`
+**Headers:** `Authorization: Bearer <super_admin_token>`
+
+---
+
+## 4 — Revoke Admin Access
+**Method:** `PATCH`
+**URL:** `http://localhost:3001/api/admin/auth/revoke-admin/:adminId`
+**Headers:** `Authorization: Bearer <super_admin_token>`
+
+---
+
+## 5 — Change Admin Password
+**Method:** `PATCH`
+**URL:** `http://localhost:3001/api/admin/auth/change-password`
+**Headers:** `Authorization: Bearer <admin_token>`
+**Body:**
+```json
+{
+  "currentPassword": "Admin@123",
+  "newPassword": "Admin@456"
+}
+```
+
+---
+
+## 6 — KYC Dashboard Stats
+**Method:** `GET`
+**URL:** `http://localhost:3001/api/admin/kyc/dashboard-stats`
+**Headers:** `Authorization: Bearer <admin_token>`
+
+---
+
+## 7 — All KYC Submissions
+**Method:** `GET`
+**URL:** `http://localhost:3001/api/admin/kyc/all-submissions`
+**Headers:** `Authorization: Bearer <admin_token>`
+
+---
+
+## 8 — Pending Reviews
+**Method:** `GET`
+**URL:** `http://localhost:3001/api/admin/kyc/pending-reviews`
+**Headers:** `Authorization: Bearer <admin_token>`
+
+---
+
+## 9 — Search User KYC
+**Method:** `GET`
+**URL:** `http://localhost:3001/api/admin/kyc/search-user?query=ganesh`
+**Headers:** `Authorization: Bearer <admin_token>`
+
+---
+
+## 10 — Submission Details
+**Method:** `GET`
+**URL:** `http://localhost:3001/api/admin/kyc/submission-details/:kycId`
+**Headers:** `Authorization: Bearer <admin_token>`
+
+---
+
+## 11 — Approve KYC
+**Method:** `PATCH`
+**URL:** `http://localhost:3001/api/admin/kyc/approve-verification/:kycId`
+**Headers:** `Authorization: Bearer <admin_token>`
+
+---
+
+## 12 — Reject KYC
+**Method:** `PATCH`
+**URL:** `http://localhost:3001/api/admin/kyc/reject-verification/:kycId`
+**Headers:** `Authorization: Bearer <admin_token>`
+**Body:**
+```json
+{
+  "reason": "Documents are not clear"
+}
+```
+
+---
+
+## 13 — Bulk Approve
+**Method:** `PATCH`
+**URL:** `http://localhost:3001/api/admin/kyc/bulk-approve`
+**Headers:** `Authorization: Bearer <admin_token>`
+**Body:**
+```json
+{
+  "kycIds": ["id1", "id2"]
+}
+```
+
+---
+
+## 14 — Bulk Reject
+**Method:** `PATCH`
+**URL:** `http://localhost:3001/api/admin/kyc/bulk-reject`
+**Headers:** `Authorization: Bearer <admin_token>`
+**Body:**
+```json
+{
+  "kycIds": ["id1", "id2"],
+  "reason": "Documents unclear"
+}
+```
+
+---
+
+## 15 — Delete KYC Record
+**Method:** `DELETE`
+**URL:** `http://localhost:3001/api/admin/kyc/delete-record/:kycId`
+**Headers:** `Authorization: Bearer <admin_token>`
+
+---
+
+## 16 — Audit Log
+**Method:** `GET`
+**URL:** `http://localhost:3001/api/admin/kyc/audit-log`
+**Headers:** `Authorization: Bearer <admin_token>`
+
+---
+
