@@ -1,0 +1,445 @@
+# Complete API Flow (ngrok Public URL)
+
+From **New User Registration → KYC Pending → Verified**
+
+## Base URL
+
+```text id="g1"
+https://anemia-stove-chief.ngrok-free.dev
+```
+
+---
+
+# JWT TOKEN (Use This in Authorization)
+
+```text id="g2"
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2JpbGUiOiI4MzI4MTY5MzM5IiwiaWF0IjoxNzc5OTQ2NjY3LCJleHAiOjE3ODAwMzMwNjd9.M5PnseY82lZ3H4XnlpYbX1yfnhnP1nz-EocO5f_jp_o
+```
+
+---
+
+# 1. Send OTP (New User)
+
+## API
+
+```text id="g3"
+POST /api/auth/send-otp
+```
+
+## Full URL
+
+```text id="g4"
+https://anemia-stove-chief.ngrok-free.dev/api/auth/send-otp
+```
+
+## Headers
+
+```text id="g5"
+Content-Type: application/json
+```
+
+## Body (raw JSON)
+
+```json id="g6"
+{
+  "mobile": "8328169339"
+}
+```
+
+## Response
+
+```json id="g7"
+{
+  "message": "OTP sent",
+  "otp": "1234"
+}
+```
+
+---
+
+# 2. Verify OTP
+
+## API
+
+```text id="g8"
+POST /api/auth/verify-otp
+```
+
+## Full URL
+
+```text id="g9"
+https://anemia-stove-chief.ngrok-free.dev/api/auth/verify-otp
+```
+
+## Headers
+
+```text id="g10"
+Content-Type: application/json
+```
+
+## Body
+
+```json id="g11"
+{
+  "mobile": "8328169339",
+  "otp": "1234"
+}
+```
+
+## Response
+
+```json id="g12"
+{
+  "message": "OTP verified",
+  "token": "JWT_TOKEN"
+}
+```
+
+---
+
+# 3. Register User
+
+## API
+
+```text id="g13"
+POST /api/auth/register
+```
+
+## Full URL
+
+```text id="g14"
+https://anemia-stove-chief.ngrok-free.dev/api/auth/register
+```
+
+## Headers
+
+```text id="g15"
+Content-Type: application/json
+Authorization: Bearer eyJhbGc...
+```
+
+## Body
+
+```json id="g16"
+{
+  "name": "N1thin",
+  "email": "n1thin@gmail.com",
+  "password": "Password@123",
+  "confirmpassword": "Password@123"
+}
+```
+
+## Response
+
+```json id="g17"
+{
+  "message": "Registered successfully. Please complete KYC to access the app.",
+  "myReferralCode": "PAYO7085ee",
+  "kycRequired": true
+}
+```
+
+---
+
+# 4. Login
+
+## API
+
+```text id="g18"
+POST /api/auth/login
+```
+
+## Full URL
+
+```text id="g19"
+https://anemia-stove-chief.ngrok-free.dev/api/auth/login
+```
+
+## Headers
+
+```text id="g20"
+Content-Type: application/json
+```
+
+## Body
+
+```json id="g21"
+{
+  "mobile": "8328169339",
+  "password": "Password@123"
+}
+```
+
+## Response
+
+```json id="g22"
+{
+  "message": "Login success",
+  "token": "LOGIN_TOKEN",
+  "kycStatus": "not_started",
+  "redirectTo": "kyc_upload"
+}
+```
+
+---
+
+# 5A. Upload Aadhar KYC
+
+## API
+
+```text id="g27"
+POST /api/kyc/upload-aadhar-documents
+```
+
+## Full URL
+
+```text id="g28"
+https://anemia-stove-chief.ngrok-free.dev/api/kyc/upload-aadhar-documents
+```
+
+## Authorization
+
+```text id="g29"
+Bearer eyJhbGc...
+```
+
+## Body → form-data
+
+| KEY         | TYPE | VALUE                   |
+| ----------- | ---- | ----------------------- |
+| aadharFront | File | Upload Aadhar image/pdf |
+| selfie      | File | Upload Selfie image     |
+
+## Response
+
+```json id="g30"
+{
+  "success": true,
+  "message": "Aadhar uploaded successfully",
+  "status": "documents_uploaded"
+}
+```
+
+---
+
+# 5B. Upload PAN KYC
+
+## API
+
+```text id="g23"
+POST /api/kyc/upload-pan-documents
+```
+
+## Full URL
+
+```text id="g24"
+https://anemia-stove-chief.ngrok-free.dev/api/kyc/upload-pan-documents
+```
+
+## Authorization
+
+```text id="g25"
+Bearer eyJhbGc...
+```
+
+## Body → form-data
+
+| KEY     | TYPE | VALUE                |
+| ------- | ---- | -------------------- |
+| panCard | File | Upload PAN image/pdf |
+
+## Response
+
+```json id="g26"
+{
+  "success": true,
+  "message": "PAN card uploaded successfully",
+  "status": "documents_uploaded"
+}
+```
+
+---
+
+# 5C. Upload Passport KYC
+
+## API
+
+```text id="g31"
+POST /api/kyc/upload-passport-documents
+```
+
+## Full URL
+
+```text id="g32"
+https://anemia-stove-chief.ngrok-free.dev/api/kyc/upload-passport-documents
+```
+
+## Authorization
+
+```text id="g33"
+Bearer eyJhbGc...
+```
+
+## Body → form-data
+
+| KEY      | TYPE | VALUE                     |
+| -------- | ---- | ------------------------- |
+| passport | File | Upload Passport image/pdf |
+
+## Response
+
+```json id="g34"
+{
+  "success": true,
+  "message": "Passport uploaded successfully",
+  "status": "documents_uploaded"
+}
+```
+
+---
+
+# 6. Submit KYC For Review
+
+## API
+
+```text id="g35"
+POST /api/kyc/submit-for-review
+```
+
+## Full URL
+
+```text id="g36"
+https://anemia-stove-chief.ngrok-free.dev/api/kyc/submit-for-review
+```
+
+## Authorization
+
+```text id="g37"
+Bearer eyJhbGc...
+```
+
+## Body
+
+No body required.
+
+## Response
+
+```json id="g38"
+{
+  "success": true,
+  "message": "KYC submitted for review successfully",
+  "status": "under_review",
+  "pipeline": {
+    "accountCreated": "Completed",
+    "documentsUploaded": "Completed",
+    "kycVerification": "Pending",
+    "walletActivated": "Pending"
+  }
+}
+```
+
+This means:
+
+✅ Pending Status
+✅ Waiting For Admin Approval
+✅ Figma Review Screen Active
+
+---
+
+# 7. Check Verification Status
+
+## API
+
+```text id="g39"
+GET /api/kyc/verification-status
+```
+
+## Full URL
+
+```text id="g40"
+https://anemia-stove-chief.ngrok-free.dev/api/kyc/verification-status
+```
+
+## Authorization
+
+```text id="g41"
+Bearer eyJhbGc...
+```
+
+## Response
+
+```json id="g42"
+{
+  "status": "under_review"
+}
+```
+
+---
+
+# 8. Review Pipeline Status
+
+## API
+
+```text id="g43"
+GET /api/kyc/review-pipeline-status
+```
+
+## Full URL
+
+```text id="g44"
+https://anemia-stove-chief.ngrok-free.dev/api/kyc/review-pipeline-status
+```
+
+## Authorization
+
+```text id="g45"
+Bearer eyJhbGc..."
+```
+
+## Response
+
+```json id="g46"
+{
+  "pipeline": {
+    "accountCreated": "Completed",
+    "documentsUploaded": "Completed",
+    "kycVerification": "Pending",
+    "walletActivated": "Pending"
+  }
+}
+```
+
+---
+
+# 9. KYC Approved Status (After Admin Approval)
+
+Admin changes:
+
+```text id="g47"
+under_review → approved
+```
+
+Then login response becomes:
+
+```json id="g48"
+{
+  "message": "Login success",
+  "kycStatus": "approved",
+  "redirectTo": "home"
+}
+```
+
+MongoDB user document updates:
+
+```json id="g49"
+{
+  "kycVerified": true,
+  "walletActivated": true
+}
+```
+
+## Final Result
+
+✅ KYC Verified
+✅ Wallet Activated
+✅ User Gets Full App Access
