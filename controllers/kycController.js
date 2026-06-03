@@ -1,6 +1,7 @@
 const Kyc   = require("../models/Kyc");
 const User  = require("../models/User");
 const path  = require("path");
+const fs=require("fs");
  
 // ─── helpers ────────────────────────────────────────────────────────────────
  
@@ -218,40 +219,60 @@ const uploadAadharDocuments = async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const uploadPanDocuments = async (req, res) => {
   try {
-    const files = req.files;
+    const { panCard } = req.body;
 
-   
-
-    if (!files?.panCard?.[0]) {
+    if (!panCard) {
       return res.status(400).json({
         success: false,
         message: "PAN card image is required",
       });
     }
 
-    // FIND EXISTING KYC
-    let kyc = await Kyc.findOne({ userId: req.userId });
-    if (!kyc || !kyc.aadharFrontUrl) {
-  return res.status(400).json({
-    success: false,
-    message: "Please upload Aadhar first",
-  });
-}
+    const userId = req.userId;
 
-    
-
-    // UPDATE PAN
-    kyc.panCardUrl = toPublicUrl(
-      req,
-      files.panCard[0].path
+    const uploadDir = path.join(
+      __dirname,
+      "../uploads/kyc",
+      userId.toString()
     );
+
+    fs.mkdirSync(uploadDir, { recursive: true });
+
+    const panBase64 = panCard.split(";base64,").pop();
+
+    const panFileName = `panCard-${Date.now()}.jpg`;
+
+    const panPath = path.join(
+      uploadDir,
+      panFileName
+    );
+
+    fs.writeFileSync(
+      panPath,
+      panBase64,
+      "base64"
+    );
+
+    let kyc = await Kyc.findOne({
+      userId: req.userId,
+    });
+
+    if (!kyc || !kyc.aadharFrontUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "Please upload Aadhar first",
+      });
+    }
+
+    kyc.panCardUrl = toPublicUrl(req, panPath);
+
     if (
-  kyc.aadharFrontUrl &&
-  kyc.selfieUrl &&
-  (kyc.panCardUrl || kyc.passportUrl)
-) {
-  kyc.status = "documents_uploaded";
-}
+      kyc.aadharFrontUrl &&
+      kyc.selfieUrl &&
+      (kyc.panCardUrl || kyc.passportUrl)
+    ) {
+      kyc.status = "documents_uploaded";
+    }
 
     await kyc.save();
 
@@ -262,9 +283,9 @@ const uploadPanDocuments = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("uploadPanDocuments error:", err);
+    console.error(err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });
@@ -278,39 +299,60 @@ const uploadPanDocuments = async (req, res) => {
 // In kycController.js - Update uploadPassportDocuments
 const uploadPassportDocuments = async (req, res) => {
   try {
-    const files = req.files;
+    const { passport } = req.body;
 
-  
-    if (!files?.passport?.[0]) {
+    if (!passport) {
       return res.status(400).json({
         success: false,
         message: "Passport image is required",
       });
     }
 
-    // FIND EXISTING KYC
-    let kyc = await Kyc.findOne({ userId: req.userId });
-    if (!kyc || !kyc.aadharFrontUrl) {
-  return res.status(400).json({
-    success: false,
-    message: "Please upload Aadhar first",
-  });
-}
+    const userId = req.userId;
 
- 
-
-    // UPDATE PASSPORT
-    kyc.passportUrl = toPublicUrl(
-      req,
-      files.passport[0].path
+    const uploadDir = path.join(
+      __dirname,
+      "../uploads/kyc",
+      userId.toString()
     );
+
+    fs.mkdirSync(uploadDir, { recursive: true });
+
+    const passportBase64 = passport.split(";base64,").pop();
+
+    const passportFileName = `passport-${Date.now()}.jpg`;
+
+    const passportPath = path.join(
+      uploadDir,
+      passportFileName
+    );
+
+    fs.writeFileSync(
+      passportPath,
+      passportBase64,
+      "base64"
+    );
+
+    let kyc = await Kyc.findOne({
+      userId: req.userId,
+    });
+
+    if (!kyc || !kyc.aadharFrontUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "Please upload Aadhar first",
+      });
+    }
+
+    kyc.passportUrl = toPublicUrl(req, passportPath);
+
     if (
-  kyc.aadharFrontUrl &&
-  kyc.selfieUrl &&
-  (kyc.panCardUrl || kyc.passportUrl)
-) {
-  kyc.status = "documents_uploaded";
-}
+      kyc.aadharFrontUrl &&
+      kyc.selfieUrl &&
+      (kyc.panCardUrl || kyc.passportUrl)
+    ) {
+      kyc.status = "documents_uploaded";
+    }
 
     await kyc.save();
 
@@ -321,9 +363,9 @@ const uploadPassportDocuments = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("uploadPassportDocuments error:", err);
+    console.error(err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });
