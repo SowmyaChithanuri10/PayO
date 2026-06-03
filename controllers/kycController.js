@@ -57,53 +57,143 @@ const getVerificationStatus = async (req, res) => {
 // SCREEN 1 — UPLOAD AADHAR DOCUMENTS  →  POST /api/kyc/upload-aadhar-documents
 // Accepts: aadharFront (file), aadharBack (file), selfie (file)
 // ════════════════════════════════════════════════════════════════════════════
-const uploadAadharDocuments = async (req, res) => {
-  try {
-    const files = req.files;
+// const uploadAadharDocuments = async (req, res) => {
+//   try {
+//     const files = req.files;
 
    
 
-    if (!files?.aadharFront?.[0] || !files?.selfie?.[0]) {
+//     if (!files?.aadharFront?.[0] || !files?.selfie?.[0]) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Aadhar front and selfie are required",
+//       });
+//     }
+
+//     // FIND EXISTING KYC
+// let kyc = await Kyc.findOne({ userId: req.userId });
+// const user = await User.findById(req.userId);
+
+// // CREATE NEW KYC IF NOT EXISTS
+// if (!kyc) {
+//   kyc = await Kyc.create({
+//     userId: req.userId,
+//     fullName: user.name,
+//     status: "not_started",
+//     submissionCount: 0,
+//   });
+// }
+
+   
+//     // UPDATE FIELDS
+//     kyc.aadharFrontUrl = toPublicUrl(
+//       req,
+//       files.aadharFront[0].path
+//     );
+
+//     kyc.selfieUrl = toPublicUrl(
+//       req,
+//       files.selfie[0].path
+//     );
+
+// if (
+//   kyc.aadharFrontUrl &&
+//   kyc.selfieUrl &&
+//   (kyc.panCardUrl || kyc.passportUrl)
+// ) {
+//   kyc.status = "documents_uploaded";
+// } 
+// kyc.fullName = user.name;
+
+//     await kyc.save();
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Aadhar uploaded successfully",
+//       kycId: kyc._id,
+//     });
+
+//   } catch (err) {
+//     console.error("uploadAadharDocuments error:", err);
+
+//     res.status(500).json({
+//       success: false,
+//       message: "Server error",
+//     });
+//   }
+// };
+const uploadAadharDocuments = async (req, res) => {
+  try {
+    const { aadharFront, selfie } = req.body;
+
+    if (!aadharFront || !selfie) {
       return res.status(400).json({
         success: false,
         message: "Aadhar front and selfie are required",
       });
     }
 
-    // FIND EXISTING KYC
-let kyc = await Kyc.findOne({ userId: req.userId });
-const user = await User.findById(req.userId);
+    const userId = req.userId;
 
-// CREATE NEW KYC IF NOT EXISTS
-if (!kyc) {
-  kyc = await Kyc.create({
-    userId: req.userId,
-    fullName: user.name,
-    status: "not_started",
-    submissionCount: 0,
-  });
-}
-
-   
-    // UPDATE FIELDS
-    kyc.aadharFrontUrl = toPublicUrl(
-      req,
-      files.aadharFront[0].path
+    const uploadDir = path.join(
+      __dirname,
+      "../uploads/kyc",
+      userId.toString()
     );
 
-    kyc.selfieUrl = toPublicUrl(
-      req,
-      files.selfie[0].path
+    fs.mkdirSync(uploadDir, { recursive: true });
+
+    // Aadhaar
+    const aadharBase64 = aadharFront.split(";base64,").pop();
+
+    const aadharFileName = `aadharFront-${Date.now()}.jpg`;
+
+    const aadharPath = path.join(
+      uploadDir,
+      aadharFileName
     );
 
-if (
-  kyc.aadharFrontUrl &&
-  kyc.selfieUrl &&
-  (kyc.panCardUrl || kyc.passportUrl)
-) {
-  kyc.status = "documents_uploaded";
-} 
-kyc.fullName = user.name;
+    fs.writeFileSync(
+      aadharPath,
+      aadharBase64,
+      "base64"
+    );
+
+    // Selfie
+    const selfieBase64 = selfie.split(";base64,").pop();
+
+    const selfieFileName = `selfie-${Date.now()}.jpg`;
+
+    const selfiePath = path.join(
+      uploadDir,
+      selfieFileName
+    );
+
+    fs.writeFileSync(
+      selfiePath,
+      selfieBase64,
+      "base64"
+    );
+
+    let kyc = await Kyc.findOne({
+      userId: req.userId,
+    });
+
+    const user = await User.findById(req.userId);
+
+    if (!kyc) {
+      kyc = await Kyc.create({
+        userId: req.userId,
+        fullName: user.name,
+        status: "not_started",
+        submissionCount: 0,
+      });
+    }
+
+    kyc.aadharFrontUrl = toPublicUrl(req, aadharPath);
+    kyc.selfieUrl = toPublicUrl(req, selfiePath);
+
+    kyc.fullName = user.name;
 
     await kyc.save();
 
@@ -114,15 +204,14 @@ kyc.fullName = user.name;
     });
 
   } catch (err) {
-    console.error("uploadAadharDocuments error:", err);
+    console.error(err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });
   }
 };
- 
 // ════════════════════════════════════════════════════════════════════════════
 // SCREEN 2 — UPLOAD PAN CARD  →  POST /api/kyc/upload-pan-documents
 // Accepts: panCard (file), selfie (file)
