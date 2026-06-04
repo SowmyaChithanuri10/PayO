@@ -58,10 +58,10 @@ fullName: {
       default: null,
     },
 
-    reviewedAt: {
-      type: Date,
-      default: null,
-    },
+ reviewedBy: {
+  type: String,
+  default: null
+},
 
     // ───────────────────────────────
     // TRACKING / AUDIT

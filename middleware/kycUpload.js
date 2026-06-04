@@ -30,7 +30,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB per file
+  limits: { fileSize: 50 * 1024 * 1024 }, 
 });
  
 // ─── Named field sets per document type ─────────────────────────────────────
@@ -41,7 +41,7 @@ const upload = multer({
 const uploadAadhar = upload.fields([
   { name: "aadharFront", maxCount: 1 },
   { name: "selfie", maxCount: 1 },
-  // NO aadharBack field
+  
 ]);
 
 /** Screen 2 — PAN Card: card image only */

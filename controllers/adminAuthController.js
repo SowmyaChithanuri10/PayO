@@ -44,8 +44,6 @@ const adminLogin = async (req, res) => {
         token,
         admin: {
           name: "Super Admin",
-          email: process.env.ADMIN_EMAIL,
-          mobile: process.env.ADMIN_MOBILE || "9000000000",
           role: "admin",
           superAdmin: true,
         },

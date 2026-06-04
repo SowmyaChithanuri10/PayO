@@ -18,7 +18,26 @@ const toPublicUrl = (req, filePath) => {
   const normalizedPath = relativePath.replace(/\\/g, "/");
   return `${req.protocol}://${req.get("host")}/kyc-docs/${normalizedPath}`;
 };
- 
+ const getExtension = (base64Data) => {
+  const mimeType = base64Data.split(";")[0].split(":")[1];
+
+  switch (mimeType) {
+    case "application/pdf":
+      return ".pdf";
+
+    case "image/jpeg":
+      return ".jpg";
+
+    case "image/png":
+      return ".png";
+
+    case "image/webp":
+      return ".webp";
+
+    default:
+      throw new Error(`Unsupported file type: ${mimeType}`);
+  }
+};
 // ════════════════════════════════════════════════════════════════════════════
 // SCREEN 1 — GET KYC STATUS  →  GET /api/kyc/verification-status
 // Returns current KYC record (or "not_started") so the app knows which screen
@@ -147,7 +166,10 @@ const uploadAadharDocuments = async (req, res) => {
     // Aadhaar
     const aadharBase64 = aadharFront.split(";base64,").pop();
 
-    const aadharFileName = `aadharFront-${Date.now()}.jpg`;
+    // Aadhaar
+const aadharExt = getExtension(aadharFront);
+
+const aadharFileName = `aadharFront-${Date.now()}${aadharExt}`;
 
     const aadharPath = path.join(
       uploadDir,
@@ -163,7 +185,12 @@ const uploadAadharDocuments = async (req, res) => {
     // Selfie
     const selfieBase64 = selfie.split(";base64,").pop();
 
-    const selfieFileName = `selfie-${Date.now()}.jpg`;
+   const isPdf = aadharFront.startsWith("data:application/pdf");
+
+// Selfie
+const selfieExt = getExtension(selfie);
+
+const selfieFileName = `selfie-${Date.now()}${selfieExt}`;
 
     const selfiePath = path.join(
       uploadDir,
@@ -240,7 +267,9 @@ const uploadPanDocuments = async (req, res) => {
 
     const panBase64 = panCard.split(";base64,").pop();
 
-    const panFileName = `panCard-${Date.now()}.jpg`;
+  const ext = getExtension(panCard);
+
+const panFileName = `panCard-${Date.now()}${ext}`;
 
     const panPath = path.join(
       uploadDir,
@@ -320,7 +349,9 @@ const uploadPassportDocuments = async (req, res) => {
 
     const passportBase64 = passport.split(";base64,").pop();
 
-    const passportFileName = `passport-${Date.now()}.jpg`;
+   const ext = getExtension(passport);
+
+const passportFileName = `passport-${Date.now()}${ext}`;
 
     const passportPath = path.join(
       uploadDir,

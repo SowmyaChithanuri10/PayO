@@ -142,66 +142,56 @@ const getSubmissionDetails = async (req, res) => {
 const approveVerification = async (req, res) => {
   try {
     const { kycId } = req.params;
-    
+
     const kyc = await Kyc.findById(kycId);
-    
+
     if (!kyc) {
-      return res.status(404).json({ success: false, message: "KYC record not found" });
+      return res.status(404).json({
+        success: false,
+        message: "KYC record not found",
+      });
     }
-    
+
     if (kyc.status !== "under_review") {
       return res.status(400).json({
         success: false,
         message: `Cannot approve. Current status is "${kyc.status}"`,
       });
     }
-    
-    // ✅ FIX: Handle super admin (string) vs regular admin (ObjectId)
-    let reviewerId = null;
-    let reviewerName = "Admin";
-    
-    if (req.adminUser) {
-      if (req.adminUser.superAdmin) {
-        // Super admin from .env - don't set reviewedBy (or set to null)
-        reviewerId = null;
-        reviewerName = "Super Admin";
-      } else {
-        // Regular admin from database
-        reviewerId = req.adminUser._id;
-        reviewerName = req.adminUser.name;
-      }
-    }
-    
-    // Update KYC record
+
+    const reviewerName = req.adminUser?.superAdmin
+      ? "Super Admin"
+      : req.adminUser?.name || "Admin";
+
+    //  update KYC
     kyc.status = "approved";
-    if (reviewerId) {
-      kyc.reviewedBy = reviewerId;  // Only set if it's a real ObjectId
-    }
+    kyc.reviewedBy = reviewerName;
     kyc.reviewedAt = new Date();
     kyc.rejectionReason = null;
+
     await kyc.save();
-    
+
     // Activate wallet
     await User.findByIdAndUpdate(kyc.userId, {
       kycVerified: true,
       walletActivated: true,
     });
-    
+
     return res.status(200).json({
       success: true,
       message: "KYC approved. User wallet has been activated.",
       kycId: kyc._id,
       userId: kyc.userId,
-      approvedBy: reviewerName,
+      approvedBy: kyc.reviewedBy,
       approvedAt: kyc.reviewedAt,
     });
-    
+
   } catch (err) {
     console.error("approveVerification error:", err);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: "Server error",
-      error: err.message 
+      error: err.message,
     });
   }
 };
@@ -216,21 +206,19 @@ const rejectVerification = async (req, res) => {
   try {
     const { kycId } = req.params;
     const { reason } = req.body;
-    
+
     console.log("=== Reject Request ===");
     console.log("Received kycId:", kycId);
-    console.log("ID length:", kycId?.length);
-    
+
     // Validate ObjectId format
     if (!kycId || kycId.length !== 24) {
       return res.status(400).json({
         success: false,
         message: `Invalid KYC ID format. Must be 24 characters, got ${kycId?.length || 0} characters.`,
         receivedId: kycId,
-        expectedFormat: "24 character hex string"
       });
     }
-    
+
     // Validate reason
     if (!reason || reason.trim() === "") {
       return res.status(400).json({
@@ -238,75 +226,55 @@ const rejectVerification = async (req, res) => {
         message: "A rejection reason is required",
       });
     }
-    
+
     // Find KYC
     const kyc = await Kyc.findById(kycId);
-    
+
     if (!kyc) {
-      return res.status(404).json({ 
-        success: false, 
+      return res.status(404).json({
+        success: false,
         message: "KYC record not found",
-        searchedId: kycId
       });
     }
-    
+
     // Check status
     if (kyc.status !== "under_review") {
       return res.status(400).json({
         success: false,
-        message: `Cannot reject. Current status is "${kyc.status}". Only "under_review" can be rejected.`,
+        message: `Cannot reject. Current status is "${kyc.status}".`,
       });
     }
-    
-    // Handle super admin vs regular admin
-    let reviewerId = null;
-    let reviewerName = "Admin";
-    
-    if (req.adminUser) {
-      if (req.adminUser.superAdmin) {
-        reviewerId = null;
-        reviewerName = "Super Admin";
-        console.log("Super admin rejecting KYC");
-      } else {
-        reviewerId = req.adminUser._id;
-        reviewerName = req.adminUser.name;
-        console.log("Regular admin rejecting KYC:", reviewerName);
-      }
-    }
-    
+
+    // ONLY NAME LOGIC
+    const reviewerName = req.adminUser?.superAdmin
+      ? "Super Admin"
+      : req.adminUser?.name || "Admin";
+
     // Update KYC
     kyc.status = "rejected";
-    kyc.reviewedAt = new Date();
     kyc.rejectionReason = reason.trim();
-    
-    if (reviewerId) {
-      kyc.reviewedBy = reviewerId;
-    }
-    
+    kyc.reviewedAt = new Date();
+    kyc.reviewedBy = reviewerName;
+
     await kyc.save();
-    
-    console.log("KYC rejected successfully");
-    
+
     return res.status(200).json({
       success: true,
       message: "KYC rejected successfully",
       kycId: kyc._id,
       userId: kyc.userId,
       reason: kyc.rejectionReason,
-      rejectedBy: reviewerName,
+      rejectedBy: kyc.reviewedBy,
       rejectedAt: kyc.reviewedAt,
     });
-    
+
   } catch (err) {
     console.error("rejectVerification error:", err);
-    console.error("Error stack:", err.stack);
-    
-    // Send detailed error for debugging
-    res.status(500).json({ 
-      success: false, 
+
+    res.status(500).json({
+      success: false,
       message: "Server error",
       error: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
   }
 };
