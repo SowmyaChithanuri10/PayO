@@ -69,6 +69,50 @@ Authorization: Bearer <super_admin_token>
 
 ---
 
+
+
+#2.1 - getAllUsers` API URL is:
+
+```bash
+GET /api/admin/auth/users
+```
+
+Full localhost example:
+
+```bash
+https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/users
+```
+
+This route is protected, so send:
+
+### Headers
+
+```js
+Authorization: Bearer YOUR_ADMIN_TOKEN
+```
+
+Example in frontend:
+
+```js
+axios.get("https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/users", {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+})
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 3 — Get All Admins
 
 **Method:** `GET`
