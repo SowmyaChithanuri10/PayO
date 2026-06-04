@@ -28,6 +28,12 @@ fullName: {
 
     selfieUrl: { type: String, default: null },
 
+    passbookUrl:{type: String, default: null},
+
+    cancelledChequeUrl:{type: String, default: null},
+
+    statementUrl:{type: String, default: null},
+
     // ───────────────────────────────
     // PIPELINE STATUS
     // ───────────────────────────────

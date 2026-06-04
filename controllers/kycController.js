@@ -295,13 +295,14 @@ const panFileName = `panCard-${Date.now()}${ext}`;
 
     kyc.panCardUrl = toPublicUrl(req, panPath);
 
-    if (
+  if (
       kyc.aadharFrontUrl &&
       kyc.selfieUrl &&
-      (kyc.panCardUrl || kyc.passportUrl)
+      (kyc.panCardUrl || kyc.passportUrl||kyc.passbookUrl ||kyc.cancelledChequeUrl || kyc.statementUrl)
     ) {
       kyc.status = "documents_uploaded";
     }
+
 
     await kyc.save();
 
@@ -377,13 +378,14 @@ const passportFileName = `passport-${Date.now()}${ext}`;
 
     kyc.passportUrl = toPublicUrl(req, passportPath);
 
-    if (
+  if (
       kyc.aadharFrontUrl &&
       kyc.selfieUrl &&
-      (kyc.panCardUrl || kyc.passportUrl)
+      (kyc.panCardUrl || kyc.passportUrl||kyc.passbookUrl ||kyc.cancelledChequeUrl|| kyc.statementUrl)
     ) {
       kyc.status = "documents_uploaded";
     }
+
 
     await kyc.save();
 
@@ -402,6 +404,244 @@ const passportFileName = `passport-${Date.now()}${ext}`;
     });
   }
 };
+
+
+
+const uploadPassbookDocuments = async (req, res) => {
+  try {
+    const { passbook } = req.body;
+
+    if (!passbook) {
+      return res.status(400).json({
+        success: false,
+        message: "Passbook image is required",
+      });
+    }
+
+    const userId = req.userId;
+
+    const uploadDir = path.join(
+      __dirname,
+      "../uploads/kyc",
+      userId.toString()
+    );
+
+    fs.mkdirSync(uploadDir, { recursive: true });
+
+    const passBase64 = passbook.split(";base64,").pop();
+
+  const ext = getExtension(passbook);
+
+const passFileName = `passbook-${Date.now()}${ext}`;
+
+    const passPath = path.join(
+      uploadDir,
+      passFileName
+    );
+
+    fs.writeFileSync(
+      passPath,
+      passBase64,
+      "base64"
+    );
+
+    let kyc = await Kyc.findOne({
+      userId: req.userId,
+    });
+
+    if (!kyc || !kyc.aadharFrontUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "Please upload Aadhar first",
+      });
+    }
+
+    kyc.passbookUrl = toPublicUrl(req, passPath);
+
+    if (
+      kyc.aadharFrontUrl &&
+      kyc.selfieUrl &&
+      (kyc.panCardUrl || kyc.passportUrl||kyc.passbookUrl ||kyc.cancelledChequeUrl || kyc.statementUrl)
+    ) {
+      kyc.status = "documents_uploaded";
+    }
+
+    await kyc.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "PASSBOOK uploaded successfully",
+      kycId: kyc._id,
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+
+
+const uploadCancelledChequeDocuments = async (req, res) => {
+  try {
+    const { cheque } = req.body;
+
+    if (!cheque) {
+      return res.status(400).json({
+        success: false,
+        message: "Cancelled cheque image is required",
+      });
+    }
+
+    const userId = req.userId;
+
+    const uploadDir = path.join(
+      __dirname,
+      "../uploads/kyc",
+      userId.toString()
+    );
+
+    fs.mkdirSync(uploadDir, { recursive: true });
+
+    const cheBase64 = cheque.split(";base64,").pop();
+
+  const ext = getExtension(cheque);
+
+const cheFileName = `cheque-${Date.now()}${ext}`;
+
+    const chePath = path.join(
+      uploadDir,
+      cheFileName
+    );
+
+    fs.writeFileSync(
+      chePath,
+      cheBase64,
+      "base64"
+    );
+
+    let kyc = await Kyc.findOne({
+      userId: req.userId,
+    });
+
+    if (!kyc || !kyc.aadharFrontUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "Please upload Aadhar first",
+      });
+    }
+
+    kyc.cancelledChequeUrl = toPublicUrl(req, chePath);
+
+    if (
+      kyc.aadharFrontUrl &&
+      kyc.selfieUrl &&
+      (kyc.panCardUrl || kyc.passportUrl||kyc.passbookUrl ||kyc.cancelledChequeUrl|| kyc.statementUrl)
+    ) {
+      kyc.status = "documents_uploaded";
+    }
+
+    await kyc.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "CANCELLED CHEQUE uploaded successfully",
+      kycId: kyc._id,
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+
+
+const uploadStatementDocuments = async (req, res) => {
+  try {
+    const { statement } = req.body;
+
+    if (!statement) {
+      return res.status(400).json({
+        success: false,
+        message: "Statement image is required",
+      });
+    }
+
+    const userId = req.userId;
+
+    const uploadDir = path.join(
+      __dirname,
+      "../uploads/kyc",
+      userId.toString()
+    );
+
+    fs.mkdirSync(uploadDir, { recursive: true });
+
+    const staBase64 = statement.split(";base64,").pop();
+
+  const ext = getExtension(statement);
+
+const staFileName = `statement-${Date.now()}${ext}`;
+
+    const staPath = path.join(
+      uploadDir,
+      staFileName
+    );
+
+    fs.writeFileSync(
+      staPath,
+      staBase64,
+      "base64"
+    );
+
+    let kyc = await Kyc.findOne({
+      userId: req.userId,
+    });
+
+    if (!kyc || !kyc.aadharFrontUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "Please upload Aadhar first",
+      });
+    }
+
+    kyc.statementUrl = toPublicUrl(req, staPath);
+
+    if (
+      kyc.aadharFrontUrl &&
+      kyc.selfieUrl &&
+      (kyc.panCardUrl || kyc.passportUrl||kyc.passbookUrl ||kyc.cancelledChequeUrl || kyc.statementUrl)
+    ) {
+      kyc.status = "documents_uploaded";
+    }
+
+    await kyc.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "BANK STATEMENT uploaded successfully",
+      kycId: kyc._id,
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
 //════════════════════════════════════════════════════════════════════════════
 // SCREEN 3 → SCREEN 4  —  SUBMIT FOR REVIEW  →  POST /api/kyc/submit-for-review
 // Marks the KYC as "under_review". Call this after uploading documents to
@@ -595,5 +835,9 @@ module.exports = {
   getApprovalConfirmation,
   getRejectionDetails,
   resetAndRetry,
+  uploadCancelledChequeDocuments,
+  uploadPassbookDocuments,
+  uploadStatementDocuments
+  
   
 };

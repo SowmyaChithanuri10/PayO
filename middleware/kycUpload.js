@@ -50,9 +50,17 @@ const uploadPan = upload.fields([
 ]);
 
 /** Screen 3 — Passport: passport image only */
-const uploadPassport = upload.fields([
+const uploadPassbook = upload.fields([
+  { name: "passbook", maxCount: 1 },
+]);
+ const uploadPassport = upload.fields([
   { name: "passport", maxCount: 1 },
 ]);
- 
-module.exports = { uploadAadhar, uploadPan, uploadPassport };
+const uploadStatement = upload.fields([
+  { name: "statement", maxCount: 1 },
+]);
+const uploadCheque = upload.fields([
+  { name: "cheque", maxCount: 1 },
+]);
+module.exports = { uploadAadhar, uploadPan, uploadPassport,uploadCheque,uploadPassbook,uploadStatement};
  

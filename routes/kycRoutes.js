@@ -2,7 +2,7 @@ const express = require("express");
 const router  = express.Router();
  
 const auth = require("../middleware/auth");           // your existing JWT middleware
-const { uploadAadhar, uploadPan, uploadPassport } = require("../middleware/kycUpload");
+const { uploadAadhar, uploadPan, uploadPassport, uploadPassbook,uploadCheque,uploadStatement } = require("../middleware/kycUpload");
  
 const {
   // User flows (match all 6 screens)
@@ -15,6 +15,10 @@ const {
   getApprovalConfirmation,
   getRejectionDetails,
   resetAndRetry,
+  uploadCancelledChequeDocuments,
+  uploadPassbookDocuments,
+  uploadStatementDocuments
+  
 } = require("../controllers/kycController");
  
 // ─────────────────────────────────────────────────────────────────────────────
@@ -72,7 +76,24 @@ router.post(
   uploadPassport,
   uploadPassportDocuments
 );
- 
+
+
+ router.post(
+  "/upload-passbook-documents",
+  uploadPassbook,
+  uploadPassbookDocuments
+);
+
+ router.post(
+  "/upload-cheque-documents",
+  uploadCheque,
+  uploadCancelledChequeDocuments
+);
+ router.post(
+  "/upload-statement-documents",
+  uploadStatement,
+  uploadStatementDocuments
+);
 /**
  * SCREEN 3 → SCREEN 4  (Submit button tap)
  * POST /api/kyc/submit-for-review
