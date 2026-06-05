@@ -1,15 +1,15 @@
 // controllers/adminAuthController.js
-const jwt    = require("jsonwebtoken");
+
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const User   = require("../models/User");
- 
+
+const User = require("../models/User");
+const BankDetails = require("../models/Bank");
+
 // ════════════════════════════════════════════════════════════════════════════
 // ADMIN LOGIN
 // POST /api/admin/auth/login
-// Same as user login but verifies the role is "admin" before issuing token.
 // ════════════════════════════════════════════════════════════════════════════
-
-// ADMIN LOGIN
 const adminLogin = async (req, res) => {
   try {
     const { mobile, email, password } = req.body;
@@ -21,8 +21,7 @@ const adminLogin = async (req, res) => {
       });
     }
 
-    // ✅ CHECK SUPER ADMIN FIRST (BEFORE database lookup)
-    // Super admin login from .env
+    // SUPER ADMIN LOGIN
     if (
       email === process.env.ADMIN_EMAIL &&
       password === process.env.ADMIN_PASSWORD
@@ -54,8 +53,7 @@ const adminLogin = async (req, res) => {
       });
     }
 
-    // ✅ ONLY THEN CHECK FOR REGULAR ADMIN IN DATABASE
-    // Find user by mobile or email
+    // FIND USER
     const user = await User.findOne(
       mobile ? { mobile } : { email }
     );
@@ -67,7 +65,7 @@ const adminLogin = async (req, res) => {
       });
     }
 
-    // Check role
+    // CHECK ADMIN ROLE
     if (user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -76,7 +74,7 @@ const adminLogin = async (req, res) => {
       });
     }
 
-    // Verify password
+    // CHECK PASSWORD
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -86,7 +84,7 @@ const adminLogin = async (req, res) => {
       });
     }
 
-    // Generate admin JWT
+    // GENERATE TOKEN
     const token = jwt.sign(
       { id: user._id, role: "admin" },
       process.env.JWT_SECRET || "mysecretkey",
@@ -105,10 +103,11 @@ const adminLogin = async (req, res) => {
         role: user.role,
       },
     });
+
   } catch (err) {
     console.error("adminLogin error:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });
@@ -116,7 +115,7 @@ const adminLogin = async (req, res) => {
 };
 
 // ════════════════════════════════════════════════════════════════════════════
-// CREATE SUB-ADMIN
+// CREATE SUB ADMIN
 // POST /api/admin/auth/create-admin
 // ════════════════════════════════════════════════════════════════════════════
 const createSubAdmin = async (req, res) => {
@@ -130,7 +129,7 @@ const createSubAdmin = async (req, res) => {
       });
     }
 
-    // Check if account already exists
+    // CHECK EXISTING USER
     const existing = await User.findOne({
       $or: [{ mobile }, { email }],
     });
@@ -142,7 +141,7 @@ const createSubAdmin = async (req, res) => {
       });
     }
 
-    // Password strength check
+    // PASSWORD CHECK
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
@@ -171,10 +170,11 @@ const createSubAdmin = async (req, res) => {
         role: newAdmin.role,
       },
     });
+
   } catch (err) {
     console.error("createSubAdmin error:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });
@@ -196,10 +196,11 @@ const getAllAdmins = async (req, res) => {
       count: admins.length,
       admins,
     });
+
   } catch (err) {
     console.error("getAllAdmins error:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });
@@ -218,6 +219,32 @@ const getAllUsers = async (req, res) => {
       )
       .sort({ createdAt: -1 });
 
+    const usersWithBank = await Promise.all(
+      users.map(async (user) => {
+
+        // FIND BANK DETAILS
+        const bankDetails = await BankDetails.findOne({
+          userId: user._id,
+        }).select(
+          "accountHolderName bankName accountNumber ifscCode accountType isTpinCreated"
+        );
+
+        return {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          mobile: user.mobile,
+          kycVerified: user.kycVerified,
+          walletBalance: user.walletBalance,
+          createdAt: user.createdAt,
+          role: user.role,
+
+          // ADD BANK DETAILS
+          bankDetails: bankDetails || null,
+        };
+      })
+    );
+
     const total = users.length;
 
     const verified = users.filter(
@@ -233,12 +260,47 @@ const getAllUsers = async (req, res) => {
       total,
       verified,
       pending,
-      users,
+      users: usersWithBank,
     });
+
   } catch (err) {
     console.error("getAllUsers error:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// GET USER BANK DETAILS
+// GET /api/admin/auth/user-bank-details/:userId
+// ════════════════════════════════════════════════════════════════════════════
+const getUserBankDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const bankDetails = await BankDetails.findOne({
+      userId,
+    });
+
+    if (!bankDetails) {
+      return res.status(404).json({
+        success: false,
+        message: "Bank details not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      bankDetails,
+    });
+
+  } catch (err) {
+    console.error("getUserBankDetails error:", err);
+
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });
@@ -253,7 +315,6 @@ const revokeAdminAccess = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Prevent self-demotion
     if (userId === req.userId.toString()) {
       return res.status(400).json({
         success: false,
@@ -286,10 +347,11 @@ const revokeAdminAccess = async (req, res) => {
       message: `Admin access revoked for ${user.name}. They are now a regular user.`,
       userId: user._id,
     });
+
   } catch (err) {
     console.error("revokeAdminAccess error:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });
@@ -299,7 +361,6 @@ const revokeAdminAccess = async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 // CHANGE ADMIN PASSWORD
 // PATCH /api/admin/auth/change-password
-// Body: { currentPassword, newPassword }
 // ════════════════════════════════════════════════════════════════════════════
 const changeAdminPassword = async (req, res) => {
   try {
@@ -342,10 +403,11 @@ const changeAdminPassword = async (req, res) => {
       message:
         "Password changed successfully. Please login again with your new password.",
     });
+
   } catch (err) {
     console.error("changeAdminPassword error:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error",
     });
@@ -357,6 +419,7 @@ module.exports = {
   createSubAdmin,
   getAllAdmins,
   getAllUsers,
+  getUserBankDetails,
   revokeAdminAccess,
   changeAdminPassword,
 };

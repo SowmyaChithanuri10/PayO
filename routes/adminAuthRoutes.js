@@ -11,6 +11,7 @@ const {
   revokeAdminAccess,
   changeAdminPassword,
   getAllUsers, // ADD THIS
+  getUserBankDetails,
 } = require("../controllers/adminAuthController");
 
 // Public route
@@ -25,6 +26,8 @@ router.get("/all-admins", getAllAdmins);
 
 // ADD THIS ROUTE
 router.get("/users", getAllUsers);
+
+router.get("/user-bank-details/:userId", getUserBankDetails);
 
 router.patch("/revoke-admin/:userId", revokeAdminAccess);
 
