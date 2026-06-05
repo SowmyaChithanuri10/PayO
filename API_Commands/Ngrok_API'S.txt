@@ -105,6 +105,73 @@ axios.get("https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/users", {
 
 
 
+##2.2 Get All Users API - BankDetails included
+
+---
+
+## Endpoint
+
+```txt
+GET /api/admin/auth/users
+```
+
+### Full API URL
+
+```txt
+https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/users
+```
+
+---
+
+## Headers
+
+```json
+{
+  "Authorization": "Bearer YOUR_ADMIN_TOKEN"
+}
+```
+
+---
+
+## Method
+
+```txt
+GET
+```
+
+---
+
+## Success Response
+
+```json
+{
+  "success": true,
+  "total": 1,
+  "verified": 1,
+  "pending": 0,
+  "users": [
+    {
+      "_id": "6a1d69f27c95d63f84fb7212",
+      "name": "Nithin",
+      "email": "nithin@gmail.com",
+      "mobile": "8328169339",
+      "kycVerified": true,
+      "walletBalance": 5000,
+      "createdAt": "2026-06-05T05:57:40.369Z",
+      "role": "user",
+      "bankDetails": {
+        "_id": "6a226554f552c2c4036c9831",
+        "accountHolderName": "N1thin",
+        "bankName": "State Bank of India",
+        "accountNumber": "123456789012",
+        "ifscCode": "SBIN0001234",
+        "accountType": "Savings",
+        "isTpinCreated": false
+      }
+    }
+  ]
+}
+```
 
 
 
