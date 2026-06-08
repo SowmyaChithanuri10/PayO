@@ -1,0 +1,768 @@
+# PAYO Backend Testing APIs
+
+## Base URL
+
+```txt
+http://payo-app.duckdns.org:3001
+ ```
+
+---
+
+# AUTH APIs
+
+---
+
+## 1. Send Registration OTP
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/send-otp
+ ```
+
+### Token Required
+
+❌ No
+
+### Body
+
+```json
+ {
+ "mobile": "9876543210"
+ }
+ ```
+
+---
+
+## 2. Verify Registration OTP
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/verify-otp
+ ```
+
+### Token Required
+
+❌ No
+
+### Body
+
+```json
+ {
+ "mobile": "9876543210",
+ "otp": "1234"
+ }
+ ```
+
+### Response
+
+Returns JWT token.
+
+---
+
+## 3. Resend Registration OTP
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/resend-otp
+ ```
+
+### Token Required
+
+❌ No
+
+### Body
+
+```json
+ {
+ "mobile": "9876543210"
+ }
+ ```
+
+---
+
+## 4. Register User
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/register
+ ```
+
+### Token Required
+
+✅ Yes
+
+### Headers
+
+```txt
+ Authorization: Bearer YOUR_VERIFY_OTP_TOKEN
+ ```
+
+### Body
+
+```json
+ {
+ "name": "user",
+ "email": "user@gmail.com",
+ "password": "Password@123",
+ "confirmpassword": "Password@123",
+ "referralCode": "PAYO123"
+ }
+ ```
+
+---
+
+## 5. Login
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/login
+ ```
+
+### Token Required
+
+❌ No
+
+### Body
+
+```json
+ {
+ "email": "user@gmail.com",
+ "password": "Password@123"
+ }
+ ```
+
+OR
+
+```json
+ {
+ "mobile": "9876543210",
+ "password": "Password@123"
+ }
+ ```
+
+### Response
+
+Returns JWT token.
+
+---
+
+## 6. Send Login OTP
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/send-login-otp
+ ```
+
+### Token Required
+
+❌ No
+
+### Body
+
+```json
+ {
+ "mobile": "9876543210"
+ }
+ ```
+
+---
+
+## 7. Verify Login OTP
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/verify-login-otp
+ ```
+
+### Token Required
+
+❌ No
+
+### Body
+
+```json
+ {
+ "mobile": "9876543210",
+ "otp": "1234"
+ }
+ ```
+
+### Response
+
+Returns JWT token.
+
+---
+
+## 8. Resend Login OTP
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/resend-login-otp
+ ```
+
+### Token Required
+
+❌ No
+
+### Body
+
+```json
+ {
+ "mobile": "9876543210"
+ }
+ ```
+
+---
+
+## 9. Set Transaction PIN
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/set-pin
+ ```
+
+### Token Required
+
+✅ Yes
+
+### Headers
+
+```txt
+ Authorization: Bearer USER_LOGIN_TOKEN
+ ```
+
+### Body
+
+```json
+ {
+ "pin": "1234"
+ }
+ ```
+
+---
+
+## 10. Change Transaction PIN
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/change-pin
+ ```
+
+### Token Required
+
+✅ Yes
+
+### Headers
+
+```txt
+ Authorization: Bearer USER_LOGIN_TOKEN
+ ```
+
+### Body
+
+```json
+ {
+ "old_pin": "1234",
+ "new_pin": "5678"
+ }
+ ```
+
+---
+
+## 11. Send Reset Password OTP
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/reset-send-otp
+ ```
+
+### Token Required
+
+❌ No
+
+### Body
+
+```json
+ {
+ "mobile": "9876543210"
+ }
+ ```
+
+---
+
+## 12. Verify Reset Password OTP
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/reset-verify-otp
+ ```
+
+### Token Required
+
+❌ No
+
+### Body
+
+```json
+ {
+ "mobile": "9876543210",
+ "otp": "1234"
+ }
+ ```
+
+### Response
+
+Returns JWT token.
+
+---
+
+## 13. Reset Password
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/auth/reset-password
+ ```
+
+### Token Required
+
+✅ Yes
+
+### Headers
+
+```txt
+ Authorization: Bearer TOKEN
+ ```
+
+### Body
+
+```json
+ {
+ "password": "NewPassword@123",
+ "confirmPassword": "NewPassword@123"
+ }
+ ```
+
+---
+
+# WALLET APIs
+
+---
+
+## 14. Get Wallet
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/getwallet
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 15. Get Balance
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/balance
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 16. Generate QR & Wallet Address
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/generate-address
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 17. Scan QR
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/wallet/scan-qr
+ ```
+
+### Token Required
+
+✅ Yes
+
+### Body
+
+```json
+ {
+ "qrData": "QR_TOKEN"
+ }
+ ```
+
+---
+
+## 18. Get User By Wallet Address
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/user/WALLET_ADDRESS
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 19. Preview Transfer
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/wallet/transfer/preview
+ ```
+
+### Token Required
+
+✅ Yes
+
+### Body
+
+```json
+ {
+ "toAddress": "PAY123456",
+ "amount": 100
+ }
+ ```
+
+---
+
+## 20. Confirm Transfer
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/wallet/transfer/confirm
+ ```
+
+### Token Required
+
+✅ Yes
+
+### Body
+
+```json
+ {
+ "toAddress": "PAY123456",
+ "amount": 100,
+ "pin": "1234"
+ }
+ ```
+
+---
+
+## 21. Direct Transfer
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/wallet/transfer
+ ```
+
+### Token Required
+
+✅ Yes
+
+### Body
+
+```json
+ {
+ "toAddress": "PAY123456",
+ "amount": 100,
+ "pin": "1234"
+ }
+ ```
+
+---
+
+## 22. Transaction History
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/transaction-list
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 23. Transaction Details By ID
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/transactionById/TRANSACTION_ID
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 24. Transactions With Particular User
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/transactions/user/WALLET_ADDRESS
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 25. Save Recent User
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/wallet/recent-toggle-add
+ ```
+
+### Token Required
+
+✅ Yes
+
+### Body
+
+```json
+ {
+ "receiverName": "Rahul",
+ "walletAddress": "PAY123456"
+ }
+ ```
+
+---
+
+## 26. Check Recent User
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/recent-check/WALLET_ADDRESS
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 27. Get Recents Page
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/recents-page
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 28. Wallet Dashboard
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/getwalletdashboard
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 29. Referral Details
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/refer
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 30. Add Bank Details
+
+### URL
+
+```txt
+ POST http://payo-app.duckdns.org:3001/api/wallet/add-bank
+ ```
+
+### Token Required
+
+✅ Yes
+
+### Body
+
+```json
+ {
+ "name": "user",
+ "mobile": "9876543210",
+ "bank": "SBI",
+ "account": "123456789012",
+ "confirmAccount": "123456789012",
+ "ifsc": "SBIN0001234",
+ "accountType": "Savings"
+ }
+ ```
+
+---
+
+## 31. Transaction Count
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/get-transaction-count
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 32. Income & Outcome
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/income-outcome
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 33. Profile API
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/wallet/profile
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+# NOTIFICATION APIs
+
+---
+
+## 34. Get All Notifications
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/notifications/notifications
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 35. Mark One Notification As Read
+
+### URL
+
+```txt
+ PUT http://payo-app.duckdns.org:3001/api/notifications/notifications/NOTIFICATION_ID/read
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 36. Mark All Notifications As Read
+
+### URL
+
+```txt
+ PUT http://payo-app.duckdns.org:3001/api/notifications/notifications/read-all
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+## 37. Get Unread Notification Count
+
+### URL
+
+```txt
+ GET http://payo-app.duckdns.org:3001/api/notifications/notifications/unread-count
+ ```
+
+### Token Required
+
+✅ Yes
+
+---
+
+# Common Header For Protected APIs
+
+```txt
+ Authorization: Bearer YOUR_TOKEN
+ ```
