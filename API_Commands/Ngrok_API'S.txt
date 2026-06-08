@@ -1,21 +1,54 @@
-Ngrok
-
-URL in your frontend:
-
-const API_BASE = "https://anemia-stove-chief.ngrok-free.dev";
-
-
-Test:
-GET https://anemia-stove-chief.ngrok-free.dev/health
-
-
-# PayO Admin APIs (ngrok URLs)
+# PayO Admin APIs (Updated ngrok URLs)
 
 ## Base URL
 
 ```text
-https://anemia-stove-chief.ngrok-free.dev
+https://hedge-cadet-cognition.ngrok-free.dev
 ```
+
+---
+
+# Frontend Base URL Setup
+
+```js
+const API_BASE = "https://hedge-cadet-cognition.ngrok-free.dev";
+```
+
+---
+
+# Health Check
+
+**Method:** `GET`
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/health
+```
+
+---
+
+# KYC Document URLs
+
+The following new fields are now supported in the backend:
+
+```js
+cancelChequeUrl
+bankStatementUrl
+passbookUrl
+```
+
+All uploaded files (PDF/Image) are served from:
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/
+```
+
+Example:
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/passbook-172839.pdf
+```
+
+These URLs work exactly like existing Aadhaar/PAN/Selfie document URLs.
 
 ---
 
@@ -23,443 +56,208 @@ https://anemia-stove-chief.ngrok-free.dev
 
 **Method:** `POST`
 
-**URL:**
-
 ```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/login
-```
-
-**Body:**
-
-```json
-{
-  "email": "admin@payo.com",
-  "password": "Admin@123"
-}
+https://hedge-cadet-cognition.ngrok-free.dev/api/admin/auth/login
 ```
 
 ---
 
-# 2 — Create Sub Admin
+# 2 — Get All KYC Submissions
 
-**Method:** `POST`
-
-**URL:**
+**Method:** `GET`
 
 ```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/create-admin
+https://hedge-cadet-cognition.ngrok-free.dev/api/admin/kyc/all-submissions
 ```
-
-**Headers:**
-
-```text
-Authorization: Bearer <super_admin_token>
-```
-
-**Body:**
-
-```json
-{
-  "name": "Admin One",
-  "mobile": "9111111111",
-  "email": "admin1@payo.com",
-  "password": "Admin@123"
-}
-```
-
----
-
-
-
-#2.1 - getAllUsers` API URL is:
-
-```bash
-GET /api/admin/auth/users
-```
-
-Full localhost example:
-
-```bash
-https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/users
-```
-
-This route is protected, so send:
 
 ### Headers
 
-```js
-Authorization: Bearer YOUR_ADMIN_TOKEN
+```text
+Authorization: Bearer <admin_token>
 ```
 
-Example in frontend:
-
-```js
-axios.get("https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/users", {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-})
-```
-
-
-
-
-
-##2.2 Get All Users API - BankDetails included
-
----
-
-## Endpoint
-
-```txt
-GET /api/admin/auth/users
-```
-
-### Full API URL
-
-```txt
-https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/users
-```
-
----
-
-## Headers
+### Response Includes
 
 ```json
 {
-  "Authorization": "Bearer YOUR_ADMIN_TOKEN"
+  "_id": "kyc_id",
+  "fullName": "Nithin",
+  "status": "under_review",
+
+  "aadharFrontUrl": "https://...",
+  "panCardUrl": "https://...",
+  "passportUrl": "https://...",
+  "selfieUrl": "https://...",
+
+  "cancelChequeUrl": "https://...",
+  "bankStatementUrl": "https://...",
+  "passbookUrl": "https://..."
 }
 ```
 
 ---
 
-## Method
+# 3 — Get Single KYC Submission Details
 
-```txt
-GET
+**Method:** `GET`
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/admin/kyc/submission-details/:kycId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
 ```
 
 ---
 
-## Success Response
+# Example Response
 
 ```json
 {
   "success": true,
-  "total": 1,
-  "verified": 1,
-  "pending": 0,
-  "users": [
-    {
-      "_id": "6a1d69f27c95d63f84fb7212",
+  "kyc": {
+    "_id": "689d7f1ab23d9d0012ab3456",
+
+    "fullName": "Nithin",
+
+    "status": "under_review",
+
+    "aadharFrontUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/aadhar-front.jpg",
+
+    "panCardUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/pan-card.jpg",
+
+    "passportUrl": null,
+
+    "selfieUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/selfie.jpg",
+
+    "cancelChequeUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/cancel-cheque.pdf",
+
+    "bankStatementUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/bank-statement.pdf",
+
+    "passbookUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/passbook.jpg",
+
+    "userId": {
+      "_id": "689d7e7ab23d9d0012ab1111",
       "name": "Nithin",
-      "email": "nithin@gmail.com",
       "mobile": "8328169339",
-      "kycVerified": true,
-      "walletBalance": 5000,
-      "createdAt": "2026-06-05T05:57:40.369Z",
-      "role": "user",
-      "bankDetails": {
-        "_id": "6a226554f552c2c4036c9831",
-        "accountHolderName": "N1thin",
-        "bankName": "State Bank of India",
-        "accountNumber": "123456789012",
-        "ifscCode": "SBIN0001234",
-        "accountType": "Savings",
-        "isTpinCreated": false
-      }
-    }
-  ]
+      "email": "nithin@gmail.com"
+    },
+
+    "reviewedBy": null,
+
+    "rejectionReason": null,
+
+    "reviewedAt": null,
+
+    "createdAt": "2025-08-10T10:20:30.000Z"
+  }
 }
 ```
 
-
-
-
-
-
-
-
-# 3 — Get All Admins
-
-**Method:** `GET`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/all-admins
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <super_admin_token>
-```
-
 ---
 
-# 4 — Revoke Admin Access
+# 4 — Approve KYC
 
 **Method:** `PATCH`
 
-**URL:**
-
 ```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/revoke-admin/:adminId
+https://hedge-cadet-cognition.ngrok-free.dev/api/admin/kyc/approve-verification/:kycId
 ```
 
-**Headers:**
-
-```text
-Authorization: Bearer <super_admin_token>
-```
-
----
-
-# 5 — Change Admin Password
-
-**Method:** `PATCH`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/auth/change-password
-```
-
-**Headers:**
+### Headers
 
 ```text
 Authorization: Bearer <admin_token>
 ```
 
-**Body:**
+---
+
+# 5 — Reject KYC
+
+**Method:** `PATCH`
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/admin/kyc/reject-verification/:kycId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+### Body
 
 ```json
 {
-  "currentPassword": "Admin@123",
-  "newPassword": "Admin@456"
+  "reason": "Documents are unclear"
 }
 ```
 
 ---
 
-# 6 — KYC Dashboard Stats
+# New Backend Fields Added
 
-**Method:** `GET`
+These are the exact field names added by backend:
 
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/dashboard-stats
+```js
+cancelChequeUrl
+bankStatementUrl
+passbookUrl
 ```
 
-**Headers:**
+Frontend can directly use:
 
-```text
-Authorization: Bearer <admin_token>
+```js
+kyc.cancelChequeUrl
+kyc.bankStatementUrl
+kyc.passbookUrl
+```
+
+These fields may be:
+
+```js
+null
+```
+
+if the user has not uploaded that document yet.
+
+---
+
+# Backend File Upload Support
+
+The following file types are supported for the new bank document fields:
+
+## Supported Upload Types
+
+* PDF
+* JPG
+* JPEG
+* PNG
+* WEBP
+
+## Fields
+
+```js
+cancelChequeUrl
+bankStatementUrl
+passbookUrl
 ```
 
 ---
 
-# 7 — All KYC Submissions
+# Backend Changes Done
 
-**Method:** `GET`
-
-**URL:**
+Modified Files:
 
 ```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/all-submissions
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <admin_token>
+models/Kyc.js
+controllers/adminKycController.js
+routes/adminKycRoutes.js
+server.js
 ```
 
 ---
-
-# 8 — Pending Reviews
-
-**Method:** `GET`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/pending-reviews
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <admin_token>
-```
-
----
-
-# 9 — Search User KYC
-
-**Method:** `GET`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/search-user?query=ganesh
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <admin_token>
-```
-
----
-
-# 10 — Submission Details
-
-**Method:** `GET`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/submission-details/:kycId
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <admin_token>
-```
-
----
-
-# 11 — Approve KYC
-
-**Method:** `PATCH`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/approve-verification/:kycId
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <admin_token>
-```
-
----
-
-# 12 — Reject KYC
-
-**Method:** `PATCH`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/reject-verification/:kycId
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <admin_token>
-```
-
-**Body:**
-
-```json
-{
-  "reason": "Documents are not clear"
-}
-```
-
----
-
-# 13 — Bulk Approve
-
-**Method:** `PATCH`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/bulk-approve
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <admin_token>
-```
-
-**Body:**
-
-```json
-{
-  "kycIds": ["id1", "id2"]
-}
-```
-
----
-
-# 14 — Bulk Reject
-
-**Method:** `PATCH`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/bulk-reject
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <admin_token>
-```
-
-**Body:**
-
-```json
-{
-  "kycIds": ["id1", "id2"],
-  "reason": "Documents unclear"
-}
-```
-
----
-
-# 15 — Delete KYC Record
-
-**Method:** `DELETE`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/delete-record/:kycId
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <admin_token>
-```
-
----
-
-# 16 — Audit Log
-
-**Method:** `GET`
-
-**URL:**
-
-```text
-https://anemia-stove-chief.ngrok-free.dev/api/admin/kyc/audit-log
-```
-
-**Headers:**
-
-```text
-Authorization: Bearer <admin_token>
-```

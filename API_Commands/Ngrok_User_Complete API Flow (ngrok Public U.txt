@@ -1,0 +1,343 @@
+# Complete API Flow (ngrok Public URL)
+
+From **New User Registration → KYC Pending → Verified**
+
+---
+
+# Base URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev
+```
+
+---
+
+# JWT TOKEN (Use This in Authorization)
+
+```text
+Bearer YOUR_JWT_TOKEN
+```
+
+---
+
+# 1. Send OTP (New User)
+
+## API
+
+```text
+POST /api/auth/send-otp
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/auth/send-otp
+```
+
+---
+
+# 2. Verify OTP
+
+## API
+
+```text
+POST /api/auth/verify-otp
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/auth/verify-otp
+```
+
+---
+
+# 3. Register User
+
+## API
+
+```text
+POST /api/auth/register
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/auth/register
+```
+
+---
+
+# 4. Login
+
+## API
+
+```text
+POST /api/auth/login
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/auth/login
+```
+
+---
+
+# 5A. Upload Aadhaar Documents
+
+## API
+
+```text
+POST /api/kyc/upload-aadhar-documents
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/kyc/upload-aadhar-documents
+```
+
+## Authorization
+
+```text
+Bearer YOUR_JWT_TOKEN
+```
+
+## Body → form-data
+
+| KEY         | TYPE | VALUE             |
+| ----------- | ---- | ----------------- |
+| aadharFront | File | Aadhaar image/pdf |
+| selfie      | File | Selfie image      |
+
+---
+
+# 5B. Upload PAN Card
+
+## API
+
+```text
+POST /api/kyc/upload-pan-documents
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/kyc/upload-pan-documents
+```
+
+## Body → form-data
+
+| KEY     | TYPE | VALUE         |
+| ------- | ---- | ------------- |
+| panCard | File | PAN image/pdf |
+
+---
+
+# 5C. Upload Passport
+
+## API
+
+```text
+POST /api/kyc/upload-passport-documents
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/kyc/upload-passport-documents
+```
+
+## Body → form-data
+
+| KEY      | TYPE | VALUE              |
+| -------- | ---- | ------------------ |
+| passport | File | Passport image/pdf |
+
+---
+
+# 5D. Upload Bank Documents (NEW)
+
+## API
+
+```text
+POST /api/kyc/upload-bank-documents
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/kyc/upload-bank-documents
+```
+
+## Authorization
+
+```text
+Bearer YOUR_JWT_TOKEN
+```
+
+## Body → form-data
+
+| KEY           | TYPE | VALUE                    |
+| ------------- | ---- | ------------------------ |
+| cancelCheque  | File | Cancel cheque image/pdf  |
+| bankStatement | File | Bank statement image/pdf |
+| passbook      | File | Passbook image/pdf       |
+
+---
+
+# 6. Submit KYC For Review
+
+## API
+
+```text
+POST /api/kyc/submit-for-review
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/kyc/submit-for-review
+```
+
+---
+
+# 7. Verification Status
+
+## API
+
+```text
+GET /api/kyc/verification-status
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/kyc/verification-status
+```
+
+---
+
+# 8. Review Pipeline Status
+
+## API
+
+```text
+GET /api/kyc/review-pipeline-status
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/kyc/review-pipeline-status
+```
+
+---
+
+# 9. Admin — Get All KYC Submissions
+
+## API
+
+```text
+GET /api/admin/kyc/all-submissions
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/admin/kyc/all-submissions
+```
+
+## Headers
+
+```text
+Authorization: Bearer ADMIN_TOKEN
+```
+
+---
+
+# 10. Admin — Get KYC Submission Details
+
+## API
+
+```text
+GET /api/admin/kyc/submission-details/:kycId
+```
+
+## Full URL
+
+```text
+https://hedge-cadet-cognition.ngrok-free.dev/api/admin/kyc/submission-details/:kycId
+```
+
+## Headers
+
+```text
+Authorization: Bearer ADMIN_TOKEN
+```
+
+---
+
+# New Fields Added To KYC Response
+
+These fields are now available in the KYC response:
+
+```json
+{
+  "cancelChequeUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/cancel-cheque.pdf",
+  "bankStatementUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/bank-statement.pdf",
+  "passbookUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/passbook.pdf"
+}
+```
+
+---
+
+# KYC Submission Details Example Response
+
+```json
+{
+  "success": true,
+  "kyc": {
+    "_id": "6890f4c9e4b2e4c8a4b98a12",
+
+    "fullName": "N1thin",
+
+    "aadharFrontUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/aadhar.png",
+
+    "panCardUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/pan.png",
+
+    "passportUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/passport.png",
+
+    "selfieUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/selfie.png",
+
+    "cancelChequeUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/cancel-cheque.png",
+
+    "bankStatementUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/bank-statement.pdf",
+
+    "passbookUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/passbook.png",
+
+    "status": "under_review",
+
+    "createdAt": "2026-06-05T05:57:40.369Z"
+  }
+}
+```
+
+---
+
+# Exact Field Names Confirmed
+
+```text
+cancelChequeUrl
+bankStatementUrl
+passbookUrl
+```
+
+These fields are:
+
+✅ Flat fields
+✅ Included in submission-details response
+✅ Accessible from same ngrok domain
+✅ Supports image/pdf uploads
+✅ Frontend-ready

@@ -1,0 +1,88 @@
+# Bank Document APIs for Frontend Integration
+
+## Base URL
+
+```bash
+https://hedge-cadet-cognition.ngrok-free.dev
+```
+
+---
+
+# 1. Get KYC Submission Details
+
+## API
+
+```bash
+GET /api/admin/kyc/submission-details/:kycId
+```
+
+## Full URL Example
+
+```bash
+https://hedge-cadet-cognition.ngrok-free.dev/api/admin/kyc/submission-details/6895f7c123456789abcd1234
+```
+
+## Response Fields
+
+```json
+{
+  "success": true,
+  "kyc": {
+    "_id": "6895f7c123456789abcd1234",
+
+    "aadharFrontUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/aadhar.jpg",
+    "panCardUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/pan.jpg",
+    "passportUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/passport.jpg",
+    "selfieUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/selfie.jpg",
+
+    "cancelChequeUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/cancel-cheque.pdf",
+
+    "bankStatementUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/bank-statement.pdf",
+
+    "passbookUrl": "https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/passbook.jpg"
+  }
+}
+```
+
+---
+
+# 2. Frontend Field Names
+
+```js
+src.cancelChequeUrl
+src.bankStatementUrl
+src.passbookUrl
+```
+
+---
+
+# 3. Document Access
+
+All files are directly accessible from the same ngrok domain.
+
+Example:
+
+```bash
+https://hedge-cadet-cognition.ngrok-free.dev/kyc-docs/passbook.jpg
+```
+
+Supports:
+
+* PDF
+* JPG
+* PNG
+* JPEG
+
+---
+
+# 4. Existing Auth Flow
+
+Admin JWT authentication remains unchanged.
+
+Frontend should continue sending:
+
+```bash
+Authorization: Bearer <token>
+```
+
+in request headers.
