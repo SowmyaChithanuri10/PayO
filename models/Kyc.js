@@ -12,27 +12,52 @@ const kycSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
-fullName: {
-    type: String,
-    default: null,
-  },
+
+    fullName: {
+      type: String,
+      default: null,
+    },
 
     // ───────────────────────────────
     // FILES (uploaded docs)
     // ───────────────────────────────
-    aadharFrontUrl: { type: String, default: null },
+    aadharFrontUrl: {
+      type: String,
+      default: null,
+    },
 
-    panCardUrl: { type: String, default: null },
+    panCardUrl: {
+      type: String,
+      default: null,
+    },
 
-    passportUrl: { type: String, default: null },
+    passportUrl: {
+      type: String,
+      default: null,
+    },
 
-    selfieUrl: { type: String, default: null },
+    selfieUrl: {
+      type: String,
+      default: null,
+    },
 
-    passbookUrl:{type: String, default: null},
+    // ───────────────────────────────
+    // BANK DOCUMENTS
+    // ───────────────────────────────
+    cancelChequeUrl: {
+      type: String,
+      default: null,
+    },
 
-    cancelledChequeUrl:{type: String, default: null},
+    bankStatementUrl: {
+      type: String,
+      default: null,
+    },
 
-    statementUrl:{type: String, default: null},
+    passbookUrl: {
+      type: String,
+      default: null,
+    },
 
     // ───────────────────────────────
     // PIPELINE STATUS
@@ -64,10 +89,10 @@ fullName: {
       default: null,
     },
 
- reviewedBy: {
-  type: String,
-  default: null
-},
+    reviewedAt: {
+      type: Date,
+      default: null,
+    },
 
     // ───────────────────────────────
     // TRACKING / AUDIT
