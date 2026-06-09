@@ -77,71 +77,6 @@ const getVerificationStatus = async (req, res) => {
 // SCREEN 1 — UPLOAD AADHAR DOCUMENTS  →  POST /api/kyc/upload-aadhar-documents
 // Accepts: aadharFront (file), aadharBack (file), selfie (file)
 // ════════════════════════════════════════════════════════════════════════════
-// const uploadAadharDocuments = async (req, res) => {
-//   try {
-//     const files = req.files;
-
-   
-
-//     if (!files?.aadharFront?.[0] || !files?.selfie?.[0]) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Aadhar front and selfie are required",
-//       });
-//     }
-
-//     // FIND EXISTING KYC
-// let kyc = await Kyc.findOne({ userId: req.userId });
-// const user = await User.findById(req.userId);
-
-// // CREATE NEW KYC IF NOT EXISTS
-// if (!kyc) {
-//   kyc = await Kyc.create({
-//     userId: req.userId,
-//     fullName: user.name,
-//     status: "not_started",
-//     submissionCount: 0,
-//   });
-// }
-
-   
-//     // UPDATE FIELDS
-//     kyc.aadharFrontUrl = toPublicUrl(
-//       req,
-//       files.aadharFront[0].path
-//     );
-
-//     kyc.selfieUrl = toPublicUrl(
-//       req,
-//       files.selfie[0].path
-//     );
-
-// if (
-//   kyc.aadharFrontUrl &&
-//   kyc.selfieUrl &&
-//   (kyc.panCardUrl || kyc.passportUrl)
-// ) {
-//   kyc.status = "documents_uploaded";
-// } 
-// kyc.fullName = user.name;
-
-//     await kyc.save();
-
-//     return res.status(201).json({
-//       success: true,
-//       message: "Aadhar uploaded successfully",
-//       kycId: kyc._id,
-//     });
-
-//   } catch (err) {
-//     console.error("uploadAadharDocuments error:", err);
-
-//     res.status(500).json({
-//       success: false,
-//       message: "Server error",
-//     });
-//   }
-// };
 const uploadAadharDocuments = async (req, res) => {
   try {
     const { aadharFront, selfie } = req.body;
@@ -295,10 +230,11 @@ const panFileName = `panCard-${Date.now()}${ext}`;
 
     kyc.panCardUrl = toPublicUrl(req, panPath);
 
-  if (
+    // ✅ FIX: use correct schema field names (cancelChequeUrl, bankStatementUrl)
+    if (
       kyc.aadharFrontUrl &&
       kyc.selfieUrl &&
-      (kyc.panCardUrl || kyc.passportUrl||kyc.passbookUrl ||kyc.cancelledChequeUrl || kyc.statementUrl)
+      (kyc.panCardUrl || kyc.passportUrl || kyc.passbookUrl || kyc.cancelChequeUrl || kyc.bankStatementUrl)
     ) {
       kyc.status = "documents_uploaded";
     }
@@ -378,10 +314,11 @@ const passportFileName = `passport-${Date.now()}${ext}`;
 
     kyc.passportUrl = toPublicUrl(req, passportPath);
 
-  if (
+    // ✅ FIX: use correct schema field names (cancelChequeUrl, bankStatementUrl)
+    if (
       kyc.aadharFrontUrl &&
       kyc.selfieUrl &&
-      (kyc.panCardUrl || kyc.passportUrl||kyc.passbookUrl ||kyc.cancelledChequeUrl|| kyc.statementUrl)
+      (kyc.panCardUrl || kyc.passportUrl || kyc.passbookUrl || kyc.cancelChequeUrl || kyc.bankStatementUrl)
     ) {
       kyc.status = "documents_uploaded";
     }
@@ -458,10 +395,11 @@ const passFileName = `passbook-${Date.now()}${ext}`;
 
     kyc.passbookUrl = toPublicUrl(req, passPath);
 
+    // ✅ FIX: use correct schema field names (cancelChequeUrl, bankStatementUrl)
     if (
       kyc.aadharFrontUrl &&
       kyc.selfieUrl &&
-      (kyc.panCardUrl || kyc.passportUrl||kyc.passbookUrl ||kyc.cancelledChequeUrl || kyc.statementUrl)
+      (kyc.panCardUrl || kyc.passportUrl || kyc.passbookUrl || kyc.cancelChequeUrl || kyc.bankStatementUrl)
     ) {
       kyc.status = "documents_uploaded";
     }
@@ -535,12 +473,14 @@ const cheFileName = `cheque-${Date.now()}${ext}`;
       });
     }
 
-    kyc.cancelledChequeUrl = toPublicUrl(req, chePath);
+    // ✅ FIX: was kyc.cancelledChequeUrl — correct schema field is cancelChequeUrl
+    kyc.cancelChequeUrl = toPublicUrl(req, chePath);
 
+    // ✅ FIX: use correct schema field names (cancelChequeUrl, bankStatementUrl)
     if (
       kyc.aadharFrontUrl &&
       kyc.selfieUrl &&
-      (kyc.panCardUrl || kyc.passportUrl||kyc.passbookUrl ||kyc.cancelledChequeUrl|| kyc.statementUrl)
+      (kyc.panCardUrl || kyc.passportUrl || kyc.passbookUrl || kyc.cancelChequeUrl || kyc.bankStatementUrl)
     ) {
       kyc.status = "documents_uploaded";
     }
@@ -614,12 +554,14 @@ const staFileName = `statement-${Date.now()}${ext}`;
       });
     }
 
-    kyc.statementUrl = toPublicUrl(req, staPath);
+    // ✅ FIX: was kyc.statementUrl — correct schema field is bankStatementUrl
+    kyc.bankStatementUrl = toPublicUrl(req, staPath);
 
+    // ✅ FIX: use correct schema field names (cancelChequeUrl, bankStatementUrl)
     if (
       kyc.aadharFrontUrl &&
       kyc.selfieUrl &&
-      (kyc.panCardUrl || kyc.passportUrl||kyc.passbookUrl ||kyc.cancelledChequeUrl || kyc.statementUrl)
+      (kyc.panCardUrl || kyc.passportUrl || kyc.passbookUrl || kyc.cancelChequeUrl || kyc.bankStatementUrl)
     ) {
       kyc.status = "documents_uploaded";
     }
@@ -802,10 +744,14 @@ const resetAndRetry = async (req, res) => {
     const previousCount = kyc.submissionCount;
   kyc.status = "not_started";
 
-kyc.aadharFrontUrl = null;
-kyc.panCardUrl = null;
-kyc.passportUrl = null;
-kyc.selfieUrl = null;
+kyc.aadharFrontUrl   = null;
+kyc.panCardUrl       = null;
+kyc.passportUrl      = null;
+kyc.selfieUrl        = null;
+// ✅ FIX: also clear bank document fields on retry
+kyc.cancelChequeUrl  = null;
+kyc.bankStatementUrl = null;
+kyc.passbookUrl      = null;
 
 kyc.rejectionReason = null;
 
