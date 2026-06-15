@@ -1,0 +1,352 @@
+# PayO Admin APIs (Updated ngrok URLs)
+
+## Base URL
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev
+```
+
+---
+
+# Frontend Base URL Setup
+
+```js
+const API_BASE = "https://shadily-hazard-widget.ngrok-free.dev";
+```
+
+---
+
+# Health Check
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/health
+```
+
+---
+
+# KYC Document URLs
+
+The following new fields are now supported in the backend:
+
+```js
+cancelChequeUrl
+bankStatementUrl
+passbookUrl
+```
+
+All uploaded files (PDF/Image) are served from:
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/
+```
+
+Example:
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/passbook-172839.pdf
+```
+
+These URLs work exactly like existing Aadhaar/PAN/Selfie document URLs.
+
+---
+
+# 1 — Admin Login
+
+**Method:** `POST`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/auth/login
+```
+
+---
+
+# 2 — Get All KYC Submissions
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/all-submissions
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+### Response Includes
+
+```json
+{
+  "_id": "kyc_id",
+  "fullName": "Nithin",
+  "status": "under_review",
+
+  "aadharFrontUrl": "https://...",
+  "panCardUrl": "https://...",
+  "passportUrl": "https://...",
+  "selfieUrl": "https://...",
+
+  "cancelChequeUrl": "https://...",
+  "bankStatementUrl": "https://...",
+  "passbookUrl": "https://..."
+}
+```
+
+---
+
+# 3 — Get Single KYC Submission Details
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/submission-details/:kycId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+# Example Response
+
+```json
+{
+  "success": true,
+  "kyc": {
+    "_id": "689d7f1ab23d9d0012ab3456",
+
+    "fullName": "Nithin",
+
+    "status": "under_review",
+
+    "aadharFrontUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/aadhar-front.jpg",
+
+    "panCardUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/pan-card.jpg",
+
+    "passportUrl": null,
+
+    "selfieUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/selfie.jpg",
+
+    "cancelChequeUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/cancel-cheque.pdf",
+
+    "bankStatementUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/bank-statement.pdf",
+
+    "passbookUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/passbook.jpg",
+
+    "userId": {
+      "_id": "689d7e7ab23d9d0012ab1111",
+      "name": "Nithin",
+      "mobile": "8328169339",
+      "email": "nithin@gmail.com"
+    },
+
+    "reviewedBy": null,
+
+    "rejectionReason": null,
+
+    "reviewedAt": null,
+
+    "createdAt": "2025-08-10T10:20:30.000Z"
+  }
+}
+```
+
+---
+
+# 4 — Approve KYC
+
+**Method:** `PATCH`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/approve-verification/:kycId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+# 5 — Reject KYC
+
+**Method:** `PATCH`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/reject-verification/:kycId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+### Body
+
+```json
+{
+  "reason": "Documents are unclear"
+}
+```
+
+---
+
+# New Backend Fields Added
+
+These are the exact field names added by backend:
+
+```js
+cancelChequeUrl
+bankStatementUrl
+passbookUrl
+```
+
+Frontend can directly use:
+
+```js
+kyc.cancelChequeUrl
+kyc.bankStatementUrl
+kyc.passbookUrl
+```
+
+These fields may be:
+
+```js
+null
+```
+
+if the user has not uploaded that document yet.
+
+---
+
+# Backend File Upload Support
+
+The following file types are supported for the new bank document fields:
+
+## Supported Upload Types
+
+* PDF
+* JPG
+* JPEG
+* PNG
+* WEBP
+
+## Fields
+
+```js
+cancelChequeUrl
+bankStatementUrl
+passbookUrl
+```
+
+---
+
+# Backend Changes Done
+
+Modified Files:
+
+```text
+models/Kyc.js
+controllers/adminKycController.js
+routes/adminKycRoutes.js
+server.js
+```
+
+---
+
+# Bank Document APIs for Frontend Integration
+
+## Base URL
+
+```bash
+https://shadily-hazard-widget.ngrok-free.dev
+```
+
+---
+
+# 1. Get KYC Submission Details
+
+## API
+
+```bash
+GET /api/admin/kyc/submission-details/:kycId
+```
+
+## Full URL Example
+
+```bash
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/submission-details/6895f7c123456789abcd1234
+```
+
+## Response Fields
+
+```json
+{
+  "success": true,
+  "kyc": {
+    "_id": "6895f7c123456789abcd1234",
+
+    "aadharFrontUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/aadhar.jpg",
+    "panCardUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/pan.jpg",
+    "passportUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/passport.jpg",
+    "selfieUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/selfie.jpg",
+
+    "cancelChequeUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/cancel-cheque.pdf",
+
+    "bankStatementUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/bank-statement.pdf",
+
+    "passbookUrl": "https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/passbook.jpg"
+  }
+}
+```
+
+---
+
+# 2. Frontend Field Names
+
+```js
+src.cancelChequeUrl
+src.bankStatementUrl
+src.passbookUrl
+```
+
+---
+
+# 3. Document Access
+
+All files are directly accessible from the same ngrok domain.
+
+Example:
+
+```bash
+https://shadily-hazard-widget.ngrok-free.dev/kyc-docs/passbook.jpg
+```
+
+Supports:
+
+* PDF
+* JPG
+* PNG
+* JPEG
+
+---
+
+# 4. Existing Auth Flow
+
+Admin JWT authentication remains unchanged.
+
+Frontend should continue sending:
+
+```bash
+Authorization: Bearer <token>
+```
+
+in request headers.

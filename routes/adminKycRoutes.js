@@ -1,9 +1,10 @@
-const express  = require("express");
-const router   = express.Router();
- 
-const auth      = require("../middleware/auth");       // your existing JWT middleware
-const adminAuth = require("../middleware/adminAuth");   // new admin guard
- 
+const express = require("express");
+const router = express.Router();
+
+const auth = require("../middleware/auth");
+const adminAuth = require("../middleware/adminAuth");
+const requireRole = require("../middleware/requireRole");
+
 const {
   getDashboardStats,
   getAllSubmissions,
@@ -16,113 +17,84 @@ const {
   searchUserKyc,
   deleteKycRecord,
   getAuditLog,
-  getAllKycIds
+  getAllKycIds,
 } = require("../controllers/adminKycController");
- 
-// ─────────────────────────────────────────────────────────────────────────────
-// ALL admin routes require:
-//   1. Valid JWT token (auth)
-//   2. User role === "admin" (adminAuth)
-// ─────────────────────────────────────────────────────────────────────────────
+
+// ── ALL ROUTES BELOW REQUIRE: valid JWT (auth) + admin role (adminAuth) ──────
 router.use(auth, adminAuth);
- 
-// ══════════════════════════════════════════════════════════════════════════════
-//  DASHBOARD
-// ══════════════════════════════════════════════════════════════════════════════
- 
-/**
- * GET /api/admin/kyc/dashboard-stats
- * Summary counts per status: pending, approved, rejected, total.
- * Use this to populate the admin dashboard cards.
- */
+
+// ── ALL ADMINS ────────────────────────────────────────────────────────────────
+// Dashboard stats and audit log are read-only summaries — visible to everyone
 router.get("/dashboard-stats", getDashboardStats);
- 
-// ══════════════════════════════════════════════════════════════════════════════
-//  LISTING & SEARCH
-// ══════════════════════════════════════════════════════════════════════════════
- 
-/**
- * GET /api/admin/kyc/all-submissions
- * All KYC records with optional filters.
- * Query params:
- *   ?status=under_review|approved|rejected|documents_uploaded
- *   ?page=1&limit=20
- */
-router.get("/all-submissions", getAllSubmissions);
- 
-/**
- * GET /api/admin/kyc/pending-reviews
- * Only "under_review" records, oldest first (FIFO queue for admins).
- */
-router.get("/pending-reviews", listPendingReviews);
- 
-/**
- * GET /api/admin/kyc/search-user?query=<mobile|email|name>
- * Search for a specific user's KYC by their mobile number, email, or name.
- */
-router.get("/search-user", searchUserKyc);
- 
-/**
- * GET /api/admin/kyc/submission-details/:kycId
- * Full KYC record with all document URLs, user info, and reviewer info.
- */
-router.get("/submission-details/:kycId", getSubmissionDetails);
- 
-// ══════════════════════════════════════════════════════════════════════════════
-//  SINGLE RECORD ACTIONS
-// ══════════════════════════════════════════════════════════════════════════════
- 
-/**
- * PATCH /api/admin/kyc/approve-verification/:kycId
- * Approves KYC → user sees Screen 5, wallet is activated.
- * No body required.
- */
-router.patch("/approve-verification/:kycId", approveVerification);
- 
-/**
- * PATCH /api/admin/kyc/reject-verification/:kycId
- * Rejects KYC → user sees Screen 6 with the reason.
- * Body: { "reason": "Aadhar details do not match PAN" }
- */
-router.patch("/reject-verification/:kycId", rejectVerification);
- 
-/**
- * DELETE /api/admin/kyc/delete-record/:kycId
- * Hard deletes a KYC record (only rejected records — approved ones are protected).
- * Use for data cleanup only.
- */
-router.delete("/delete-record/:kycId", deleteKycRecord);
- 
-// ══════════════════════════════════════════════════════════════════════════════
-//  BULK ACTIONS
-// ══════════════════════════════════════════════════════════════════════════════
- 
-/**
- * PATCH /api/admin/kyc/bulk-approve
- * Approve multiple KYC submissions in one call.
- * Body: { "kycIds": ["id1", "id2", "id3"] }
- */
-router.patch("/bulk-approve", bulkApprove);
- 
-/**
- * PATCH /api/admin/kyc/bulk-reject
- * Reject multiple KYC submissions with the same reason.
- * Body: { "kycIds": ["id1", "id2"], "reason": "Documents unclear" }
- */
-router.patch("/bulk-reject", bulkReject);
- 
-// ══════════════════════════════════════════════════════════════════════════════
-//  AUDIT LOG
-// ══════════════════════════════════════════════════════════════════════════════
- 
-/**
- * GET /api/admin/kyc/audit-log
- * All reviewed KYC records showing who approved/rejected them and when.
- * Query params: ?page=1&limit=20
- */
 router.get("/audit-log", getAuditLog);
-// Add route
-router.get("/debug-list-ids", getAllKycIds);
- 
+
+// ── SUPER ADMIN + KYC ADMIN + OPERATIONS ADMIN ───────────────────────────────
+// operations_admin needs all-submissions for the Wallets page and Analytics page
+// (both pages derive wallet/analytics data from KYC submissions)
+router.get(
+  "/all-submissions",
+  requireRole("super_admin", "kyc_admin", "operations_admin"),
+  getAllSubmissions
+);
+
+// ── SUPER ADMIN + KYC ADMIN ONLY ─────────────────────────────────────────────
+// Viewing and acting on individual KYC records is restricted to KYC team
+router.get(
+  "/pending-reviews",
+  requireRole("super_admin", "kyc_admin"),
+  listPendingReviews
+);
+
+router.get(
+  "/search-user",
+  requireRole("super_admin", "kyc_admin"),
+  searchUserKyc
+);
+
+router.get(
+  "/submission-details/:kycId",
+  requireRole("super_admin", "kyc_admin"),
+  getSubmissionDetails
+);
+
+// Approve / Reject — KYC team only
+router.patch(
+  "/approve-verification/:kycId",
+  requireRole("super_admin", "kyc_admin"),
+  approveVerification
+);
+
+router.patch(
+  "/reject-verification/:kycId",
+  requireRole("super_admin", "kyc_admin"),
+  rejectVerification
+);
+
+// Bulk actions — KYC team only
+router.patch(
+  "/bulk-approve",
+  requireRole("super_admin", "kyc_admin"),
+  bulkApprove
+);
+
+router.patch(
+  "/bulk-reject",
+  requireRole("super_admin", "kyc_admin"),
+  bulkReject
+);
+
+// ── SUPER ADMIN ONLY ─────────────────────────────────────────────────────────
+// Hard delete is destructive — super admin only
+router.delete(
+  "/delete-record/:kycId",
+  requireRole("super_admin"),
+  deleteKycRecord
+);
+
+router.get(
+  "/debug-list-ids",
+  requireRole("super_admin"),
+  getAllKycIds
+);
+
 module.exports = router;
- 

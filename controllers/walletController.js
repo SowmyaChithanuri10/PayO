@@ -9,40 +9,32 @@ const Recent = require("../models/Recents");
 const Bank = require("../models/Bank");
 const Notification = require("../models/Notification");
 const { sendNotification } = require("../utils/notify");
-
+ 
 // ================= get wallet =================
 exports.getWallet = async (req, res) => {  
- 
     const wallet = await Wallet.findOne({ userId: req.userId });
- 
     res.json(wallet);
- 
 };
+ 
 // ================= Send tokens =================
- 
- 
- 
 exports.transfer = async (req, res) => {
   let txn;
-
+ 
   try {
     const { amount, toAddress, pin } = req.body;
     const amt = Number(amount);
-
-    // 1. Basic validation
+ 
     if (!amt || amt <= 0 || !toAddress || !pin) {
       return res.status(400).json({ message: "Invalid input" });
     }
-
-    // 2. Get user + wallet
+ 
     const user = await User.findById(req.userId);
     const senderWallet = await Wallet.findOne({ userId: req.userId });
-
+ 
     if (!user || !senderWallet) {
       return res.status(404).json({ message: "User/Wallet not found" });
     }
-
-    // 3. Create PENDING transaction first
+ 
     txn = await Transaction.create({
       userId: req.userId,
       senderWallet: senderWallet.walletAddress,
@@ -50,158 +42,137 @@ exports.transfer = async (req, res) => {
       amount: amt,
       status: "pending"
     });
-
-    // 4. PIN check
+ 
     const isMatch = await bcrypt.compare(pin, user.transactionPin);
     if (!isMatch) {
       txn.status = "failed";
       txn.failureReason = "Invalid PIN";
       await txn.save();
       await sendNotification({
-  userId: req.userId,
-  title: "Transaction Failed",
-  message: "Invalid PIN",
-  type: "SECURITY"
-});
+        userId: req.userId,
+        title: "Transaction Failed",
+        message: "Invalid PIN",
+        type: "SECURITY"
+      });
       return res.status(401).json({
         message: "Invalid PIN",
         txnId: txn.transactionId
       });
     }
-
-    // 5. Receiver check
+ 
     const receiverWallet = await Wallet.findOne({ walletAddress: toAddress });
     if (!receiverWallet) {
       txn.status = "failed";
       txn.failureReason = "Receiver not found";
       await txn.save();
       await sendNotification({
-  userId: req.userId,
-  title: "Transaction Failed",
-  message: "Receiver not found",
-  type: "PAYMENT"
-});
+        userId: req.userId,
+        title: "Transaction Failed",
+        message: "Receiver not found",
+        type: "PAYMENT"
+      });
       return res.status(404).json({
         message: "Receiver not found",
         txnId: txn.transactionId
       });
     }
-
-    // 6. Self transfer check
+ 
     if (senderWallet.walletAddress === receiverWallet.walletAddress) {
       txn.status = "failed";
       txn.failureReason = "Cannot transfer to self";
       await txn.save();
-
       return res.status(400).json({
         message: "Cannot transfer to self",
         txnId: txn.transactionId
       });
     }
-// DAILY LIMIT CHECK
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
-const tomorrow = new Date(today);
-tomorrow.setDate(tomorrow.getDate() + 1);
-
-const todayTransactions = await Transaction.find({
-  userId: req.userId,
-  status: "success",
-  createdAt: {
-    $gte: today,
-    $lt: tomorrow
-  }
-});
-
-const totalSentToday = todayTransactions.reduce(
-  (sum, txn) => sum + txn.amount,
-  0
-);
-
-const dailyLimit = 10000;
-
-if (totalSentToday + amt > dailyLimit) {
-  txn.status = "failed";
-  txn.failureReason = "Daily limit exceeded";
-  await txn.save();
-
-  await sendNotification({
-    userId: req.userId,
-    title: "Transaction Failed",
-    message: "Daily transaction limit reached",
-    type: "PAYMENT"
-  });
-
-  return res.status(400).json({
-    message: "Daily transaction limit exceeded",
-    remainingLimit: dailyLimit - totalSentToday,
-    txnId: txn.transactionId
-  });
-}
-    // 7. Balance check
+ 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+ 
+    const todayTransactions = await Transaction.find({
+      userId: req.userId,
+      status: "success",
+      createdAt: { $gte: today, $lt: tomorrow }
+    });
+ 
+    const totalSentToday = todayTransactions.reduce(
+      (sum, txn) => sum + txn.amount, 0
+    );
+ 
+    const dailyLimit = 10000;
+ 
+    if (totalSentToday + amt > dailyLimit) {
+      txn.status = "failed";
+      txn.failureReason = "Daily limit exceeded";
+      await txn.save();
+      await sendNotification({
+        userId: req.userId,
+        title: "Transaction Failed",
+        message: "Daily transaction limit reached",
+        type: "PAYMENT"
+      });
+      return res.status(400).json({
+        message: "Daily transaction limit exceeded",
+        remainingLimit: dailyLimit - totalSentToday,
+        txnId: txn.transactionId
+      });
+    }
+ 
     if (senderWallet.balance < amt) {
       txn.status = "failed";
       txn.failureReason = "Insufficient balance";
       await txn.save();
       await sendNotification({
-  userId: req.userId,
-  title: "Transaction Failed",
-  message: "Insufficient balance",
-  type: "PAYMENT"
-});
+        userId: req.userId,
+        title: "Transaction Failed",
+        message: "Insufficient balance",
+        type: "PAYMENT"
+      });
       return res.status(400).json({
         message: "Insufficient balance",
         txnId: txn.transactionId
       });
     }
-
-    // 8. Perform transfer
+ 
     senderWallet.balance -= amt;
     receiverWallet.balance += amt;
-
     await senderWallet.save();
     await receiverWallet.save();
-
-    // 9. Mark success
+ 
     txn.receiverWallet = receiverWallet.walletAddress;
     txn.status = "success";
     await txn.save();
-
-// notification
-
-//  Sender notification
-await sendNotification({
-  userId: req.userId,
-  title: "Payment Sent",
-  message: `You sent ${amt} PAYO`,
-  type: "PAYMENT"
-});
-
-// Receiver notification
-await sendNotification({
-  userId: receiverWallet.userId,
-  title: "Payment Received",
-  message: `You received ${amt} PAYO`,
-  type: "PAYMENT"
-});
-    // 10. Response
+ 
+    await sendNotification({
+      userId: req.userId,
+      title: "Payment Sent",
+      message: `You sent ${amt} PAYO`,
+      type: "PAYMENT"
+    });
+ 
+    await sendNotification({
+      userId: receiverWallet.userId,
+      title: "Payment Received",
+      message: `You received ${amt} PAYO`,
+      type: "PAYMENT"
+    });
+ 
     return res.json({
       message: "Transfer successful",
       txnId: txn.transactionId,
       balance: senderWallet.balance
     });
-
+ 
   } catch (err) {
     console.error("TRANSFER ERROR:", err);
-
-    // 11. Handle unexpected error
     if (txn) {
       txn.status = "failed";
       txn.failureReason = "Server error";
       await txn.save();
     }
-
     return res.status(500).json({
       message: "Something went wrong",
       txnId: txn?.transactionId
@@ -209,20 +180,13 @@ await sendNotification({
   }
 };
  
- 
 // ================= to check balance =================
- 
-exports.getBalance=async (req, res) => {
- 
+exports.getBalance = async (req, res) => {
   const wallet = await Wallet.findOne({ userId: req.userId });
- 
   res.json({ balance: wallet.balance });
- 
 };
  
- 
 // ================= TRANSACTION HISTORY =================
-
 exports.getTransactions = async (req, res) => {
   try {
     const wallet = await Wallet.findOne({ userId: req.userId });
@@ -239,9 +203,7 @@ exports.getTransactions = async (req, res) => {
     }).sort({ createdAt: -1 });
  
     const addresses = [
-      ...new Set(
-        txs.flatMap(t => [t.senderWallet, t.receiverWallet])
-      )
+      ...new Set(txs.flatMap(t => [t.senderWallet, t.receiverWallet]))
     ];
  
     const wallets = await Wallet.find({
@@ -252,7 +214,6 @@ exports.getTransactions = async (req, res) => {
       _id: { $in: wallets.map(w => w.userId) }
     });
  
-   
     const walletMap = {};
     wallets.forEach(w => {
       const user = users.find(
@@ -263,18 +224,14 @@ exports.getTransactions = async (req, res) => {
  
     const formatted = txs.map(t => {
       const isSender = t.senderWallet === wallet.walletAddress;
- 
-      const otherAddress = isSender
-        ? t.receiverWallet
-        : t.senderWallet;
+      const otherAddress = isSender ? t.receiverWallet : t.senderWallet;
  
       return {
         id: t.transactionId,
         name: walletMap[otherAddress] || "Unknown",
         amount: isSender ? -t.amount : t.amount,
         type: isSender ? "sent" : "received",
-        status:
-          t.status === "pending" ? "processing" : t.status,
+        status: t.status === "pending" ? "processing" : t.status,
         createdAt: t.createdAt
       };
     });
@@ -287,62 +244,51 @@ exports.getTransactions = async (req, res) => {
   }
 };
  
-
- //===============transactions history of particular user==================
- 
-     
+// =============== transactions history of particular user ==================
 exports.transactionsById = async (req, res) => {
   try {
     const txn = await Transaction.findOne({
       transactionId: req.params.transaction_id
     });
-
+ 
     if (!txn) {
-      return res.status(404).json({
-        message: "Transaction not found"
-      });
+      return res.status(404).json({ message: "Transaction not found" });
     }
-
-    // get current user wallet
+ 
     const myWallet = await Wallet.findOne({ userId: req.userId });
-
+ 
     if (!myWallet) {
       return res.status(404).json({ message: "Wallet not found" });
     }
-
-    // find both users
+ 
     const senderWallet = await Wallet.findOne({
       walletAddress: txn.senderWallet
     });
-
+ 
     const receiverWallet = await Wallet.findOne({
       walletAddress: txn.receiverWallet
     });
-
+ 
     const senderUser = senderWallet
       ? await User.findById(senderWallet.userId)
       : null;
-
+ 
     const receiverUser = receiverWallet
       ? await User.findById(receiverWallet.userId)
       : null;
-
-   
+ 
     const isSender = txn.senderWallet === myWallet.walletAddress;
-
-
+ 
     let otherUser, otherWallet;
-
+ 
     if (isSender) {
-      // I sent → show receiver
       otherUser = receiverUser;
       otherWallet = txn.receiverWallet;
     } else {
-      // I received → show sender
       otherUser = senderUser;
       otherWallet = txn.senderWallet;
     }
-
+ 
     res.json({
       name: otherUser?.name || "Unknown",
       wallet: otherWallet,
@@ -351,28 +297,25 @@ exports.transactionsById = async (req, res) => {
       status: txn.status,
       id: txn.transactionId,
       timestamp: txn.createdAt
-
     });
-
+ 
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error" });
   }
 };
-
-//=======================transaction of user history (in person)=================
+ 
+// ===================== transaction of user history (in person) ===============
 exports.getTransactionsWithUser = async (req, res) => {
   try {
     const { walletAddress } = req.params;
-
-    // 1. My wallet
+ 
     const myWallet = await Wallet.findOne({ userId: req.userId });
-
+ 
     if (!myWallet) {
       return res.status(404).json({ message: "Wallet not found" });
     }
-
-    // 2. Get all transactions between both wallets
+ 
     const txs = await Transaction.find({
       $or: [
         {
@@ -385,18 +328,16 @@ exports.getTransactionsWithUser = async (req, res) => {
         }
       ]
     }).sort({ createdAt: -1 });
-
-    // 3. Get other user details
+ 
     const otherWallet = await Wallet.findOne({ walletAddress });
-
+ 
     const otherUser = otherWallet
       ? await User.findById(otherWallet.userId)
       : null;
-
-    // 4. Format response (frontend friendly)
+ 
     const formatted = txs.map(t => {
       const isSender = t.senderWallet === myWallet.walletAddress;
-
+ 
       return {
         id: t.transactionId,
         type: isSender ? "sent" : "received",
@@ -405,24 +346,24 @@ exports.getTransactionsWithUser = async (req, res) => {
         date: t.createdAt
       };
     });
-
+ 
     res.json({
       name: otherUser?.name || "Unknown",
       walletAddress,
       transactions: formatted
     });
-
+ 
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
-
-//======================transaction count ========================
+ 
+// ===================== transaction count ========================
 exports.transactionCount = async (req, res) => {
   try {
     const wallet = await Wallet.findOne({ userId: req.userId });
-
+ 
     const count = await Transaction.countDocuments({
       $or: [
         { userId: req.userId },
@@ -430,36 +371,25 @@ exports.transactionCount = async (req, res) => {
         { receiverWallet: wallet.walletAddress }
       ]
     });
-
+ 
     res.json({ count });
-
+ 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
-
- // ================= generate qr address =================
  
- 
- 
- exports.generateAddress = async (req, res) => {
+// ================= generate qr address =================
+exports.generateAddress = async (req, res) => {
   try {
     let wallet = await Wallet.findOne({ userId: req.userId });
  
-    // create wallet if not exists
     if (!wallet) {
-     const walletAddress = generateWalletAddress();
- 
-      wallet = new Wallet({
-        userId: req.userId,
-        walletAddress,
-      });
- 
+      const walletAddress = generateWalletAddress();
+      wallet = new Wallet({ userId: req.userId, walletAddress });
       await wallet.save();
     }
  
-    // ensure address exists
     if (!wallet.walletAddress) {
       wallet.walletAddress = generateWalletAddress();
       await wallet.save();
@@ -467,13 +397,10 @@ exports.transactionCount = async (req, res) => {
  
     let qrToken = wallet.qrToken;
  
-    //  generate new QR if expired
     if (!wallet.qrToken || wallet.qrExpiry <= Date.now()) {
       qrToken = uuidv4();
- 
       wallet.qrToken = qrToken;
       wallet.qrExpiry = Date.now() + 15 * 60 * 1000;
- 
       await wallet.save();
     }
  
@@ -484,16 +411,15 @@ exports.transactionCount = async (req, res) => {
       address: wallet.walletAddress,
       expiresIn: Math.floor((wallet.qrExpiry - Date.now()) / 1000),
     });
+ 
   } catch (err) {
     console.log("QR ERROR:", err);
     res.status(500).json({ message: "Error generating QR" });
   }
 };
  
- 
 // ================= validating qr image(scanning qrtoken) =========================
- 
- exports.scan=async (req, res) => {
+exports.scan = async (req, res) => {
   try {
     const { qrData } = req.body;
  
@@ -509,12 +435,10 @@ exports.transactionCount = async (req, res) => {
       return res.status(404).json({ message: "Invalid QR" });
     }
  
-    // Expiry check
-   if (!wallet.qrExpiry || wallet.qrExpiry <= Date.now()) {
-  return res.status(400).json({ message: "QR expired" });
-}
+    if (!wallet.qrExpiry || wallet.qrExpiry <= Date.now()) {
+      return res.status(400).json({ message: "QR expired" });
+    }
  
-    //  Prevent self scan
     if (wallet.userId.toString() === req.userId) {
       return res.status(400).json({
         message: "You cannot scan your own QR",
@@ -534,10 +458,8 @@ exports.transactionCount = async (req, res) => {
   }
 };
  
- 
 // ================= get user by address =================
- 
- exports.getUserByAddress = async (req, res) => {
+exports.getUserByAddress = async (req, res) => {
   try {
     const { address } = req.params;
  
@@ -559,11 +481,10 @@ exports.transactionCount = async (req, res) => {
   }
 };
  
- //==========================preview transfer(screen 1)==========================
+// ========================== preview transfer(screen 1) ==========================
 exports.previewTransfer = async (req, res) => {
   try {
     const { toAddress, amount } = req.body;
-    
     const amt = Number(amount);
  
     if (!toAddress || !amt || amt <= 0) {
@@ -573,9 +494,9 @@ exports.previewTransfer = async (req, res) => {
     const senderWallet = await Wallet.findOne({ userId: req.userId });
     const receiverWallet = await Wallet.findOne({ walletAddress: toAddress });
     const existing = await Recent.findOne({
-  userId: req.userId,
-  walletAddress: toAddress
-});
+      userId: req.userId,
+      walletAddress: toAddress
+    });
  
     if (!receiverWallet) {
       return res.status(404).json({ message: "Receiver not found" });
@@ -592,16 +513,15 @@ exports.previewTransfer = async (req, res) => {
     const receiverUser = await User.findById(receiverWallet.userId);
     const senderUser = await User.findById(senderWallet.userId);
  
-    // RESPONSE MATCHES FRONTEND
     res.json({
       sender: {
         name: senderUser.name,
-        wallet: senderWallet.walletAddress   // match frontend
+        wallet: senderWallet.walletAddress
       },
       receiver: {
         name: receiverUser.name
       },
-      address: receiverWallet.walletAddress, // required
+      address: receiverWallet.walletAddress,
       amount: amt,
       isRecent: !!existing
     });
@@ -611,12 +531,10 @@ exports.previewTransfer = async (req, res) => {
   }
 };
  
-//=========================confirm and transfer (Screen 2)======================
- 
+// ========================= confirm and transfer (Screen 2) ======================
 exports.confirmTransfer = async (req, res) => {
   try {
     const { toAddress, amount, pin } = req.body;
- 
     const amt = Number(amount);
  
     if (!toAddress || !amt || !pin) {
@@ -625,7 +543,6 @@ exports.confirmTransfer = async (req, res) => {
  
     const user = await User.findById(req.userId);
  
-    // PIN CHECK
     const isMatch = await bcrypt.compare(pin, user.transactionPin);
  
     if (!isMatch) {
@@ -642,47 +559,40 @@ exports.confirmTransfer = async (req, res) => {
     if (senderWallet.walletAddress === receiverWallet.walletAddress) {
       return res.status(400).json({ message: "Self transfer not allowed" });
     }
- // DAILY LIMIT CHECK
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
-const tomorrow = new Date(today);
-tomorrow.setDate(tomorrow.getDate() + 1);
-
-const todayTransactions = await Transaction.find({
-  senderWallet: senderWallet.walletAddress,
-  status: "success",
-  createdAt: {
-    $gte: today,
-    $lt: tomorrow
-  }
-});
-
-const totalSentToday = todayTransactions.reduce(
-  (sum, txn) => sum + txn.amount,
-  0
-);
-
-const dailyLimit = 10000;
-
-if (totalSentToday + amt > dailyLimit) {
-  return res.status(400).json({
-    message: "Daily transaction limit exceeded",
-    remainingLimit: dailyLimit - totalSentToday
-  });
-}
+ 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+ 
+    const todayTransactions = await Transaction.find({
+      senderWallet: senderWallet.walletAddress,
+      status: "success",
+      createdAt: { $gte: today, $lt: tomorrow }
+    });
+ 
+    const totalSentToday = todayTransactions.reduce(
+      (sum, txn) => sum + txn.amount, 0
+    );
+ 
+    const dailyLimit = 10000;
+ 
+    if (totalSentToday + amt > dailyLimit) {
+      return res.status(400).json({
+        message: "Daily transaction limit exceeded",
+        remainingLimit: dailyLimit - totalSentToday
+      });
+    }
+ 
     if (senderWallet.balance < amt) {
       return res.status(400).json({ message: "Insufficient balance" });
     }
  
-    //  TRANSFER
     senderWallet.balance -= amt;
     receiverWallet.balance += amt;
- 
     await senderWallet.save();
     await receiverWallet.save();
  
-    //  TRANSACTION
     await Transaction.create({
       from: senderWallet.walletAddress,
       to: receiverWallet.walletAddress,
@@ -704,26 +614,22 @@ if (totalSentToday + amt > dailyLimit) {
 };
  
 // ================= REFER & EARN =================
- 
 exports.getReferData = async (req, res) => {
   try {
     const rewardPerUser = 50;
  
-    // 1. Get current user
     const user = await User.findById(req.userId);
  
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
  
-    // 2. Get all referred users
     const referredUsers = await User.find({
       referredBy: user.myReferralCode
     });
  
     let successfulReferrals = 0;
  
-    // 3. Check each user first transaction
     for (let refUser of referredUsers) {
       const wallet = await Wallet.findOne({ userId: refUser._id });
  
@@ -739,7 +645,6 @@ exports.getReferData = async (req, res) => {
       }
     }
  
-    // 4. Response
     res.json({
       referralCode: user.myReferralCode,
       totalUsers: referredUsers.length,
@@ -754,26 +659,22 @@ exports.getReferData = async (req, res) => {
   }
 };
  
- 
-//==============================save to recents(toggle button code)=========================
- 
- 
+// ============================== save to recents ==============================
 exports.saveRecent = async (req, res) => {
   try {
     const { receiverName, walletAddress } = req.body;
  
-    //  check duplicate
     const existing = await Recent.findOne({
       userId: req.userId,
       walletAddress,
     });
  
-  if (existing) {
-  return res.status(200).json({
-    message: "Already saved",
-    isRecent: true   // already exists
-  });
-}
+    if (existing) {
+      return res.status(200).json({
+        message: "Already saved",
+        isRecent: true
+      });
+    }
  
     const recent = new Recent({
       userId: req.userId,
@@ -784,48 +685,49 @@ exports.saveRecent = async (req, res) => {
     await recent.save();
  
     res.status(201).json({
-  message: "Saved to recents",
-  isRecent: true   
-});
+      message: "Saved to recents",
+      isRecent: true
+    });
  
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
- //==============================check recent (for toggle)=========================
+ 
+// ============================== check recent (for toggle) ==============================
 exports.checkRecent = async (req, res) => {
   try {
     const { walletAddress } = req.params;
-
+ 
     const existing = await Recent.findOne({
       userId: req.userId,
       walletAddress
     });
-
+ 
     res.json({
-      isRecent: !!existing   // true or false
+      isRecent: !!existing
     });
-
+ 
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
-//=================== recents page================
  
+// =================== recents page ================
 exports.getRecents = async (req, res) => {
   try {
     const recents = await Recent.find({ userId: req.userId })
-      .sort({ createdAt: -1 }) // latest first
-      .limit(20); // optional limit
+      .sort({ createdAt: -1 })
+      .limit(20);
  
     res.json(recents);
   } catch (err) {
     res.status(500).json({ message: "Error fetching recents" });
   }
 };
-//==============================get wallet dashboard=========================
  
-exports.walletDashboard=async (req, res) => {
+// ============================== get wallet dashboard ==============================
+exports.walletDashboard = async (req, res) => {
   try {
     const wallet = await Wallet.findOne({ userId: req.userId });
     if (!wallet) {
@@ -834,15 +736,12 @@ exports.walletDashboard=async (req, res) => {
  
     const user = await User.findById(req.userId);
  
-    // REFERRALS (optimized)
     const referredUsers = await User.find({
       referredBy: user.myReferralCode
     });
  
     const referredUserIds = referredUsers.map(u => u._id);
- 
     const wallets = await Wallet.find({ userId: { $in: referredUserIds } });
- 
     const walletAddresses = wallets.map(w => w.walletAddress);
  
     const successfulTxns = await Transaction.find({
@@ -850,31 +749,19 @@ exports.walletDashboard=async (req, res) => {
       status: "success"
     });
  
-    const uniqueSenders = new Set(
-      successfulTxns.map(t => t.senderWallet)
-    );
- 
+    const uniqueSenders = new Set(successfulTxns.map(t => t.senderWallet));
     const successfulReferrals = uniqueSenders.size;
  
     const rewardPerUser = 50;
     const totalReferralRewards = successfulReferrals * rewardPerUser;
  
-    // LOCK LOGIC
-    const accountAge =
-      Date.now() - new Date(user.createdAt).getTime();
- 
-    const daysSinceSignup =
-      accountAge / (1000 * 60 * 60 * 24);
- 
+    const accountAge = Date.now() - new Date(user.createdAt).getTime();
+    const daysSinceSignup = accountAge / (1000 * 60 * 60 * 24);
     const isLocked = daysSinceSignup < 3;
-    const daysUntilUnlock = isLocked
-      ? Math.ceil(3 - daysSinceSignup)
-      : 0;
+    const daysUntilUnlock = isLocked ? Math.ceil(3 - daysSinceSignup) : 0;
  
-    // DAILY LIMIT
     const today = new Date();
     today.setHours(0, 0, 0, 0);
- 
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
  
@@ -885,29 +772,26 @@ exports.walletDashboard=async (req, res) => {
     });
  
     const totalSentToday = todayTransactions.reduce(
-      (sum, txn) => sum + txn.amount,
-      0
+      (sum, txn) => sum + txn.amount, 0
     );
  
     const dailyLimit = 10000;
-    if (totalSentToday >= dailyLimit) {
-  await sendNotification({
-    userId: req.userId,
-    title: "Limit Reached",
-    message: "You reached your daily limit",
-    type: "SYSTEM"
-  });
-}
  
-    // FINAL RESPONSE 
+    if (totalSentToday >= dailyLimit) {
+      await sendNotification({
+        userId: req.userId,
+        title: "Limit Reached",
+        message: "You reached your daily limit",
+        type: "SYSTEM"
+      });
+    }
+ 
     res.json({
       id: wallet.walletAddress,
-      balance: wallet.balance,  
- 
+      balance: wallet.balance,
       referralRewards: totalReferralRewards,
       referralStatus: isLocked ? "Locked" : "Unlocked",
       unlockInDays: daysUntilUnlock,
- 
       dailyUsed: totalSentToday,
       dailyLimit: dailyLimit
     });
@@ -917,20 +801,16 @@ exports.walletDashboard=async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-   
-
-
-
+ 
 // ================= INCOME & OUTCOME =================
 exports.getIncomeOutcome = async (req, res) => {
   try {
     const wallet = await Wallet.findOne({ userId: req.userId });
-
+ 
     if (!wallet) {
       return res.status(404).json({ message: "Wallet not found" });
     }
-
-    // Get all SUCCESS transactions of this user
+ 
     const transactions = await Transaction.find({
       status: "success",
       $or: [
@@ -938,48 +818,45 @@ exports.getIncomeOutcome = async (req, res) => {
         { receiverWallet: wallet.walletAddress }
       ]
     });
-
+ 
     let income = 0;
     let outcome = 0;
-
+ 
     transactions.forEach(txn => {
       if (txn.receiverWallet === wallet.walletAddress) {
-        income += txn.amount;   // money received
+        income += txn.amount;
       } else if (txn.senderWallet === wallet.walletAddress) {
-        outcome += txn.amount;  // money sent
+        outcome += txn.amount;
       }
     });
-
-    res.json({
-      income,
-      outcome
-    });
-
+ 
+    res.json({ income, outcome });
+ 
   } catch (err) {
     console.error("Income/Outcome error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
-//======================profile api=====================
-
+ 
+// ===================== profile api =====================
 exports.profile = async (req, res) => {
   try {
-    // 1. Get user
+    // 1. Get user — ✅ added createdAt
     const user = await User.findById(req.userId).select(
-      "name email mobile myReferralCode walletId"
+      "name email mobile myReferralCode walletId createdAt"
     );
-
+ 
     if (!user) {
       return res.status(404).json({
         message: "User not found"
       });
     }
-
+ 
     // 2. Get wallet
     const wallet = await Wallet.findById(user.walletId).select(
       "walletAddress balance"
     );
-
+ 
     // 3. Transaction count
     const txnCount = await Transaction.countDocuments({
       $or: [
@@ -987,24 +864,25 @@ exports.profile = async (req, res) => {
         { receiverWallet: wallet?.walletAddress }
       ]
     });
-
-    // 4. Final response (ONLY required fields)
+ 
+    // 4. Final response — ✅ added createdAt
     res.status(200).json({
       message: "Profile fetched",
       data: {
-        name: user.name,
-        mobile: user.mobile,
-        email: user.email,
-        referralCode: user.myReferralCode,
-
-        walletId: user.walletId,
+        name:          user.name,
+        mobile:        user.mobile,
+        email:         user.email,
+        referralCode:  user.myReferralCode,
+        createdAt:     user.createdAt,       // ← Registration date added
+ 
+        walletId:      user.walletId,
         walletAddress: wallet?.walletAddress,
-        balance: wallet?.balance,
-
+        balance:       wallet?.balance,
+ 
         transactionCount: txnCount
       }
     });
-
+ 
   } catch (err) {
     console.error("Profile error:", err);
     res.status(500).json({
@@ -1012,3 +890,4 @@ exports.profile = async (req, res) => {
     });
   }
 };
+ 

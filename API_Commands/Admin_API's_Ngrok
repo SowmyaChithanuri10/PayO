@@ -1,0 +1,501 @@
+# PayO Admin APIs (Updated ngrok URLs)
+
+## Base URL
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev
+```
+
+---
+
+# Frontend Base URL Setup
+
+```js
+const API_BASE = "https://shadily-hazard-widget.ngrok-free.dev";
+```
+
+---
+
+# Admin Authentication APIs
+
+## 1 — Admin Login
+
+**Method:** `POST`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/auth/login
+```
+
+### Request Body
+
+```json
+{
+  "email": "admin@example.com",
+  "password": "password123"
+}
+```
+
+or
+
+```json
+{
+  "mobile": "9876543210",
+  "password": "password123"
+}
+```
+
+---
+
+## 2 — Create Sub Admin
+
+**Method:** `POST`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/auth/create-admin
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+### Body
+
+```json
+{
+  "name": "Operations Admin",
+  "mobile": "9876543210",
+  "email": "ops@payo.com",
+  "password": "Password123",
+  "adminRole": "operations_admin"
+}
+```
+
+### Allowed Admin Roles
+
+```js
+kyc_admin
+operations_admin
+support_admin
+```
+
+---
+
+## 3 — Get All Admins
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/auth/all-admins
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 4 — Update Admin Role
+
+**Method:** `PATCH`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/auth/update-admin-role/:userId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+### Body
+
+```json
+{
+  "adminRole": "support_admin"
+}
+```
+
+---
+
+## 5 — Revoke Admin Access
+
+**Method:** `PATCH`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/auth/revoke-admin/:userId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 6 — Change Admin Password
+
+**Method:** `PATCH`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/auth/change-password
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+### Body
+
+```json
+{
+  "currentPassword": "oldPassword",
+  "newPassword": "newPassword123"
+}
+```
+
+---
+
+# User Management APIs
+
+## 7 — Get All Users
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/auth/users
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+### Response Includes
+
+```json
+{
+  "success": true,
+  "total": 100,
+  "verified": 80,
+  "pending": 20,
+  "users": [
+    {
+      "_id": "user_id",
+      "name": "Nithin",
+      "email": "nithin@gmail.com",
+      "mobile": "8328169339",
+      "kycVerified": true,
+      "role": "user",
+      "bankDetails": {}
+    }
+  ]
+}
+```
+
+---
+
+## 8 — Get User Bank Details
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/auth/user-bank-details/:userId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+# KYC Management APIs
+
+## 9 — Dashboard Statistics
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/dashboard-stats
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 10 — Audit Log
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/audit-log
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 11 — Get All KYC Submissions
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/all-submissions
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 12 — Get Pending Reviews
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/pending-reviews
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 13 — Search User KYC
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/search-user
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+### Query Example
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/search-user?mobile=8328169339
+```
+
+---
+
+## 14 — Get KYC Submission Details
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/submission-details/:kycId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 15 — Approve Verification
+
+**Method:** `PATCH`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/approve-verification/:kycId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 16 — Reject Verification
+
+**Method:** `PATCH`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/reject-verification/:kycId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+### Body
+
+```json
+{
+  "reason": "Documents are unclear"
+}
+```
+
+---
+
+## 17 — Bulk Approve KYC
+
+**Method:** `PATCH`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/bulk-approve
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 18 — Bulk Reject KYC
+
+**Method:** `PATCH`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/bulk-reject
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 19 — Delete KYC Record
+
+**Method:** `DELETE`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/delete-record/:kycId
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+## 20 — Debug KYC IDs
+
+**Method:** `GET`
+
+```text
+https://shadily-hazard-widget.ngrok-free.dev/api/admin/kyc/debug-list-ids
+```
+
+### Headers
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+---
+
+# Admin Roles Implemented
+
+```js
+super_admin
+kyc_admin
+operations_admin
+support_admin
+```
+
+---
+
+# Role Permissions Matrix
+
+| API                | Super Admin | KYC Admin | Operations Admin | Support Admin |
+| ------------------ | ----------- | --------- | ---------------- | ------------- |
+| Login              | ✅           | ✅         | ✅                | ✅             |
+| Create Admin       | ✅           | ❌         | ❌                | ❌             |
+| View Admins        | ✅           | ❌         | ❌                | ❌             |
+| Update Admin Role  | ✅           | ❌         | ❌                | ❌             |
+| Revoke Admin       | ✅           | ❌         | ❌                | ❌             |
+| Dashboard Stats    | ✅           | ✅         | ✅                | ✅             |
+| Audit Log          | ✅           | ✅         | ✅                | ✅             |
+| All Submissions    | ✅           | ✅         | ✅                | ❌             |
+| Pending Reviews    | ✅           | ✅         | ❌                | ❌             |
+| Search User KYC    | ✅           | ✅         | ❌                | ❌             |
+| Submission Details | ✅           | ✅         | ❌                | ❌             |
+| Approve KYC        | ✅           | ✅         | ❌                | ❌             |
+| Reject KYC         | ✅           | ✅         | ❌                | ❌             |
+| Bulk Approve       | ✅           | ✅         | ❌                | ❌             |
+| Bulk Reject        | ✅           | ✅         | ❌                | ❌             |
+| Users List         | ✅           | ❌         | ✅                | ✅             |
+| User Bank Details  | ✅           | ❌         | ❌                | ✅             |
+| Change Password    | ✅           | ✅         | ✅                | ✅             |
+| Delete KYC Record  | ✅           | ❌         | ❌                | ❌             |
+| Debug List IDs     | ✅           | ❌         | ❌                | ❌             |
+
+---
+
+# Authentication
+
+All protected APIs require:
+
+```text
+Authorization: Bearer <admin_token>
+```
+
+The token is returned from:
+
+```text
+POST /api/admin/auth/login
+```
+
+and contains:
+
+```json
+{
+  "id": "user_id",
+  "role": "admin",
+  "adminRole": "kyc_admin"
+}
+```
+
+or
+
+```json
+{
+  "id": "super_admin",
+  "role": "admin",
+  "superAdmin": true,
+  "adminRole": "super_admin"
+}
+```

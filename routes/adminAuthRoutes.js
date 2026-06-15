@@ -3,6 +3,7 @@ const router = express.Router();
 
 const auth = require("../middleware/auth");
 const adminAuth = require("../middleware/adminAuth");
+const requireRole = require("../middleware/requireRole");
 
 const {
   adminLogin,
@@ -10,27 +11,59 @@ const {
   getAllAdmins,
   revokeAdminAccess,
   changeAdminPassword,
-  getAllUsers, // ADD THIS
+  getAllUsers,
   getUserBankDetails,
+  updateAdminRole,
 } = require("../controllers/adminAuthController");
 
-// Public route
+// ── PUBLIC ───────────────────────────────────────────────────────────────────
 router.post("/login", adminLogin);
 
-// Protected routes
+// ── ALL ROUTES BELOW REQUIRE: valid JWT (auth) + admin role (adminAuth) ──────
 router.use(auth, adminAuth);
 
-router.post("/create-admin", createSubAdmin);
+// ── SUPER ADMIN ONLY ─────────────────────────────────────────────────────────
+// Only super_admin can create, list, or revoke other admins
+router.post(
+  "/create-admin",
+  requireRole("super_admin"),
+  createSubAdmin
+);
 
-router.get("/all-admins", getAllAdmins);
+router.get(
+  "/all-admins",
+  requireRole("super_admin"),
+  getAllAdmins
+);
 
-// ADD THIS ROUTE
-router.get("/users", getAllUsers);
+router.patch(
+  "/revoke-admin/:userId",
+  requireRole("super_admin"),
+  revokeAdminAccess
+);
 
-router.get("/user-bank-details/:userId", getUserBankDetails);
+router.patch(
+  "/update-admin-role/:userId",
+  requireRole("super_admin"),
+  updateAdminRole
+);
 
-router.patch("/revoke-admin/:userId", revokeAdminAccess);
+// ── SUPER ADMIN + OPERATIONS ADMIN + SUPPORT ADMIN ───────────────────────────
+// KYC admin has no reason to manage users — their job is document review only
+router.get(
+  "/users",
+  requireRole("super_admin", "operations_admin", "support_admin"),
+  getAllUsers
+);
 
+router.get(
+  "/user-bank-details/:userId",
+  requireRole("super_admin", "support_admin"),
+  getUserBankDetails
+);
+
+// ── ALL ADMINS ────────────────────────────────────────────────────────────────
+// Any logged-in admin can change their own password
 router.patch("/change-password", changeAdminPassword);
 
 module.exports = router;
