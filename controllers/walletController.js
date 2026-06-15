@@ -841,8 +841,10 @@ exports.getIncomeOutcome = async (req, res) => {
 // ===================== profile api =====================
 exports.profile = async (req, res) => {
   try {
-    // 1. Get user — ✅ added createdAt
-    const user = await User.findById(req.userId).select(
+    // 1. Get target user (Uses query param if admin is looking up a user, otherwise falls back to logged-in user)
+    const targetUserId = req.query.userId || req.userId;
+ 
+    const user = await User.findById(targetUserId).select(
       "name email mobile myReferralCode walletId createdAt"
     );
  
@@ -852,20 +854,20 @@ exports.profile = async (req, res) => {
       });
     }
  
-    // 2. Get wallet
-    const wallet = await Wallet.findById(user.walletId).select(
+    // 2. Get wallet — searched by userId to remain reliable even if walletId string is missing/mismatched
+    const wallet = await Wallet.findOne({ userId: targetUserId }).select(
       "walletAddress balance"
     );
  
-    // 3. Transaction count
+    // 3. Transaction count — safely handles missing wallets
     const txnCount = await Transaction.countDocuments({
       $or: [
-        { senderWallet: wallet?.walletAddress },
-        { receiverWallet: wallet?.walletAddress }
+        { senderWallet: wallet?.walletAddress || "NOT_FOUND" },
+        { receiverWallet: wallet?.walletAddress || "NOT_FOUND" }
       ]
     });
  
-    // 4. Final response — ✅ added createdAt
+    // 4. Final response
     res.status(200).json({
       message: "Profile fetched",
       data: {
@@ -873,7 +875,7 @@ exports.profile = async (req, res) => {
         mobile:        user.mobile,
         email:         user.email,
         referralCode:  user.myReferralCode,
-        createdAt:     user.createdAt,       // ← Registration date added
+        createdAt:     user.createdAt,
  
         walletId:      user.walletId,
         walletAddress: wallet?.walletAddress,
@@ -890,4 +892,3 @@ exports.profile = async (req, res) => {
     });
   }
 };
- 
