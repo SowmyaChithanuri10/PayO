@@ -1,45 +1,39 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-
+ 
 const User = require("../models/User");
 const BankDetails = require("../models/Bank");
-
+ 
 // Valid adminRole values for sub-admins (super_admin is env-var only, never stored via API)
 const VALID_ADMIN_ROLES = [
   "kyc_admin",
   "operations_admin",
   "support_admin",
 ];
-
+ 
 // ════════════════════════════════════════════════════════════════════════════
 // ADMIN LOGIN
 // POST /api/admin/auth/login
-//
-// CHANGES:
-//   • Super admin JWT now includes adminRole: "super_admin"
-//   • Super admin response now includes adminRole: "super_admin"
-//   • Sub-admin JWT now includes adminRole: user.adminRole
-//   • Sub-admin response now includes adminRole: user.adminRole
 // ════════════════════════════════════════════════════════════════════════════
-
+ 
 const adminLogin = async (req, res) => {
   try {
     const { mobile, email, password } = req.body;
-
+ 
     if (!password || (!mobile && !email)) {
       return res.status(400).json({
         success: false,
         message: "Password and mobile or email are required",
       });
     }
-
+ 
     // ── SUPER ADMIN LOGIN ────────────────────────────────────────────────────
     if (
       email === process.env.ADMIN_EMAIL &&
       password === process.env.ADMIN_PASSWORD
     ) {
       console.log("✅ Super admin login successful");
-
+ 
       const token = jwt.sign(
         {
           id: "super_admin",
@@ -51,7 +45,7 @@ const adminLogin = async (req, res) => {
         process.env.JWT_SECRET || "mysecretkey",
         { expiresIn: "12h" }
       );
-
+ 
       return res.status(200).json({
         success: true,
         message: "Super admin login successful",
@@ -64,17 +58,17 @@ const adminLogin = async (req, res) => {
         },
       });
     }
-
+ 
     // ── FIND USER ────────────────────────────────────────────────────────────
     const user = await User.findOne(mobile ? { mobile } : { email });
-
+ 
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "No account found with these credentials",
       });
     }
-
+ 
     // ── CHECK ADMIN ROLE ─────────────────────────────────────────────────────
     if (user.role !== "admin") {
       return res.status(403).json({
@@ -82,17 +76,17 @@ const adminLogin = async (req, res) => {
         message: "Access denied. This account does not have admin privileges.",
       });
     }
-
+ 
     // ── CHECK PASSWORD ───────────────────────────────────────────────────────
     const isMatch = await bcrypt.compare(password, user.password);
-
+ 
     if (!isMatch) {
       return res.status(401).json({
         success: false,
         message: "Incorrect password",
       });
     }
-
+ 
     // ── GENERATE TOKEN ───────────────────────────────────────────────────────
     const token = jwt.sign(
       {
@@ -103,7 +97,7 @@ const adminLogin = async (req, res) => {
       process.env.JWT_SECRET || "mysecretkey",
       { expiresIn: "12h" }
     );
-
+ 
     return res.status(200).json({
       success: true,
       message: "Admin login successful",
@@ -125,30 +119,24 @@ const adminLogin = async (req, res) => {
     });
   }
 };
-
+ 
 // ════════════════════════════════════════════════════════════════════════════
 // CREATE SUB ADMIN
 // POST /api/admin/auth/create-admin
-// Protected: requireRole("super_admin") in routes
-//
-// CHANGES:
-//   • Accepts adminRole in request body
-//   • Validates adminRole against allowed values
-//   • Saves adminRole to User document
-//   • Returns adminRole in response
+// Protected: requireRole("super_admin")
 // ════════════════════════════════════════════════════════════════════════════
-
+ 
 const createSubAdmin = async (req, res) => {
   try {
     const { name, mobile, email, password, adminRole } = req.body;
-
+ 
     if (!name || !mobile || !email || !password) {
       return res.status(400).json({
         success: false,
         message: "name, mobile, email, and password are all required",
       });
     }
-
+ 
     // ── VALIDATE adminRole ───────────────────────────────────────────────────
     if (!adminRole) {
       return res.status(400).json({
@@ -156,26 +144,26 @@ const createSubAdmin = async (req, res) => {
         message: `adminRole is required. Must be one of: ${VALID_ADMIN_ROLES.join(", ")}`,
       });
     }
-
+ 
     if (!VALID_ADMIN_ROLES.includes(adminRole)) {
       return res.status(400).json({
         success: false,
         message: `Invalid adminRole "${adminRole}". Must be one of: ${VALID_ADMIN_ROLES.join(", ")}`,
       });
     }
-
+ 
     // ── CHECK EXISTING USER ──────────────────────────────────────────────────
     const existing = await User.findOne({
       $or: [{ mobile }, { email }],
     });
-
+ 
     if (existing) {
       return res.status(409).json({
         success: false,
         message: "An account with this mobile or email already exists",
       });
     }
-
+ 
     // ── PASSWORD CHECK ───────────────────────────────────────────────────────
     if (password.length < 8) {
       return res.status(400).json({
@@ -183,9 +171,9 @@ const createSubAdmin = async (req, res) => {
         message: "Password must be at least 8 characters",
       });
     }
-
+ 
     const hashedPassword = await bcrypt.hash(password, 10);
-
+ 
     const newAdmin = await User.create({
       name,
       mobile,
@@ -194,7 +182,7 @@ const createSubAdmin = async (req, res) => {
       role: "admin",
       adminRole,
     });
-
+ 
     return res.status(201).json({
       success: true,
       message: "New admin account created successfully",
@@ -215,22 +203,19 @@ const createSubAdmin = async (req, res) => {
     });
   }
 };
-
+ 
 // ════════════════════════════════════════════════════════════════════════════
 // GET ALL ADMINS
 // GET /api/admin/auth/all-admins
-// Protected: requireRole("super_admin") in routes
-//
-// CHANGES:
-//   • Added adminRole to .select()
+// Protected: requireRole("super_admin")
 // ════════════════════════════════════════════════════════════════════════════
-
+ 
 const getAllAdmins = async (req, res) => {
   try {
     const admins = await User.find({ role: "admin" })
       .select("_id name email mobile createdAt role adminRole")
       .sort({ createdAt: -1 });
-
+ 
     return res.status(200).json({
       success: true,
       count: admins.length,
@@ -244,19 +229,143 @@ const getAllAdmins = async (req, res) => {
     });
   }
 };
-
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// REVOKE ADMIN ACCESS (DELETE)
+// PATCH /api/admin/auth/revoke-admin/:userId
+// Protected: requireRole("super_admin")
+// ════════════════════════════════════════════════════════════════════════════
+ 
+const revokeAdminAccess = async (req, res) => {
+  try {
+    const { userId } = req.params;
+ 
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+ 
+    if (user.role !== "admin") {
+      return res.status(400).json({ success: false, message: "This user is not an admin" });
+    }
+ 
+    await User.findByIdAndDelete(userId);
+ 
+    return res.status(200).json({
+      success: true,
+      message: `Admin account for ${user.name} has been deleted`,
+    });
+  } catch (err) {
+    console.error("revokeAdminAccess error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// CHANGE ADMIN PASSWORD
+// PATCH /api/admin/auth/change-password
+// Protected: all admins
+// ════════════════════════════════════════════════════════════════════════════
+ 
+const changeAdminPassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+ 
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "currentPassword and newPassword are required",
+      });
+    }
+ 
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters",
+      });
+    }
+ 
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+ 
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: "Current password is incorrect" });
+    }
+ 
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+ 
+    return res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (err) {
+    console.error("changeAdminPassword error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+ 
+// ════════════════════════════════════════════════════════════════════════════
+// UPDATE ADMIN ROLE
+// PATCH /api/admin/auth/update-admin-role/:userId
+// Protected: requireRole("super_admin")
+// ════════════════════════════════════════════════════════════════════════════
+ 
+const updateAdminRole = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { adminRole } = req.body;
+ 
+    if (!adminRole || !VALID_ADMIN_ROLES.includes(adminRole)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid adminRole. Must be one of: ${VALID_ADMIN_ROLES.join(", ")}`,
+      });
+    }
+ 
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+ 
+    if (user.role !== "admin") {
+      return res.status(400).json({ success: false, message: "This user is not an admin" });
+    }
+ 
+    user.adminRole = adminRole;
+    await user.save();
+ 
+    return res.status(200).json({
+      success: true,
+      message: `Role updated to "${adminRole}" for ${user.name}`,
+      admin: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        adminRole: user.adminRole,
+      },
+    });
+  } catch (err) {
+    console.error("updateAdminRole error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+ 
 // ════════════════════════════════════════════════════════════════════════════
 // GET ALL USERS
 // GET /api/admin/auth/users
 // Protected: requireRole("super_admin", "operations_admin", "support_admin")
 // ════════════════════════════════════════════════════════════════════════════
-
+ 
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({})
       .select("_id name email mobile kycVerified walletBalance createdAt role")
       .sort({ createdAt: -1 });
-
+ 
     const usersWithBank = await Promise.all(
       users.map(async (user) => {
         const bankDetails = await BankDetails.findOne({
@@ -264,7 +373,7 @@ const getAllUsers = async (req, res) => {
         }).select(
           "accountHolderName bankName accountNumber ifscCode accountType isTpinCreated"
         );
-
+ 
         return {
           _id: user._id,
           name: user.name,
@@ -278,11 +387,11 @@ const getAllUsers = async (req, res) => {
         };
       })
     );
-
+ 
     const total = users.length;
     const verified = users.filter((u) => u.kycVerified === true).length;
     const pending = users.filter((u) => !u.kycVerified).length;
-
+ 
     return res.status(200).json({
       success: true,
       total,
@@ -298,26 +407,26 @@ const getAllUsers = async (req, res) => {
     });
   }
 };
-
+ 
 // ════════════════════════════════════════════════════════════════════════════
 // GET USER BANK DETAILS
 // GET /api/admin/auth/user-bank-details/:userId
 // Protected: requireRole("super_admin", "support_admin")
 // ════════════════════════════════════════════════════════════════════════════
-
+ 
 const getUserBankDetails = async (req, res) => {
   try {
     const { userId } = req.params;
-
+ 
     const bankDetails = await BankDetails.findOne({ userId });
-
+ 
     if (!bankDetails) {
       return res.status(404).json({
         success: false,
         message: "Bank details not found",
       });
     }
-
+ 
     return res.status(200).json({
       success: true,
       bankDetails,
@@ -330,4 +439,14 @@ const getUserBankDetails = async (req, res) => {
     });
   }
 };
-
+ 
+module.exports = {
+  adminLogin,
+  createSubAdmin,
+  getAllAdmins,
+  revokeAdminAccess,
+  changeAdminPassword,
+  updateAdminRole,
+  getAllUsers,
+  getUserBankDetails,
+};
