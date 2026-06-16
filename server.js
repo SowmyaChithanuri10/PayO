@@ -28,7 +28,8 @@ const bankRoutes = require("./routes/bankRoutes");
 const tradingRoutes = require('./routes/tradingRoutes');
 const kycRoutes= require("./routes/kycRoutes");
 const adminKycRoutes = require("./routes/adminKycRoutes");
-const adminAuthRoutes     = require("./routes/adminAuthRoutes"); 
+const adminAuthRoutes = require("./routes/adminAuthRoutes");
+const adminStatsRoutes = require("./routes/adminStatsRoutes");
 
 
 // connect database
@@ -95,7 +96,8 @@ app.use("/api/kyc",kycRoutes);
 app.use("/api/admin/kyc",adminKycRoutes);
 
 // ── Admin routes ──────────────────────────────────────────────────────────────
-app.use("/api/admin/auth",adminAuthRoutes);    // login, create admin ← NEW
+app.use("/api/admin/auth", adminAuthRoutes);   // login, create admin, users
+app.use("/api/admin/stats", adminStatsRoutes); // dashboard widget stats
 
 
 // Root Route

@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
  
 const User = require("../models/User");
 const BankDetails = require("../models/Bank");
+const Wallet = require("../models/Wallet");
  
 // Valid adminRole values for sub-admins (super_admin is env-var only, never stored via API)
 const VALID_ADMIN_ROLES = [
@@ -362,42 +363,45 @@ const updateAdminRole = async (req, res) => {
  
 const getAllUsers = async (req, res) => {
   try {
+    // FIX: User model has no walletBalance field — balance lives in Wallet model as `balance`
     const users = await User.find({})
-      .select("_id name email mobile kycVerified walletBalance createdAt role")
+      .select("_id name email mobile kycVerified createdAt role")
       .sort({ createdAt: -1 });
- 
-    const usersWithBank = await Promise.all(
+
+    const usersWithDetails = await Promise.all(
       users.map(async (user) => {
-        const bankDetails = await BankDetails.findOne({
-          userId: user._id,
-        }).select(
-          "accountHolderName bankName accountNumber ifscCode accountType isTpinCreated"
-        );
- 
+        const [bankDetails, wallet] = await Promise.all([
+          BankDetails.findOne({ userId: user._id }).select(
+            "accountHolderName bankName accountNumber ifscCode accountType isTpinCreated"
+          ),
+          Wallet.findOne({ userId: user._id }).select("balance walletAddress"),
+        ]);
+
         return {
           _id: user._id,
           name: user.name,
           email: user.email,
           mobile: user.mobile,
           kycVerified: user.kycVerified,
-          walletBalance: user.walletBalance,
+          walletBalance: wallet ? wallet.balance : 0,   // real balance from Wallet model
+          walletAddress: wallet ? wallet.walletAddress : null,
           createdAt: user.createdAt,
           role: user.role,
           bankDetails: bankDetails || null,
         };
       })
     );
- 
+
     const total = users.length;
     const verified = users.filter((u) => u.kycVerified === true).length;
     const pending = users.filter((u) => !u.kycVerified).length;
- 
+
     return res.status(200).json({
       success: true,
       total,
       verified,
       pending,
-      users: usersWithBank,
+      users: usersWithDetails,
     });
   } catch (err) {
     console.error("getAllUsers error:", err);
