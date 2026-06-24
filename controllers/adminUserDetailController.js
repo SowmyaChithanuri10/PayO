@@ -7,8 +7,6 @@ const Wallet      = require("../models/Wallet");
 
 // ════════════════════════════════════════════════════════════════════════════
 // HELPER — convert stored file path → public URL
-// The server already serves /kyc-docs → ./uploads via express.static
-// So  uploads/kyc/…/selfie.jpg  →  /kyc-docs/kyc/…/selfie.jpg
 // ════════════════════════════════════════════════════════════════════════════
 function buildFileUrl(req, filePath) {
   if (!filePath) return null;
@@ -22,7 +20,6 @@ function buildFileUrl(req, filePath) {
 // ════════════════════════════════════════════════════════════════════════════
 // GET USER KYC DOCUMENTS
 // GET /api/admin/user-details/:userId/kyc
-// — Same pattern as getUserBankDetails in adminAuthController.js
 // Protected: super_admin | kyc_admin | support_admin
 // ════════════════════════════════════════════════════════════════════════════
 const getUserKycDocs = async (req, res) => {
@@ -72,9 +69,7 @@ const getUserKycDocs = async (req, res) => {
 
 // ════════════════════════════════════════════════════════════════════════════
 // GET USER TRANSACTION HISTORY
-// GET /api/admin/user-details/:userId/transactions
-// Query params: page (default 1), limit (default 20), status (optional)
-// — Same pattern as getAllUsers in adminAuthController.js
+// GET /api/admin/user-details/:userId/transactions?page=1&limit=20&status=
 // Protected: super_admin | operations_admin | support_admin
 // ════════════════════════════════════════════════════════════════════════════
 const getUserTransactions = async (req, res) => {
@@ -82,7 +77,18 @@ const getUserTransactions = async (req, res) => {
     const { userId } = req.params;
     const { page = 1, limit = 20, status } = req.query;
 
-    const filter = { userId };
+    // ── 1. Look up this user's wallet address ────────────────────────────
+    const userWallet = await Wallet.findOne({ userId }).lean();
+    const walletAddress = userWallet?.walletAddress || null;
+
+    // ── 2. Build filter: user is sender (userId) OR receiver (receiverWallet)
+    const orConditions = [{ userId }];
+    if (walletAddress) {
+      orConditions.push({ receiverWallet: walletAddress });
+    }
+
+    const filter = { $or: orConditions };
+
     if (status && ["pending", "success", "failed"].includes(status)) {
       filter.status = status;
     }
@@ -98,7 +104,7 @@ const getUserTransactions = async (req, res) => {
       Transaction.countDocuments(filter),
     ]);
 
-    // Resolve sender and receiver display names from wallet addresses
+    // ── 3. Resolve sender and receiver display names ─────────────────────
     const list = await Promise.all(
       transactions.map(async (txn) => {
         let senderName   = null;
@@ -133,18 +139,35 @@ const getUserTransactions = async (req, res) => {
           receiverWallet: txn.receiverWallet,
           senderName,
           receiverName,
-          createdAt:      txn.createdAt,
+          // "sent" if this user initiated it, "received" if they were the receiver
+          direction: txn.userId?.toString() === userId ? "sent" : "received",
+          createdAt: txn.createdAt,
         };
       })
     );
 
-    // Summary counts
+    // ── 4. Summary counts (covers both sent and received) ────────────────
+    const summaryFilter = walletAddress
+      ? {
+          $or: [
+            { userId: new mongoose.Types.ObjectId(userId) },
+            { receiverWallet: walletAddress },
+          ],
+        }
+      : { userId: new mongoose.Types.ObjectId(userId) };
+
     const [successCount, failedCount, pendingCount, sentAgg] = await Promise.all([
-      Transaction.countDocuments({ userId, status: "success" }),
-      Transaction.countDocuments({ userId, status: "failed" }),
-      Transaction.countDocuments({ userId, status: "pending" }),
+      Transaction.countDocuments({ ...summaryFilter, status: "success" }),
+      Transaction.countDocuments({ ...summaryFilter, status: "failed" }),
+      Transaction.countDocuments({ ...summaryFilter, status: "pending" }),
+      // totalSent = only transactions the user initiated (not received)
       Transaction.aggregate([
-        { $match: { userId: new mongoose.Types.ObjectId(userId), status: "success" } },
+        {
+          $match: {
+            userId: new mongoose.Types.ObjectId(userId),
+            status: "success",
+          },
+        },
         { $group: { _id: null, total: { $sum: "$amount" } } },
       ]),
     ]);
@@ -172,7 +195,6 @@ const getUserTransactions = async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 // GET USER REFERRAL DETAILS
 // GET /api/admin/user-details/:userId/referral
-// — Same pattern as getUserBankDetails in adminAuthController.js
 // Protected: super_admin | operations_admin | support_admin
 // ════════════════════════════════════════════════════════════════════════════
 const getUserReferralDetails = async (req, res) => {

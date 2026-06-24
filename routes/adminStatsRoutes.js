@@ -1,17 +1,28 @@
 const express = require("express");
-const router = express.Router();
+const router  = express.Router();
 
-const auth = require("../middleware/auth");
+const auth      = require("../middleware/auth");
 const adminAuth = require("../middleware/adminAuth");
 
-const { getWidgetStats } = require("../controllers/adminStatsController");
+const {
+  getWidgetStats,
+  getReferralManagement,
+  getTransactionMonitoring,
+  getTransactionDetails,
+} = require("../controllers/adminStatsController");
 
-// ── ALL ROUTES BELOW REQUIRE: valid JWT (auth) + admin role (adminAuth) ──────
 router.use(auth, adminAuth);
 
-// ── ALL ADMINS ────────────────────────────────────────────────────────────────
-// Dashboard widget stats — readable by every admin role
-// GET /api/admin/stats/widgets
+// Dashboard widget stats
 router.get("/widgets", getWidgetStats);
+
+// Referral Management page
+router.get("/referrals", getReferralManagement);
+
+// Transaction Monitoring page
+router.get("/transactions", getTransactionMonitoring);
+
+// Transaction Details (view button)
+router.get("/transactions/:transactionId", getTransactionDetails);
 
 module.exports = router;
