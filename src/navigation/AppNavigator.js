@@ -67,6 +67,7 @@ import KycComplete from '../screens/kycVerify/KycComplete';
 import KycFail from '../screens/kycVerify/KycFail';
 import KycNotStarted from '../screens/kycVerify/KycnotStartedYet';
 import HelpCenterScreen from '../screens/helpCenter/HelpCenterScreen.jsx';
+import { ThemeProvider } from '../screens/themes/ThemeContext.js';
 
 
 
@@ -74,6 +75,7 @@ const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   return (
+       <ThemeProvider>
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
 
@@ -160,5 +162,6 @@ export default function AppNavigator() {
 
       </Stack.Navigator>
     </NavigationContainer>
+      </ThemeProvider>
   );
 }

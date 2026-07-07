@@ -33,6 +33,8 @@ import RNFS from "react-native-fs";
 import Icon from "react-native-vector-icons/Feather";
 import { useFocusEffect } from '@react-navigation/native';
 import BottomNav from '../components/bottomNav';
+import { useTheme } from '../themes/ThemeContext';
+
 
 export default function UserProfile({ navigation }) {
 
@@ -40,6 +42,7 @@ export default function UserProfile({ navigation }) {
   const [bankData, setBankData] = useState([]);
   const [address, setAddress] = useState("");
   const [qr, setQr] = useState(null);
+  const {theme, isDark, toggleTheme} = useTheme();
 
   useEffect(() => {
     const backAction = () => {
@@ -164,10 +167,17 @@ export default function UserProfile({ navigation }) {
       style={{ flex: 1 }}
       edges={['top', 'bottom']}>
 
-      <View style={styles.container}>
+     <View
+style={[
+styles.container,
+{
+backgroundColor: theme.background,
+color:theme.text
+}
+]}>
 
         {/* HEADER */}
-        <View style={styles.header}>
+        {/* <View style={styles.header}>
           <TouchableOpacity
             onPress={() => navigation.navigate("Main")}
           >
@@ -190,7 +200,57 @@ export default function UserProfile({ navigation }) {
               resizeMode="contain"
             />
           </TouchableOpacity>
-        </View>
+        </View> */}
+        <View style={styles.header}>
+
+<TouchableOpacity
+onPress={() => navigation.goBack()}>
+<Icon
+name="chevron-left"
+size={28}
+color={theme.text}
+/>
+</TouchableOpacity>
+
+<Text
+style={[
+styles.title,
+{color: theme.text}
+]}>
+Profile
+</Text>
+
+<View
+style={{
+flexDirection:"row",
+alignItems:"center"
+}}>
+
+<TouchableOpacity
+onPress={toggleTheme}
+style={{
+marginRight:15,
+}}>
+<Icon
+name={isDark ? "moon" : "sun"}
+size={24}
+color={isDark ? "#FFD700" : "#FF9800"}
+/>
+</TouchableOpacity>
+
+<TouchableOpacity
+onPress={() => navigation.navigate("HelpCenter")}>
+
+<Image
+source={require('../../../assets/images/helpdesk.png')}
+style={styles.helpImage}
+/>
+
+</TouchableOpacity>
+
+</View>
+
+</View>
         {/* PROFILE */}
         <View style={styles.profileSection}>
           <View style={styles.profileCircle}>
@@ -375,6 +435,7 @@ export default function UserProfile({ navigation }) {
           </TouchableOpacity>
 
         </ScrollView>
+
       </View>
 
       <BottomNav
