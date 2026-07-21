@@ -1399,7 +1399,7 @@ import Header from '../components/header';
 export default function HomeScreen({ navigation }) {
   const [balanceVisible, setBalanceVisible] = useState(true);
   const [available, setAvailable] = useState('0');
-  const [avbRuppee, setAvbRuppee] = useState('0');
+  const [avbRuppee, setAvbRuppee] = useState('1000');
   const [expertCoins, setExpertCoins] = useState([]);
   const [marketNews, setMarketNews] = useState([]);
   const [newsCount, setNewsCount] = useState(3);
