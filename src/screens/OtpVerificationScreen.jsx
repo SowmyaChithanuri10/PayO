@@ -1181,6 +1181,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { moderateScale, verticalScale, windowWidth } from '../utils/responsive';
 import { NetworkInfo } from 'react-native-network-info';
 import DeviceInfo from 'react-native-device-info';
+import Geolocation from '@react-native-community/geolocation';
 
 export default function OtpVerificationScreen({ route, navigation }) {
   // Destructured userId from parameters to align with the upload image payload signature
@@ -1198,6 +1199,22 @@ export default function OtpVerificationScreen({ route, navigation }) {
   
   // Validation check: returns true only when all 4 slots contain a valid digit
   const isOtpComplete = otp.join('').length === 4;
+
+  const getCurrentLocation = () => {
+  return new Promise((resolve, reject) => {
+    Geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        resolve(`${latitude}, ${longitude}`); // Returns e.g., "17.3850, 78.4867"
+      },
+      (error) => {
+        console.warn("Error fetching location: ", error);
+        resolve("Location Unavailable"); // Fallback so the app doesn't crash
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+  });
+};
 
   useEffect(() => {
     startTimer();
@@ -1283,6 +1300,7 @@ export default function OtpVerificationScreen({ route, navigation }) {
               const deviceModel = await DeviceInfo.getModel();
               const systemName = DeviceInfo.getSystemName();     
               const systemVersion = DeviceInfo.getSystemVersion(); 
+              const dynamicLocation = await getCurrentLocation();
         
 
         response = await api.post('/api/auth/verify-login-otp', {
@@ -1292,7 +1310,7 @@ export default function OtpVerificationScreen({ route, navigation }) {
         deviceId: uniqueId, 
         deviceName: deviceModel,
         userAgent: `${systemName} ${systemVersion}`, 
-        location: "Hyderabad", 
+        location: dynamicLocation, 
         country_code: countryCode
         });
 //         if(response.data?.token || response.data?.status === "200"){
