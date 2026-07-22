@@ -585,7 +585,10 @@ export default function OtpVerificationScreen({ route, navigation }) {
         
         if (type === 'login') {
           navigation.replace('Main');
-          await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+          // navigation.replace('WalletScreen');
+          // navigation.replace('KYCVerification')
+
+           await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
         } else {
           navigation.replace('OtpVerified');
         }

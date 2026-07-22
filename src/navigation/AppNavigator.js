@@ -253,12 +253,15 @@ import AddMoneytoWallet from '../screens/HomeScreen/AddMoneytoWallet.jsx';
 // import  AddMoneytoWallet from "../screens/components/AddMoneyModal.jsx"
 import NotFoundScreen from '../screens/HomeScreen/NotFoundScreen.jsx';
 import PaymentCompleteDetails from '../screens/HomeScreen/completeTransaction.jsx';
+import { navigationRef } from './navigationRef.js';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   return (
-    <NavigationContainer>
+    <NavigationContainer
+    //  ref={navigationRef}
+     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
 
         {/* AUTH */}
@@ -347,6 +350,7 @@ export default function AppNavigator() {
         <Stack.Screen name="TpinScreen" component={TpinScreen} />
         <Stack.Screen name="Notifications" component={NotificationScreen} />
         <Stack.Screen name="BankAddedScreen" component={BankAddedScreen} />
+
 
       </Stack.Navigator>
     </NavigationContainer>

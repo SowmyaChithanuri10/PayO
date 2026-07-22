@@ -10,7 +10,9 @@ import {
   Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Feather';
+import LinearGradient from 'react-native-linear-gradient';
+import { moderateScale } from '../../utils/responsive';
 
 const { width, height } = Dimensions.get('window');
 
@@ -26,32 +28,31 @@ const NotFoundScreen = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
       <View style={styles.container}>
-        {/* Top Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerText}>404 ERROR</Text>
-          <Icon name="code-outline" size={20} color="#00C853" />
-        </View>
-
-        {/* Illustration */}
-   
-
         {/* Text Content */}
         <Text style={styles.oopsText}>Oops....</Text>
         <Text style={styles.titleText}>Page not found</Text>
         <Text style={styles.messageText}>
           The page you were looking for does not exist!{'\n'}
-          We suggest you go back to home.
+          We suggest you go back to Login.
         </Text>
 
-             <Image
+        <Image
           source={require('../../../assets/images/biomatric/Ilustration.png')}
           style={styles.errorImage}
           resizeMode="contain"
         />
 
-        {/* Button */}
-        <TouchableOpacity style={styles.button} onPress={goBackToHome}>
-          <Text style={styles.buttonText}>← Back To Home</Text>
+        {/* Button with Linear Gradient */}
+        <TouchableOpacity style={styles.buttonContainer} onPress={goBackToHome}>
+          <LinearGradient 
+            colors={['#7B2FF7', '#285CE0']} 
+            start={{ x: 0, y: 0 }} 
+            end={{ x: 1, y: 0 }}
+            style={styles.button}
+          >
+            <Icon name="arrow-left" size={moderateScale(18)} color="#ffffff" style={styles.icon} />
+            <Text style={styles.buttonText}>Back To Home</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -70,23 +71,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     backgroundColor: '#ffffff',
   },
-  header: {
-    position: 'absolute',
-    top: 10,
-    left: 20,
-    right: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#9CA3AF',
-  },
   errorImage: {
-    width: width * 0.65,
-    height: width * 0.65,
+    width: width * 0.78,
+    height: width * 0.78,
     marginBottom: 20,
   },
   oopsText: {
@@ -108,16 +95,27 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 30,
   },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   button: {
-    backgroundColor: '#7B2FF7',
-    paddingVertical: 14,
+    flexDirection: 'row', // ✅ Places Icon and Text side-by-side
+    alignItems: 'center', // ✅ Centers Icon and Text vertically
+    justifyContent: 'center', // ✅ Centers content inside button
+    paddingVertical: 18,
     paddingHorizontal: 60,
-    borderRadius: 10,
+    borderRadius: 12,
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
+    marginTop:10
+  },
+  icon: {
+    marginRight: 8, // ✅ Adds space between icon and text
   },
   buttonText: {
     color: '#ffffff',

@@ -653,6 +653,7 @@ import {
 import { moderateScale } from 'react-native-size-matters';
 import { useRoute, useIsFocused } from "@react-navigation/native";
 import { useAuth } from '../../context/AuthContext';
+import Geolocation from 'react-native-geolocation-service';
 
 
 export default function TransactionPinScreen({ navigation }) {
@@ -688,6 +689,22 @@ export default function TransactionPinScreen({ navigation }) {
 
   const isPinValidStructure = is4Digits && isNotSequential && isNotRepeated && isNotEasyToGuess;
   const isFormValid = isPinValidStructure && confirmPin.length === 4 && pin === confirmPin;
+
+   const getCurrentLocation = () => {
+    return new Promise((resolve, reject) => {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          resolve(`${latitude}, ${longitude}`); // Returns e.g., "17.3850, 78.4867"
+        },
+        (error) => {
+          console.warn("Error fetching location: ", error);
+          resolve("Location Unavailable"); // Fallback so the app doesn't crash
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      );
+    });
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -735,6 +752,8 @@ export default function TransactionPinScreen({ navigation }) {
       const deviceModel = await DeviceInfo.getModel();
       const systemName = DeviceInfo.getSystemName();     
       const systemVersion = DeviceInfo.getSystemVersion(); 
+      const dynamicLocation = await getCurrentLocation();
+
 
       const payload = {
         userId: userId,                      
@@ -743,7 +762,7 @@ export default function TransactionPinScreen({ navigation }) {
         deviceId: uniqueId, 
         deviceName: deviceModel,
         userAgent: `${systemName} ${systemVersion}`, 
-        location: "Hyderabad",                      
+        location: dynamicLocation,                      
       };
 
       console.log("Sending Dynamic Payload: ", payload);

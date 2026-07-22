@@ -100,31 +100,6 @@ const SplashScreen = ({ navigation }) => {
 };
   
 
-//   const checkUserFlow = async () => {
-//   try {
-//     const hasCompletedOnboarding = await AsyncStorage.getItem(
-//       'hasCompletedOnboarding',
-//     );
-
-//     if (hasCompletedOnboarding === 'true') {
-//       navigation.reset({
-//         index: 0,
-//         routes: [{ name: 'Login' }],
-//       });
-//     } else {
-//       navigation.reset({
-//         index: 0,
-//         routes: [{ name: 'Onboarding1' }],
-//       });
-//     }
-//   } catch (error) {
-//     navigation.reset({
-//       index: 0,
-//       routes: [{ name: 'Onboarding1' }],
-//     });
-//   }
-// };
-
 
 const checkUserFlow = async () => {
   const hasCompletedOnboarding = await AsyncStorage.getItem(
