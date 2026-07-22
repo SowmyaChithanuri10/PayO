@@ -43,7 +43,7 @@ export const fetchConversionRates = createAsyncThunk(
       return {
         cryptoRate: 70.12,
         expectedCrypto: amount / 70.12,
-        processingFee: 5,
+        processingFee: 0,
         upiId: 'payo@mockupi',
         qrCodeUrl:
           'https://api.qrserver.com/v1/create-qr-code/?data=mock',

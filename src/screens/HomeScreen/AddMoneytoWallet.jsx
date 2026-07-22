@@ -409,9 +409,9 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
       id: 'crypto',
       title: 'Crypto Transfer',
       subtitle: 'USDT',
-      tag: '1-2 HOURS',
+      tag: 'COMING SOON',
       tagBg: '#E8EAF6',
-      tagColor: '#283593',
+      tagColor: '#2E7D32',
       imageSource: cryptoImg,
     },
   ];
@@ -578,6 +578,8 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
                       <TouchableOpacity
                         style={[styles.dropdownItem, styles.methodBorder]} // Using standard border line here
                         onPress={() => handlePaymentSelect({ ...method, id: 'crypto_erc20', subtitle: 'USDT (ERC20)' })}
+                        disabled={true} // Makes it unclickable
+                        activeOpacity={1} // Prevents click visual feedback
                       >
                         <Text style={styles.dropdownText}>ERC20</Text>
                         <FeatherIcon name="chevron-right" size={moderateScale(16)} color="#9CA3AF" />
@@ -586,6 +588,8 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
                       <TouchableOpacity
                         style={styles.dropdownItem}
                         onPress={() => handlePaymentSelect({ ...method, id: 'crypto_trc20', subtitle: 'USDT (TRC20)' })}
+                        disabled={true} // Makes it unclickable
+                        activeOpacity={1} // Prevents click visual feedback
                       >
                         <Text style={styles.dropdownText}>TRC20</Text>
                         <FeatherIcon name="chevron-right" size={moderateScale(16)} color="#9CA3AF" />
@@ -938,7 +942,6 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
 });
-
 ////////////////////////////////////////////////////////////////////////////
 
 
