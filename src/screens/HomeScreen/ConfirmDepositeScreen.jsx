@@ -854,7 +854,7 @@ const displayEstimatedTime = paymentMethod?.tag || estimatedTime || 'INSTANT';
               <Text style={styles.dottedDivider} numberOfLines={1}>....................................................................</Text>
               {/* <Text style={styles.instantValue}>{estimatedTime || 'INSTANT'} ⚡</Text> */}
               <Text style={styles.instantValue}>
-  {paymentMethod?.tag || estimatedTime || 'INSTANT'} ⚡
+  {paymentMethod?.tag || estimatedTime || 'INSTANT'}
 </Text>
             </View>
 

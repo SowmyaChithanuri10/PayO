@@ -822,7 +822,7 @@ export default function Header() {
   // 1. ALL HOOKS DECLARATIONS (TOP LEVEL UNCONDITIONAL)
   const navigation = useNavigation();
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [walletBalance, setWalletBalance] = useState(0);
+  const [walletBalance, setWalletBalance] = useState(1000);
 
   const isRestricted = useMemo(() => {
     return walletBalance < 100;

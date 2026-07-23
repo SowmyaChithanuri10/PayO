@@ -463,7 +463,7 @@ import { getThemeColors, styles } from './BottomTabStyling';
 export default function CurvedTabs() {
   // 1. Declare all Hooks in exact, un-conditional order
   const isDarkMode = useColorScheme() === 'dark';
-  const [tabWalletBalance, setTabWalletBalance] = useState(0);
+  const [tabWalletBalance, setTabWalletBalance] = useState(1000);
 
   const colors = useMemo(() => getThemeColors(isDarkMode), [isDarkMode]);
 
