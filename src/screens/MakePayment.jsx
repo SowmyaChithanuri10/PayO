@@ -341,11 +341,19 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useSelector } from 'react-redux';
 import styles from './MakePaymentStyle';
 import { moderateScale } from '../../src/utils/responsive';
+import CashfreeService from '../services/CashfreeService';
+import { createOrder } from '../api/walletApi';
+import LinearGradient from 'react-native-linear-gradient';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FeatherIcon from 'react-native-vector-icons/Feather';
+
+
 
 const MakePayment = ({ navigation }) => {
   // 1. Read data from Redux store
@@ -388,6 +396,49 @@ const MakePayment = ({ navigation }) => {
     const s = (seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
+
+   const handleAddMoney = async () => {
+      // const numAmount = parseFloat(localData?.amount?.toLocaleString());
+      
+      // if (!localData?.amount?.toLocaleString() || isNaN(numAmount) || numAmount <= 0) {
+      //   Alert.alert('Invalid Amount', 'Please enter a valid amount.');
+      //   return;
+      // }
+  
+      // // setLoading(true);
+      
+      // try {
+      //   // 1. Create order securely from your backend
+      //   const orderData = await createOrder(numAmount);
+  
+      //   // ✅ CHANGE 2 & 3: Check for both payment_session_id and paymentSessionId to be safe
+      //   const orderId = orderData.orderId;
+      //   const paymentSessionId = orderData.payment_session_id || orderData.paymentSessionId;
+  
+      //   if (orderId && paymentSessionId) {
+      //     // 2. Pass to Cashfree Service to open the Drop Checkout
+      //     await CashfreeService.startPayment(orderId, paymentSessionId);
+      //   } else {
+      //     Alert.alert('Error', 'Invalid order data received from server.');
+      //     // setLoading(false);
+      //   }
+      // } catch (error) {
+      //   // ✅ CHANGE 5: Proper Error Logging & Alerting from backend response
+      //   console.log('Create Order Error');
+      //   console.log(error.response?.data);
+      //   console.log(error.message);
+  
+      //   Alert.alert(
+      //     'Error',
+      //     error.response?.data?.message || error.message || 'Could not initiate payment.'
+      //   );
+      //   // setLoading(false);
+      // }
+
+
+      navigation.navigate('loadingtemp');
+
+    };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -550,7 +601,9 @@ const MakePayment = ({ navigation }) => {
         </View>
 
         {/* Payment Complete Button */}
-        <TouchableOpacity style={styles.completeButton}>
+        {/* <TouchableOpacity style={styles.completeButton} onPress={()=>{
+          handleAddMoney()
+        }}>
           <Image
             source={require('../../assets/images/Frame.png')}
             style={styles.checkIcon}
@@ -561,7 +614,37 @@ const MakePayment = ({ navigation }) => {
               Check payment status
             </Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+
+        <View style={styles.container}>
+  <TouchableOpacity
+    activeOpacity={0.8}
+    style={styles.proceedButtonAction}
+    onPress={handleAddMoney}
+  >
+    <LinearGradient
+      colors={['#7C3AED', '#3B82F6']} // Purple to Vivid Blue gradient
+      start={{ x: 0, y: 0.5 }}
+      end={{ x: 1, y: 0.5 }}
+      style={styles.proceedGradient}
+    >
+      <MaterialCommunityIcons
+        name="shield-check-outline"
+        size={moderateScale(22)}
+        color="#FFFFFF"
+      />
+      
+      <Text style={styles.proceedButtonText}>Make Payment</Text>
+      
+      <FeatherIcon
+        name="arrow-right"
+        size={moderateScale(20)}
+        color="#FFFFFF"
+      />
+    </LinearGradient>
+  </TouchableOpacity>
+
+</View>
 
         {/* Footer */}
         <View style={styles.footer}>
