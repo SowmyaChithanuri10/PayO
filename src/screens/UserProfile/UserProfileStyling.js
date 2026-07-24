@@ -1535,7 +1535,7 @@ securityBanner: {
   borderRadius: scale(16),   // Slightly rounder corners matching mockup
   paddingVertical: verticalScale(20),
   paddingHorizontal: scale(16),
-  marginBottom: verticalScale(16),
+  // marginBottom: verticalScale(16),
   position: 'relative',
   overflow: 'hidden',
   borderWidth: 1,

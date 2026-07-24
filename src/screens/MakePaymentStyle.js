@@ -758,6 +758,41 @@ const styles = StyleSheet.create({
     height: scale(30),
     marginHorizontal: moderateScale(6),
   },
+
+   proceedButtonAction: {
+    borderRadius: moderateScale(16), // Smooth rounded corners
+    overflow: 'hidden',
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4, // Shadow for Android
+  },
+  proceedGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: moderateScale(16),
+    paddingHorizontal: moderateScale(20),
+    gap: moderateScale(12), // Even spacing between icons and text
+  },
+  proceedButtonText: {
+    fontSize: moderateScale(16),
+    fontWeight: '600',
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
+  secureNoteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: verticalScale(10),
+  },
+  secureNoteText: {
+    fontSize: moderateScale(11),
+    color: '#9CA3AF',
+    marginLeft: moderateScale(6),
+  },
 });
 
 export default styles;

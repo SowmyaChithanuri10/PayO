@@ -503,7 +503,9 @@ export default function UserProfile({ navigation }) {
       <View style={styles.container}>
         {/* HEADER */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.navigate('Main')} style={styles.backButton}>
+          <TouchableOpacity 
+        onPress={() => navigation.navigate('Main', { screen: 'Home' })}
+          style={styles.backButton}>
             <Icon name="chevron-left" size={24} color="#285CE0" />
           </TouchableOpacity>
           <View style={styles.headerTextContainer}>
@@ -527,7 +529,7 @@ export default function UserProfile({ navigation }) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 120 }} 
+          contentContainerStyle={{ paddingBottom: 50 }} 
         >
           {/* PROFILE CARD */}
           <ImageBackground

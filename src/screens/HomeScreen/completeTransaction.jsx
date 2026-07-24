@@ -14,12 +14,13 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import { globalStyles, theme } from '../../MainTheme/theme';
 import { verticalScale, scale, moderateScale } from '../../utils/responsive'; // Imported scale and moderateScale for deep responsiveness
+import { useAppSelector } from '../../redux/hooks';
 
 const { width: windowWidth } = Dimensions.get('window');
 
 export default function PaymentCompleteDetails({ route, navigation }) {
   // Extract dynamic parameters passed down from previous transaction stacks
-  const { amount = '300', recipient = 'User 2' } = route.params || {};
+  const { amount = '300', recipient = 'User 2',transactionId , wallet_id} = route.params || {};
 
   const handleBackToHome = () => {
     navigation.reset({
@@ -100,13 +101,13 @@ export default function PaymentCompleteDetails({ route, navigation }) {
         <View style={[globalStyles.card, styles.detailsCard]}>
           <View style={styles.detailRow}>
             <Text style={globalStyles.textMuted}>Transaction ID</Text>
-            <Text style={styles.detailValueBold}>#PAY24827372</Text>
+            <Text style={styles.detailValueBold}>{transactionId}</Text>
           </View>
           <View style={styles.divider} />
 
           <View style={styles.detailRow}>
             <Text style={globalStyles.textMuted}>Paid via</Text>
-            <Text style={styles.detailValue}>Wallet : PAYHOSKJDN45</Text>
+            <Text style={styles.detailValue}>Wallet : {wallet_id}</Text>
           </View>
           <View style={styles.divider} />
 
