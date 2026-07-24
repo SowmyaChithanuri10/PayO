@@ -386,7 +386,7 @@
 //   },
 // });
 /////////////////////////////////////////////////////////
-//updated code otp popup
+//updated code otp popup autofill
 
 
 import React, { useState, useEffect, useRef } from 'react';

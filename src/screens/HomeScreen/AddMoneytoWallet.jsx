@@ -330,6 +330,7 @@ import {
 
 import api from '../../api/axios';
 import { moderateScale } from '../../utils/responsive';
+import { theme } from '../../MainTheme/theme';
 
 import upiImg from '../../../assets/images/wallet/Payment Icon.png';
 import bankImg from '../../../assets/images/wallet/Payment Icon (1).png';
@@ -465,14 +466,14 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
         {/* Header – back button now calls onClose */}
         <View style={styles.header}>
           <TouchableOpacity  onPress={() => navigation.goBack()} style={styles.backButton}>
-            <FeatherIcon name="chevron-left" size={moderateScale(26)} color="#4a8cff" />
+            <FeatherIcon name="chevron-left" size={moderateScale(26)} color={theme.colors.primaryBlue} />
           </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
             <Text style={styles.headerTitle}>Add Money to Wallet</Text>
             <Text style={styles.headerSubtitle}>Choose a payment method to add funds</Text>
           </View>
           <TouchableOpacity style={styles.helpButton}>
-            <FeatherIcon name="help-circle" size={moderateScale(22)} color="#3B82F6" />
+            <FeatherIcon name="help-circle" size={moderateScale(22)} color={theme.colors.primaryBlue} />
           </TouchableOpacity>
         </View>
 
