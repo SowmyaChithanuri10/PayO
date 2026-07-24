@@ -993,7 +993,7 @@ export default StyleSheet.create({
     fontWeight: '500',
   },
   balanceContainer: {
-    marginTop: verticalScale(20),
+    marginTop: verticalScale(5),
     alignItems: 'flex-start',
   },
   balanceRow: {
@@ -1020,7 +1020,7 @@ export default StyleSheet.create({
   bottomActionRow: {
     width: '100%',
     alignItems: 'flex-end', // Aligns the button smoothly to the right edge
-    marginTop: verticalScale(4), 
+    marginTop: verticalScale(1), 
   },
   addMoneyBtn: {
     flexDirection: 'row',

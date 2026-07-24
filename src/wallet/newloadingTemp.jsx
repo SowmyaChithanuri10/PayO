@@ -20,7 +20,11 @@ export default function PaymentLoadingTemp({
     name,
     toAddress,
     pin,
+    transactionId,
+    wallet_id
   } = route?.params || {};
+
+  console.log(transactionId,"transactionId")
 
   const dot1 = useRef(
     new Animated.Value(0),
@@ -80,7 +84,8 @@ export default function PaymentLoadingTemp({
     //   toAddress,
     // });
 
-    navigation.replace('successloadingtemp');
+    navigation.replace('successloadingtemp', { transactionId: transactionId ,amount:amount ,wallet_id: wallet_id}
+);
   };
 
   return (

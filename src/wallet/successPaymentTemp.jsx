@@ -15,7 +15,7 @@ export default function PaymentSuccessTemp({
   route,
   navigation,
 }) {
-  const { amount } = route.params || {};
+  const { amount,transactionId,wallet_id  } = route.params || {};
 
   const scaleAnim = useRef(
     new Animated.Value(0),
@@ -82,7 +82,7 @@ const timer = setTimeout(() => {
     routes: [
       {
         name: 'PaymentCompleteDetails', // Matches Stack Router setup
-        params: { amount: amount, recipient: 'User 2' },
+        params: { transactionId: transactionId ,amount:amount ,recipient: 'User 2',wallet_id: wallet_id },
       },
     ],
   });

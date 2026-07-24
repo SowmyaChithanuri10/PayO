@@ -527,7 +527,7 @@ export default function UserProfile({ navigation }) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 120 }} 
+          contentContainerStyle={{ paddingBottom: 50 }} 
         >
           {/* PROFILE CARD */}
           <ImageBackground

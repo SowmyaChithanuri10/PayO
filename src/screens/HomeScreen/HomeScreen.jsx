@@ -1396,6 +1396,8 @@ import api from '../../api/axios';
 import styles from './homeStyling';
 import { moderateScale, windowWidth } from '../../utils/responsive';
 import Header from '../components/header';
+import { useAppDispatch } from '../../redux/hooks';
+import { setWalletData } from '../../redux/features/depositSlice';
 
 export default function HomeScreen({ navigation }) {
   const [balanceVisible, setBalanceVisible] = useState(true);
@@ -1408,6 +1410,7 @@ export default function HomeScreen({ navigation }) {
   const scrollRef = useRef(null);
   const flatListRef = useRef(null);
   const [activeBanner, setActiveBanner] = useState(0);
+  const dispatch = useAppDispatch();
 
   const isRestricted = useMemo(() => {
     const numericValue = parseFloat(String(avbRuppee).replace(/[^\d.]/g, ''));
@@ -1485,19 +1488,25 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     fetchBalance();
-  //     fetchExpertCoins();
-  //     fetchMarketNews();
-  //   }, []),
-  // );
+   const fetchWallet = async () => {
+      try {
+        const res = await api.get('/api/wallet/wallet-details');
+        console.log(res.data?.data?.[0],"9059729791")
+        dispatch(setWalletData(res.data?.data?.[0]));
+      } catch (error) {
+        console.log('Wallet API error:', error?.response || error.message);
+      } finally {
+       
+      }
+    };
+
 useFocusEffect(
     useCallback(() => {
       // 1. Fetch dashboard data
       fetchBalance();
       fetchExpertCoins();
       fetchMarketNews();
+      fetchWallet()
 
       // 2. Disable iOS swipe-to-go-back gesture
       navigation.setOptions({
