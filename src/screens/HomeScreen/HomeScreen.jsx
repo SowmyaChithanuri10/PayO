@@ -1590,7 +1590,7 @@ useFocusEffect(
           <View style={styles.walletHeaderRow}>
             <View style={styles.rowCenter}>
               <Text style={styles.walletLabel}>Total Wallet Balance</Text>
-              <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)} style={{ marginLeft: 8 }}>
+              <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)} style={{ marginLeft: 10 }}>
                 <Icon name={balanceVisible ? 'eye-off' : 'eye'} size={18} color="rgba(255,255,255,0.8)" />
               </TouchableOpacity>
             </View>
@@ -1623,6 +1623,7 @@ useFocusEffect(
               <Text style={styles.addMoneyText}>Add Money</Text>
             </TouchableOpacity>
           </View>
+
         </LinearGradient>
 
         {/* Quick Actions Container */}

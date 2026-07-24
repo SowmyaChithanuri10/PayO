@@ -959,12 +959,29 @@ export default StyleSheet.create({
     top: -scale(30),
     right: -scale(20),
   },
+  // walletHeaderRow: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-between',
+  //   alignItems: 'center',
+  //   width: '100%',
+  // },
   walletHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-  },
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start', // Changed from 'center' to allow top alignment
+  width: '100%',
+},
+viewWalletBtn: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: 'transparent',
+  borderWidth: 1,
+  borderColor: 'rgba(255,255,255,0.4)',
+  paddingHorizontal: scale(14),
+  paddingVertical: verticalScale(6),
+  borderRadius: theme.borderRadius.full,
+  marginTop: verticalScale(16), // Add this to push it down
+},
   rowCenter: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -974,18 +991,18 @@ export default StyleSheet.create({
     fontSize: moderateScale(14),
     fontWeight: '500',
   },
-  viewWalletBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.4)',
-    paddingHorizontal: scale(14),
-    paddingVertical: verticalScale(6),
-    borderRadius: theme.borderRadius.full,
+  // viewWalletBtn: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   backgroundColor: 'transparent',
+  //   borderWidth: 1,
+  //   borderColor: 'rgba(255,255,255,0.4)',
+  //   paddingHorizontal: scale(14),
+  //   paddingVertical: verticalScale(6),
+  //   borderRadius: theme.borderRadius.full,
     
    
-  },
+  // },
   viewWalletText: {
     color: '#fff',
     fontSize: moderateScale(15),
@@ -993,7 +1010,7 @@ export default StyleSheet.create({
     fontWeight: '500',
   },
   balanceContainer: {
-    marginTop: verticalScale(5),
+    marginTop: verticalScale(-15),
     alignItems: 'flex-start',
   },
   balanceRow: {

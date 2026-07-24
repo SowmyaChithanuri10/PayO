@@ -503,7 +503,9 @@ export default function UserProfile({ navigation }) {
       <View style={styles.container}>
         {/* HEADER */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.navigate('Main')} style={styles.backButton}>
+          <TouchableOpacity 
+        onPress={() => navigation.navigate('Main', { screen: 'Home' })}
+          style={styles.backButton}>
             <Icon name="chevron-left" size={24} color="#285CE0" />
           </TouchableOpacity>
           <View style={styles.headerTextContainer}>
