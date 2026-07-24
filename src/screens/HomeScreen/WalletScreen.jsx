@@ -755,7 +755,7 @@ export default function WalletScreen({ navigation }) {
               activeOpacity={0.8}
               onPress={() => navigation.goBack()}
             >
-              <Icon name="chevron-left" size={24} color={theme.colors.textMain} />
+              <Icon name="chevron-left" size={24} color={theme.colors.primaryBlue} />
             </TouchableOpacity>
 
             <View style={styles.headerTitleContainer}>
