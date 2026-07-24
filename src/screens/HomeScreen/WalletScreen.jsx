@@ -630,7 +630,7 @@
 
 
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -653,29 +653,43 @@ import RNFS from 'react-native-fs';
 
 import { theme, globalStyles } from '../../MainTheme/theme'; 
 import AddMoneyModal from '../components/AddMoneyModal';
+import { useFocusEffect } from '@react-navigation/native';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { fetchWalletDetails, setWalletData } from '../../redux/features/depositSlice';
 
 export default function WalletScreen({ navigation }) {
   const [wallet, setWallet] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [qr, setQr] = useState(null);
   const [address, setAddress] = useState('');
-  
   const [isModalVisible, setModalVisible] = useState(false);
 
-  useEffect(() => {
-    fetchWallet();
-  }, []);
+  const walletData = useAppSelector((state) => state.deposit.walletData);
+  
+  console.log(walletData,"walletData676")
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     fetchWallet();
+  //   }, [])
+  // );
 
-  const fetchWallet = async () => {
-    try {
-      const res = await api.get('/api/wallet/getwalletdashboard');
-      setWallet(res?.data);
-    } catch (error) {
-      console.log('Wallet API error:', error?.response || error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchWallet = async () => {
+  //   try {
+  //     // 1. Call API only ONCE here
+  //     const res = await api.get('/api/wallet/wallet-details');
+      
+  //     // 2. Set local state (if needed)
+  //     console.log(res.data?.data?.[0],"9059729791")
+  //     setWallet(res.data?.data?.[0]);
+      
+  //     // 3. Dispatch the response data straight to Redux
+  //     dispatch(setWalletData(res.data?.data?.[0]));
+  //   } catch (error) {
+  //     console.log('Wallet API error:', error?.response || error.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const progress = wallet?.dailyLimit > 0
     ? ((wallet?.dailyUsed || 0) / wallet?.dailyLimit) * 100
@@ -701,7 +715,7 @@ export default function WalletScreen({ navigation }) {
   };
 
   const handleCopy = () => {
-    const walletAddress = wallet?.id;
+    const walletAddress = walletData?.Wallet_ID;
     if (!walletAddress) return;
 
     Clipboard.setString(walletAddress);
@@ -755,13 +769,13 @@ export default function WalletScreen({ navigation }) {
               activeOpacity={0.8}
               onPress={() => navigation.goBack()}
             >
-              <Icon name="chevron-left" size={24} color={theme.colors.textMain} />
+              <Icon name="chevron-left" size={24} color={theme.colors.primaryBlue} />
             </TouchableOpacity>
 
             <View style={styles.headerTitleContainer}>
               <Text style={styles.headerTitle}>Wallet ID</Text>
               <Text style={styles.headerSubtitle} numberOfLines={1}>
-                {wallet?.id || 'PXYZ6273849A'}
+                {walletData?.Wallet_ID}
               </Text>
             </View>
 

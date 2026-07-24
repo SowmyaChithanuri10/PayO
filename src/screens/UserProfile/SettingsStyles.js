@@ -1,4 +1,5 @@
-import { StyleSheet } from 'react-native';
+// import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, StatusBar } from 'react-native';
 import { scale, verticalScale, moderateScale } from '../../utils/responsive';
 import { theme } from '../../MainTheme/theme'; 
 
@@ -10,9 +11,8 @@ export default StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: scale(16),
-  },
-  scrollContent: {
-    paddingBottom: verticalScale(40),
+    // Add dynamic padding for Android status bar
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + verticalScale(0) : 0,
   },
   
   // --- Header ---

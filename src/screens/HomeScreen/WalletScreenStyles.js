@@ -703,7 +703,7 @@ export default StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: theme.typography.size.xs,
-    color: theme.colors.textMuted,
+    color: theme.colors.textMain,
     marginTop: verticalScale(2),
   },
   headerRight: {

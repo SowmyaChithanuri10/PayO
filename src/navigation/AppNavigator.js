@@ -256,6 +256,8 @@ import PaymentCompleteDetails from '../screens/HomeScreen/completeTransaction.js
 import { navigationRef } from './navigationRef.js';
 import Chats from '../screens/chats/Chats.jsx';
 
+import PaymentLoadingTemp from '../wallet/newloadingTemp.jsx';
+import PaymentSuccessTemp from '../wallet/successPaymentTemp.jsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -354,6 +356,9 @@ export default function AppNavigator() {
         <Stack.Screen name="TpinScreen" component={TpinScreen} />
         <Stack.Screen name="Notifications" component={NotificationScreen} />
         <Stack.Screen name="BankAddedScreen" component={BankAddedScreen} />
+
+        <Stack.Screen name="loadingtemp" component={PaymentLoadingTemp} />
+        <Stack.Screen name="successloadingtemp" component={PaymentSuccessTemp} />
 
 
       </Stack.Navigator>
