@@ -28,7 +28,7 @@ const { width, height } = Dimensions.get('window');
 // ==========================================
 
 // BACKEND SERVER IP
-const BACKEND_IP = '192.168.0.127';
+const BACKEND_IP = '192.168.1.36';
 const API_BASE_URL = `http://${BACKEND_IP}:3000/api`;
 
 // ==========================================

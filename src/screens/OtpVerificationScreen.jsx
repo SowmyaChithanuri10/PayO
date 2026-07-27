@@ -578,13 +578,15 @@ export default function OtpVerificationScreen({ route, navigation }) {
       }
 
       console.log("response.data.token")
-      if (response.data?.token || response.data?.status === "200") {
+      // if (response.data?.token || response.data?.status === "200")
+      if (response.data?.Token || response.data?.Status === "200")
+         {
         if (response.data.token) {
           await saveToken(response.data.token);
         }
         
         if (type === 'login') {
-          navigation.replace('Main');
+          navigation.replace('Chats');
           // navigation.replace('WalletScreen');
           // navigation.replace('KYCVerification')
 
