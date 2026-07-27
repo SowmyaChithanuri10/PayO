@@ -622,7 +622,11 @@ export default function CurvedTabs() {
         <CurvedBottomBar.Screen name="Wallets" position="LEFT" component={WalletScreen} />
         <CurvedBottomBar.Screen name="Send" position="CENTER" component={SendScreen} />
         <CurvedBottomBar.Screen name="Transactions" position="RIGHT" component={TransactionHistory} />
-        <CurvedBottomBar.Screen name="Profile" position="RIGHT" component={ProfileScreen} />
+<CurvedBottomBar.Screen 
+  name="Profile" 
+  position="RIGHT" 
+  component={(props) => <ProfileScreen {...props} isEditable={true} />}
+/>
       </CurvedBottomBar.Navigator>
     </View>
   );

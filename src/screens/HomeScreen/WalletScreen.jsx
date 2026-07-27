@@ -780,7 +780,8 @@ export default function WalletScreen({ navigation }) {
             </View>
 
             <View style={styles.headerRight}>
-              <TouchableOpacity style={styles.headerActionBtn} activeOpacity={0.8}>
+              <TouchableOpacity style={styles.headerActionBtn} activeOpacity={0.8}
+               onPress={() => navigation.navigate('Notifications')} >
                 <Image 
                   source={require('../../../assets/images/walletscr/Icon (4).png')} 
                   style={styles.customHeaderIcon} 
