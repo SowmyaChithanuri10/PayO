@@ -1,154 +1,3 @@
-// import React from 'react';
-// import {
-//   View,
-//   TouchableOpacity,
-//   Text,
-// } from 'react-native';
-// import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-// import Icon from 'react-native-vector-icons/Feather';
-// import { moderateScale } from 'react-native-size-matters';
-// import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-// import HomeScreen from '../HomeScreen/HomeScreen';
-// import styles from '../HomeScreen/homeStyling';
-// import SendScreen from './sendScreen';
-// import TransactionHistory from '../HomeScreen/TransactionHistory';
-// import WalletScreen from '../HomeScreen/WalletScreen';
-// import MarketScreen from '../Market/market';
-
-// const Tab = createBottomTabNavigator();
-
-// function CustomTabBar({ state, navigation }) {
-//   const insets = useSafeAreaInsets();
-
-//   const labels = {
-//     Home: 'Home',
-//     Wallets: 'Wallets',
-//     Transactions: 'Transactions',
-//     MarketScreen: 'Market',
-//   };
-
-//   return (
-//     <View
-//       style={[
-//         styles.bottomNav,
-//         {
-//           paddingBottom:
-//             insets.bottom > 0
-//               ? insets.bottom + moderateScale(8)
-//               : moderateScale(12),
-
-//           minHeight:
-//             insets.bottom > 0
-//               ? moderateScale(72) + insets.bottom
-//               : moderateScale(78),
-//         },
-//       ]}>
-//       {state.routes.map((route, index) => {
-//         const isFocused = state.index === index;
-
-//         let icon = '';
-
-//         if (route.name === 'Home') icon = 'home';
-//         if (route.name === 'Wallets') icon = 'credit-card';
-//         if (route.name === 'Transactions') icon = 'repeat';
-//         if (route.name === 'MarketScreen') icon = 'trending-up';
-
-//         if (route.name === 'Send') {
-//           return (
-//             <TouchableOpacity
-//               key={route.name}
-//               style={[
-//                 styles.centerIcon,
-//                 {
-//                   bottom:
-//                     insets.bottom > 0
-//                       ? moderateScale(22)
-//                       : moderateScale(18),
-//                 },
-//               ]}
-//               activeOpacity={0.85}
-//               onPress={() =>
-//                 navigation.navigate('Send', {
-//                   tab: 'scan',
-//                 })
-//               }>
-//               <Icon
-//                 name="maximize"
-//                 size={moderateScale(24)}
-//                 color="#fff"
-//               />
-//             </TouchableOpacity>
-//           );
-//         }
-
-//         return (
-//           <TouchableOpacity
-//             key={route.name}
-//             style={styles.navItem}
-//             activeOpacity={0.8}
-//             onPress={() =>
-//               navigation.navigate(route.name)
-//             }>
-//             <Icon
-//               name={icon}
-//               size={moderateScale(20)}
-//               color={isFocused ? '#F472B6' : '#aaa'}
-//             />
-
-//             <Text
-//               style={[
-//                 styles.navLabel,
-//                 isFocused
-//                   ? styles.navActive
-//                   : styles.navInactive,
-//               ]}>
-//               {labels[route.name]}
-//             </Text>
-//           </TouchableOpacity>
-//         );
-//       })}
-//     </View>
-//   );
-// }
-
-// export default function BottomTabs() {
-//   return (
-//     <Tab.Navigator
-//       initialRouteName="Home"
-//       screenOptions={{
-//         headerShown: false,
-//       }}
-//       tabBar={(props) => (
-//         <CustomTabBar {...props} />
-//       )}>
-//       <Tab.Screen
-//         name="Home"
-//         component={HomeScreen}
-//       />
-
-//       <Tab.Screen
-//         name="Wallets"
-//         component={WalletScreen}
-//       />
-
-//       <Tab.Screen
-//         name="Send"
-//         component={SendScreen}
-//       />
-
-//       <Tab.Screen
-//         name="Transactions"
-//         component={TransactionHistory}
-//       />
-
-//       <Tab.Screen
-//         name="MarketScreen"
-//         component={MarketScreen}
-//       />
-//     </Tab.Navigator>
-//   );
-// }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -459,31 +308,70 @@ import WalletScreen from '../HomeScreen/WalletScreen';
 import ProfileScreen from '../UserProfile/UserProfile';
 
 import { getThemeColors, styles } from './BottomTabStyling';
+import { useAppSelector } from '../../redux/hooks';
 
 export default function CurvedTabs() {
-  // 1. Declare all Hooks in exact, un-conditional order
   const isDarkMode = useColorScheme() === 'dark';
-  const [tabWalletBalance, setTabWalletBalance] = useState(1000);
+  const walletData = useAppSelector((state) => state.deposit.walletData);
+  
+  const [transactions, setTransactions] = useState([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
+
+  const tabWalletBalance = walletData?.Available_Balance || 0;
+
+  // Fetch transactions history to evaluate account access criteria
+  const fetchTransactions = async () => {
+    setLoadingTransactions(true);
+    try {
+      const res = await api.get('/api/wallet/deposit-history');
+      const rawList = res?.data?.Transactions || [];
+
+      const formattedData = rawList.map((item) => {
+        const isApproved = item.Payment_Status === 'Payment Approved';
+        const isFailed = item.Payment_Status === 'Payment Failed';
+
+        let type = 'received';
+        if (isFailed) type = 'failed';
+
+        return {
+          id: item.Transaction_UID,
+          gatewayOrderId: item.Gateway_Order_ID,
+          depositUid: item.Deposit_UID,
+          amount: parseFloat(item.Requested_Amount || 0),
+          status: item.Payment_Status,
+          createdAt: item.Payment_Date,
+          name: item.Gateway_Order_ID || item.Transaction_UID,
+          type: type,
+          isApproved,
+          isFailed,
+        };
+      });
+
+      setTransactions(formattedData);
+    } catch (err) {
+      console.log('Transaction fetch error in CurvedTabs:', err.message);
+    } finally {
+      setLoadingTransactions(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
 
   const colors = useMemo(() => getThemeColors(isDarkMode), [isDarkMode]);
 
+  // Unrestrict access if transactions > 1 OR balance >= 100
   const isRestricted = useMemo(() => {
-    return tabWalletBalance < 100;
-  }, [tabWalletBalance]);
+    const hasMultipleTransactions = transactions?.length > 1;
+    // const hasSufficientBalance = tabWalletBalance >= 100;
 
-  useEffect(() => {
-    const fetchBalanceForTabs = async () => {
-      try {
-        const response = await api.get('/api/wallet/balance');
-        const numericBalance = parseFloat(String(response?.data?.balance || '0').replace(/[^\d.]/g, ''));
-        setTabWalletBalance(isNaN(numericBalance) ? 0 : numericBalance);
-      } catch (error) {
-        console.log('Tab balance fetch error:', error);
-      }
-    };
-    
-    fetchBalanceForTabs();
-  }, []);
+    // Restricted ONLY if balance is low AND transaction count is 1 or fewer
+    return 
+    // !hasSufficientBalance 
+    // && 
+    !hasMultipleTransactions;
+  }, [tabWalletBalance, transactions]);
 
   const getIconName = (routeName) => {
     switch (routeName) {
@@ -511,7 +399,7 @@ export default function CurvedTabs() {
     if (isRestricted && restrictedRoutes.includes(routeName)) {
       Alert.alert(
         'Access Restricted',
-        'You are unable to access this. Please add money to your wallet.',
+        'You are unable to access this feature. Please add money to your wallet.',
         [
           {
             text: 'OK',
@@ -520,8 +408,7 @@ export default function CurvedTabs() {
           },
           {
             text: 'Add Money',
-            // Uses the top-level navigation engine mapping context
-            onPress: () => navigate('Home'), // Drops back to Home screen to hit the primary layout container card
+            onPress: () => navigate('Home'),
           },
         ],
         { cancelable: true }
@@ -622,11 +509,11 @@ export default function CurvedTabs() {
         <CurvedBottomBar.Screen name="Wallets" position="LEFT" component={WalletScreen} />
         <CurvedBottomBar.Screen name="Send" position="CENTER" component={SendScreen} />
         <CurvedBottomBar.Screen name="Transactions" position="RIGHT" component={TransactionHistory} />
-<CurvedBottomBar.Screen 
-  name="Profile" 
-  position="RIGHT" 
-  component={(props) => <ProfileScreen {...props} isEditable={true} />}
-/>
+        <CurvedBottomBar.Screen 
+          name="Profile" 
+          position="RIGHT" 
+          component={(props) => <ProfileScreen {...props} isEditable={true} />}
+        />
       </CurvedBottomBar.Navigator>
     </View>
   );
