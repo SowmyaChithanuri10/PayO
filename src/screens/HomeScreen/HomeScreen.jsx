@@ -1400,8 +1400,8 @@ import { useAppDispatch } from '../../redux/hooks';
 import { setWalletData } from '../../redux/features/depositSlice';
 
 export default function HomeScreen({ navigation }) {
-  const [balanceVisible, setBalanceVisible] = useState(true);
-  const [available, setAvailable] = useState('0');
+  const [balanceVisible, setBalanceVisible] = useState(false);
+  const [available, setAvailable] = useState('0.0');
   const [avbRuppee, setAvbRuppee] = useState('1000');
   const [expertCoins, setExpertCoins] = useState([]);
   const [marketNews, setMarketNews] = useState([]);
@@ -1591,7 +1591,7 @@ useFocusEffect(
             <View style={styles.rowCenter}>
               <Text style={styles.walletLabel}>Total Wallet Balance</Text>
               <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)} style={{ marginLeft: 10 }}>
-                <Icon name={balanceVisible ? 'eye-off' : 'eye'} size={18} color="rgba(255,255,255,0.8)" />
+                <Icon name={balanceVisible ? 'eye' : 'eye-off'} size={18} color="rgba(255,255,255,0.8)" />
               </TouchableOpacity>
             </View>
 
