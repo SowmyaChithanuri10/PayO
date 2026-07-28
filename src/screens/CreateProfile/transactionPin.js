@@ -654,6 +654,7 @@ import { moderateScale } from 'react-native-size-matters';
 import { useRoute, useIsFocused } from "@react-navigation/native";
 import { useAuth } from '../../context/AuthContext';
 import Geolocation from 'react-native-geolocation-service';
+import api from '../../api/axios';
 
 
 export default function TransactionPinScreen({ navigation }) {
@@ -767,7 +768,7 @@ export default function TransactionPinScreen({ navigation }) {
 
       console.log("Sending Dynamic Payload: ", payload);
       
-      const response = await axios.post(`https://purr-expediter-doorway.ngrok-free.dev/api/auth/set-pin`, payload, {
+      const response = await api.post(`/api/auth/set-pin`, payload, {
         headers: {
           'Content-Type': 'application/json',
         }

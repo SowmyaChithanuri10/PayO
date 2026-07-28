@@ -781,10 +781,9 @@ const MakePayment = ({ navigation }) => {
 
       if (response.status === 200 || response.status === 201) {
         // Navigate after successful API response
-  navigation.navigate('loadingtemp', 
+ navigation.navigate('loadingtemp', 
       { transactionId: generatedTxnId ,amount:localData.amount ? localData.amount.toString() : '100' ,wallet_id: walletDataLocal?.Wallet_ID}
-    );
-      } else {
+    );      } else {
         Alert.alert('Payment Failed', 'Something went wrong. Please try again.');
       }
     } catch (error) {
