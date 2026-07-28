@@ -264,9 +264,19 @@ export default StyleSheet.create({
     fontSize: moderateScale(13),
     fontWeight: theme.typography.weight.medium || '500',
   },
+  dropdownDate: {
+    minWidth: scale(80),
+    height: verticalScale(34),
+    backgroundColor: '#f3f4f6', // Light gray pill matching the image
+    borderRadius: theme.borderRadius.full || 20,
+    paddingHorizontal: scale(12),
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
 
   dropdown: {
-    minWidth: scale(80),
+    minWidth: scale(100),
     height: verticalScale(34),
     backgroundColor: '#f3f4f6', // Light gray pill matching the image
     borderRadius: theme.borderRadius.full || 20,
@@ -341,7 +351,7 @@ export default StyleSheet.create({
   },
 
   status: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(10.5),
     marginTop: verticalScale(2),
     textTransform: 'capitalize',
     fontWeight: theme.typography.weight.medium || '500',

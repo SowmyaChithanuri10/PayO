@@ -311,26 +311,361 @@
 //new code (rajesh)
 
 
+// import React, { useState, useEffect } from 'react';
+// import {
+//   View, Text, StyleSheet, TouchableOpacity, TextInput,
+//   ScrollView, Image, Modal, Platform, ToastAndroid,
+// } from 'react-native';
+// import { SafeAreaView } from 'react-native-safe-area-context';
+// import LinearGradient from 'react-native-linear-gradient';
+// import Icon from 'react-native-vector-icons/MaterialIcons';
+// import FeatherIcon from 'react-native-vector-icons/Feather';
+// import { useDispatch, useSelector } from 'react-redux';
+
+// import {
+//   setAmount,
+//   setPaymentMethod,
+//   fetchConversionRates,
+// } from '../../redux/features/depositSlice';
+
+// import api from '../../api/axios';
+// import { moderateScale } from '../../utils/responsive';
+// import { theme } from '../../MainTheme/theme';
+
+// import upiImg from '../../../assets/images/wallet/Payment Icon.png';
+// import bankImg from '../../../assets/images/wallet/Payment Icon (1).png';
+// import cardImg from '../../../assets/images/wallet/Payment Icon (2).png';
+// import netBankingImg from '../../../assets/images/wallet/wallet.png';
+// import wallet from '../../../assets/images/wallet/Wallet image 1.png';
+// import cryptoImg from '../../../assets/images/wallet/cryptocurrency 1.png';
+
+// export default function AddMoneytoWallet({ visible, onClose, navigation }) {
+//   const dispatch = useDispatch();
+//   const [localAmount, setLocalAmount] = useState('100');
+//   const [walletData, setWalletData] = useState(null);
+  
+//   // New state to manage the crypto dropdown visibility
+//   const [expandedMethod, setExpandedMethod] = useState(null);
+  
+//   const loading = useSelector((state) => state.deposit.loading);
+
+//   useEffect(() => {
+//     if (visible) fetchWalletBalance();
+//   }, [visible]);
+
+//   const fetchWalletBalance = async () => {
+//     try {
+//       const res = await api.get('/api/wallet/getwalletdashboard');
+//       setWalletData(res?.data);
+//     } catch (error) {
+//       console.log('Error fetching wallet balance:', error?.response || error.message);
+//     }
+//   };
+
+//   const presets = [
+//     { label: '+ ₹ 100', value: '100' },
+//     { label: '+ ₹ 1,000', value: '1,000' },
+//     { label: '+ ₹ 2,500', value: '2,500' },
+//     { label: '+ ₹ 5,500', value: '5,500' },
+//   ];
+
+//   const paymentMethods = [
+//     {
+//       id: 'upi',
+//       title: 'UPI',
+//       subtitle: 'Pay using any UPI app',
+//       tag: '1-2 HOURS',
+//       tagBg: '#E8EAF6',
+//       tagColor: '#283593',
+//       imageSource: upiImg,
+//     },
+//     {
+//       id: 'bank_transfer',
+//       title: 'Bank Transfer',
+//       subtitle: 'IMPS, NEFT, RTGS',
+//       tag: '1-2 HOURS',
+//       tagBg: '#E8EAF6',
+//       tagColor: '#283593',
+//       imageSource: bankImg,
+//     },
+//     {
+//       id: 'card',
+//       title: 'Debit/Credit Card',
+//       subtitle: 'Visa, Mastercard, RuPay',
+//       tag: 'COMING SOON',
+//       tagBg: '#E8F5E9',
+//       tagColor: '#2E7D32',
+//       imageSource: cardImg,
+//     },
+//     {
+//       id: 'net_banking',
+//       title: 'Net Banking',
+//       subtitle: 'All major Indian banks',
+//       tag: 'COMING SOON',
+//       tagBg: '#E8F5E9',
+//       tagColor: '#2E7D32',
+//       imageSource: netBankingImg,
+//     },
+//     {
+//       id: 'crypto',
+//       title: 'Crypto Transfer',
+//       subtitle: 'USDT',
+//       tag: 'COMING SOON',
+//       tagBg: '#E8EAF6',
+//       tagColor: '#2E7D32',
+//       imageSource: cryptoImg,
+//     },
+//   ];
+
+//   const parseValueToString = (val) => {
+//     const clean = val.replace(/[^0-9]/g, '');
+//     return clean ? parseInt(clean, 10).toLocaleString('en-IN') : '';
+//   };
+
+//   const handlePaymentSelect = (method) => {
+//     const numericalAmount = parseFloat(localAmount.replace(/[^0-9]/g, ''));
+
+//     if (!numericalAmount || numericalAmount <= 0) {
+//       if (Platform.OS === 'android') {
+//         ToastAndroid.show('Please enter a valid amount', ToastAndroid.SHORT);
+//       }
+//       return;
+//     }
+
+//     // 1. Save to Redux (sync – instant)
+//     dispatch(setAmount(numericalAmount));
+//     dispatch(setPaymentMethod({
+//       id: method.id,
+//       title: method.title,
+//       imageSource: method.imageSource,
+//       tag: method.tag,
+//     }));
+
+//     // 2. Start the fetch – but DON'T await it
+//     dispatch(fetchConversionRates({
+//       amount: numericalAmount,
+//       paymentMethod: method.id,
+//     }));
+
+//     // 3. ✅ NAVIGATE IMMEDIATELY – no delay!
+//     navigation.navigate('ConfirmDeposite');
+//   };
+
+//   // Handler for row clicks
+//   const handleRowPress = (method) => {
+//     if (method.id === 'crypto') {
+//       // Toggle dropdown for crypto
+//       setExpandedMethod(expandedMethod === 'crypto' ? null : 'crypto');
+//     } else {
+//       handlePaymentSelect(method);
+//     }
+//   };
+
+//   return (
+//       <SafeAreaView style={styles.container}>
+//         {/* Header – back button now calls onClose */}
+//         <View style={styles.header}>
+//           <TouchableOpacity  onPress={() => navigation.goBack()} style={styles.backButton}>
+//             <FeatherIcon name="chevron-left" size={moderateScale(26)} color={theme.colors.primaryBlue} />
+//           </TouchableOpacity>
+//           <View style={styles.headerTitleContainer}>
+//             <Text style={styles.headerTitle}>Add Money to Wallet</Text>
+//             <Text style={styles.headerSubtitle}>Choose a payment method to add funds</Text>
+//           </View>
+//           <TouchableOpacity style={styles.helpButton}>
+//             <FeatherIcon name="help-circle" size={moderateScale(22)} color={theme.colors.primaryBlue} />
+//           </TouchableOpacity>
+//         </View>
+
+//         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollBody}>
+//           {/* Balance Card */}
+//           <LinearGradient colors={['#6366F1', '#4F46E5']} style={styles.balanceCard}>
+//             <View style={styles.balanceCardLeft}>
+//               <View style={styles.balanceRow}>
+//                 <Text style={styles.balanceLabel}>Total Wallet Balance</Text>
+//                 <FeatherIcon name="eye" size={moderateScale(16)} color="#E0E7FF" style={{ marginLeft: moderateScale(6) }} />
+//               </View>
+//               <Text style={styles.cryptoBalance}>
+//                 {walletData?.balance?.toLocaleString() || '0'}{' '}
+//                 <Text style={styles.tokenTicker}>PAYO</Text>
+//               </Text>
+//               <Text style={styles.fiatBalance}>
+//                 ≈ ₹{(walletData?.balance * 0).toLocaleString() || '0'}
+//               </Text>
+//             </View>
+//             <View style={styles.walletIconContainer}>
+//               <Image source={wallet} style={styles.walletHeaderImage} resizeMode="contain" />
+//             </View>
+//           </LinearGradient>
+
+//           {/* Amount Input */}
+//           <Text style={styles.sectionLabel}>ENTER AMOUNT</Text>
+//           <View style={styles.amountInputContainer}>
+//             <Text style={styles.currencySymbol}>₹</Text>
+//             <TextInput
+//               style={styles.amountInput}
+//               value={localAmount}
+//               onChangeText={(text) => setLocalAmount(parseValueToString(text))}
+//               keyboardType="number-pad"
+//             />
+//             <View style={styles.currencySelector}>
+//               <Text style={styles.currencySelectorText}>INR</Text>
+//               <Icon name="keyboard-arrow-down" size={moderateScale(18)} color="#4A5568" />
+//             </View>
+//           </View>
+
+//           {/* Presets */}
+//           <View style={styles.presetsRow}>
+//             {presets.map((item, index) => {
+//               const formattedPresetValue = parseInt(item.value.replace(/[^0-9]/g, ''), 10).toLocaleString('en-IN');
+//               const isSelected = localAmount === formattedPresetValue;
+//               return (
+//                 <TouchableOpacity
+//                   key={index}
+//                   onPress={() => setLocalAmount(formattedPresetValue)}
+//                   style={[styles.presetChip, isSelected && styles.presetChipActive]}
+//                 >
+//                   <Text style={[styles.presetChipText, isSelected && styles.presetChipTextActive]}>
+//                     {item.label}
+//                   </Text>
+//                 </TouchableOpacity>
+//               );
+//             })}
+//           </View>
+
+//           {/* Payment Methods */}
+//           <Text style={styles.sectionLabel}>SELECT PAYMENT METHOD</Text>
+//           <View style={styles.methodsWrapperCard}>
+//             {paymentMethods.map((method, idx) => {
+//               const isUnclickable = method.id === 'card' || method.id === 'net_banking';
+//               const isLastItem = idx === paymentMethods.length - 1;
+//               const isCryptoExpanded = expandedMethod === 'crypto' && method.id === 'crypto';
+
+//               return (
+//                 <View key={method.id}>
+//                   <TouchableOpacity
+//                     onPress={() => handleRowPress(method)}
+//                     activeOpacity={0.7}
+//                     style={[
+//                       styles.methodRow, 
+//                       // Add border if it's not the last item OR if crypto is expanded (adds top border to dropdown)
+//                       (!isLastItem || isCryptoExpanded) && styles.methodBorder,
+//                       isUnclickable && { opacity: 1 } // Visual cue that it is disabled
+//                     ]}
+//                     disabled={loading || isUnclickable} // Enforcing unclickable state
+//                   >
+//                     <View style={styles.methodIconWrapper}>
+//                       <Image source={method.imageSource} style={styles.methodImage} resizeMode="contain" />
+//                     </View>
+//                     <View style={styles.methodMeta}>
+//                       <Text style={styles.methodTitle}>{method.title}</Text>
+//                       <Text style={styles.methodSubtitle}>{method.subtitle}</Text>
+//                     </View>
+//                     <View style={styles.methodRight}>
+//                       <View style={[styles.tagBadge, { backgroundColor: method.tagBg }]}>
+//                         <Text style={[styles.tagBadgeText, { color: method.tagColor }]}>{method.tag}</Text>
+//                       </View>
+//                       <FeatherIcon 
+//                         name={isCryptoExpanded ? "chevron-down" : "chevron-right"} 
+//                         size={moderateScale(20)} 
+//                         color="#9CA3AF" 
+//                       />
+//                     </View>
+//                   </TouchableOpacity>
+
+//                   {/* Dropdown Options for Crypto */}
+//                   {isCryptoExpanded && (
+//                     <View style={styles.dropdownContainer}>
+//                       <TouchableOpacity
+//                         style={[styles.dropdownItem, styles.methodBorder]} // Using standard border line here
+//                         onPress={() => handlePaymentSelect({ ...method, id: 'crypto_erc20', subtitle: 'USDT (ERC20)' })}
+//                         disabled={true} // Makes it unclickable
+//                         activeOpacity={1} // Prevents click visual feedback
+//                       >
+//                         <Text style={styles.dropdownText}>ERC20</Text>
+//                         <FeatherIcon name="chevron-right" size={moderateScale(16)} color="#9CA3AF" />
+//                       </TouchableOpacity>
+                      
+//                       <TouchableOpacity
+//                         style={styles.dropdownItem}
+//                         onPress={() => handlePaymentSelect({ ...method, id: 'crypto_trc20', subtitle: 'USDT (TRC20)' })}
+//                         disabled={true} // Makes it unclickable
+//                         activeOpacity={1} // Prevents click visual feedback
+//                       >
+//                         <Text style={styles.dropdownText}>TRC20</Text>
+//                         <FeatherIcon name="chevron-right" size={moderateScale(16)} color="#9CA3AF" />
+//                       </TouchableOpacity>
+//                     </View>
+//                   )}
+//                 </View>
+//               );
+//             })}
+//           </View>
+
+//           {/* Security Banner & Promo Card */}
+//           <View style={styles.securityBanner}>
+//             <View style={styles.shieldIconContainer}>
+//               <Image source={require('../../../assets/images/wallet/Security Icon.png')} />
+//             </View>
+//             <View style={styles.securityMeta}>
+//               <Text style={styles.securityTitle}>100% Secure & Encrypted</Text>
+//               <Text style={styles.securitySubtitle}>Your money is safe with bank-grade security and encryption.</Text>
+//             </View>
+//             <View style={styles.checkIconContainer}>
+//               <Image source={require('../../../assets/images/wallet/Shield Security Icon.png')} />
+//             </View>
+//           </View>
+
+//           <LinearGradient colors={['#2563EB', '#1D4ED8']} style={styles.promoCard}>
+//             <View style={styles.promoLeft}>
+//               <View style={styles.coinStackGraphic}>
+//                 <Image source={require('../../../assets/images/wallet/Promo Icon.png')} />
+//               </View>
+//               <View style={styles.promoTexts}>
+//                 <Text style={styles.promoTitle}>Have a promo code?</Text>
+//                 <Text style={styles.promoSubtitle}>Apply code and get exciting rewards</Text>
+//               </View>
+//             </View>
+//             <TouchableOpacity style={styles.applyActionBtn}>
+//               <Text style={styles.applyActionText}>Apply Now</Text>
+//               <FeatherIcon name="chevron-right" size={moderateScale(14)} color="#FFF" style={{ marginLeft: moderateScale(2) }} />
+//             </TouchableOpacity>
+//           </LinearGradient>
+//         </ScrollView>
+//       </SafeAreaView>
+//   );
+// }
+
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, TextInput,
-  ScrollView, Image, Modal, Platform, ToastAndroid,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Image,
+  Platform,
+  ToastAndroid,
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
   setAmount,
   setPaymentMethod,
   fetchConversionRates,
+  setWalletData,
 } from '../../redux/features/depositSlice';
 
 import api from '../../api/axios';
 import { moderateScale } from '../../utils/responsive';
 import { theme } from '../../MainTheme/theme';
+import { PAYO_EXCHANGE_RATE } from '../../api/mainValuables';
+ // Ensure your styles import matches your file structure
 
 import upiImg from '../../../assets/images/wallet/Payment Icon.png';
 import bankImg from '../../../assets/images/wallet/Payment Icon (1).png';
@@ -338,29 +673,39 @@ import cardImg from '../../../assets/images/wallet/Payment Icon (2).png';
 import netBankingImg from '../../../assets/images/wallet/wallet.png';
 import wallet from '../../../assets/images/wallet/Wallet image 1.png';
 import cryptoImg from '../../../assets/images/wallet/cryptocurrency 1.png';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 export default function AddMoneytoWallet({ visible, onClose, navigation }) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [localAmount, setLocalAmount] = useState('100');
-  const [walletData, setWalletData] = useState(null);
-  
-  // New state to manage the crypto dropdown visibility
+  const [balanceVisible, setBalanceVisible] = useState(true);
   const [expandedMethod, setExpandedMethod] = useState(null);
-  
+
   const loading = useSelector((state) => state.deposit.loading);
+  const walletData = useAppSelector((state) => state.deposit.walletData);
 
-  useEffect(() => {
-    if (visible) fetchWalletBalance();
-  }, [visible]);
-
+  // Fetch balance dynamically if redux state isn't populated
   const fetchWalletBalance = async () => {
     try {
-      const res = await api.get('/api/wallet/getwalletdashboard');
-      setWalletData(res?.data);
+      const res = await api.get('/api/wallet/wallet-details');
+      if (res?.data?.success && res?.data?.data?.[0]) {
+        dispatch(setWalletData(res.data.data[0]));
+      }
     } catch (error) {
-      console.log('Error fetching wallet balance:', error?.response || error.message);
+      console.log('Error fetching wallet balance:', error?.message);
     }
   };
+
+  useEffect(() => {
+    // if (!walletData?.Available_Balance) {
+      fetchWalletBalance();
+    // }
+  }, []);
+
+  // Compute live balance calculations from walletData
+  const inrBalance = parseFloat(walletData?.Available_Balance || 0);
+  const exchangeRate = PAYO_EXCHANGE_RATE || 0.00012;
+  const payoBalance = (inrBalance * exchangeRate).toFixed(2);
 
   const presets = [
     { label: '+ ₹ 100', value: '100' },
@@ -432,29 +777,28 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
       return;
     }
 
-    // 1. Save to Redux (sync – instant)
     dispatch(setAmount(numericalAmount));
-    dispatch(setPaymentMethod({
-      id: method.id,
-      title: method.title,
-      imageSource: method.imageSource,
-      tag: method.tag,
-    }));
+    dispatch(
+      setPaymentMethod({
+        id: method.id,
+        title: method.title,
+        imageSource: method.imageSource,
+        tag: method.tag,
+      })
+    );
 
-    // 2. Start the fetch – but DON'T await it
-    dispatch(fetchConversionRates({
-      amount: numericalAmount,
-      paymentMethod: method.id,
-    }));
+    dispatch(
+      fetchConversionRates({
+        amount: numericalAmount,
+        paymentMethod: method.id,
+      })
+    );
 
-    // 3. ✅ NAVIGATE IMMEDIATELY – no delay!
     navigation.navigate('ConfirmDeposite');
   };
 
-  // Handler for row clicks
   const handleRowPress = (method) => {
     if (method.id === 'crypto') {
-      // Toggle dropdown for crypto
       setExpandedMethod(expandedMethod === 'crypto' ? null : 'crypto');
     } else {
       handlePaymentSelect(method);
@@ -462,177 +806,189 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
   };
 
   return (
-      <SafeAreaView style={styles.container}>
-        {/* Header – back button now calls onClose */}
-        <View style={styles.header}>
-          <TouchableOpacity  onPress={() => navigation.goBack()} style={styles.backButton}>
-            <FeatherIcon name="chevron-left" size={moderateScale(26)} color={theme.colors.primaryBlue} />
-          </TouchableOpacity>
-          <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>Add Money to Wallet</Text>
-            <Text style={styles.headerSubtitle}>Choose a payment method to add funds</Text>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FeatherIcon name="chevron-left" size={moderateScale(26)} color={theme.colors.primaryBlue} />
+        </TouchableOpacity>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Add Money to Wallet</Text>
+          <Text style={styles.headerSubtitle}>Choose a payment method to add funds</Text>
+        </View>
+        <TouchableOpacity style={styles.helpButton}>
+          <FeatherIcon name="help-circle" size={moderateScale(22)} color={theme.colors.primaryBlue} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollBody}>
+        {/* Dynamic Balance Card */}
+        <LinearGradient colors={['#6366F1', '#4F46E5']} style={styles.balanceCard}>
+          <View style={styles.balanceCardLeft}>
+            <View style={styles.balanceRow}>
+              <Text style={styles.balanceLabel}>Total Wallet Balance</Text>
+              <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)}>
+                <FeatherIcon
+                  name={balanceVisible ? 'eye-off' : 'eye'}
+                  size={moderateScale(16)}
+                  color="#E0E7FF"
+                  style={{ marginLeft: moderateScale(16) }}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.cryptoBalance}>
+              {balanceVisible ? payoBalance : '****'}{' '}
+              <Text style={styles.tokenTicker}>PAYO</Text>
+            </Text>
+
+            <Text style={styles.fiatBalance}>
+              {balanceVisible ? `₹ ${inrBalance.toLocaleString('en-IN')}` : '****'}
+            </Text>
           </View>
-          <TouchableOpacity style={styles.helpButton}>
-            <FeatherIcon name="help-circle" size={moderateScale(22)} color={theme.colors.primaryBlue} />
-          </TouchableOpacity>
+          <View style={styles.walletIconContainer}>
+            <Image source={wallet} style={styles.walletHeaderImage} resizeMode="contain" />
+          </View>
+        </LinearGradient>
+
+        {/* Amount Input */}
+        <Text style={styles.sectionLabel}>ENTER AMOUNT</Text>
+        <View style={styles.amountInputContainer}>
+          <Text style={styles.currencySymbol}>₹</Text>
+          <TextInput
+            style={styles.amountInput}
+            value={localAmount}
+            onChangeText={(text) => setLocalAmount(parseValueToString(text))}
+            keyboardType="number-pad"
+          />
+          <View style={styles.currencySelector}>
+            <Text style={styles.currencySelectorText}>INR</Text>
+            <Icon name="keyboard-arrow-down" size={moderateScale(18)} color="#4A5568" />
+          </View>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollBody}>
-          {/* Balance Card */}
-          <LinearGradient colors={['#6366F1', '#4F46E5']} style={styles.balanceCard}>
-            <View style={styles.balanceCardLeft}>
-              <View style={styles.balanceRow}>
-                <Text style={styles.balanceLabel}>Total Wallet Balance</Text>
-                <FeatherIcon name="eye" size={moderateScale(16)} color="#E0E7FF" style={{ marginLeft: moderateScale(6) }} />
-              </View>
-              <Text style={styles.cryptoBalance}>
-                {walletData?.balance?.toLocaleString() || '0'}{' '}
-                <Text style={styles.tokenTicker}>PAYO</Text>
-              </Text>
-              <Text style={styles.fiatBalance}>
-                ≈ ₹{(walletData?.balance * 0).toLocaleString() || '0'}
-              </Text>
-            </View>
-            <View style={styles.walletIconContainer}>
-              <Image source={wallet} style={styles.walletHeaderImage} resizeMode="contain" />
-            </View>
-          </LinearGradient>
+        {/* Presets */}
+        <View style={styles.presetsRow}>
+          {presets.map((item, index) => {
+            const formattedPresetValue = parseInt(item.value.replace(/[^0-9]/g, ''), 10).toLocaleString('en-IN');
+            const isSelected = localAmount === formattedPresetValue;
+            return (
+              <TouchableOpacity
+                key={index}
+                onPress={() => setLocalAmount(formattedPresetValue)}
+                style={[styles.presetChip, isSelected && styles.presetChipActive]}
+              >
+                <Text style={[styles.presetChipText, isSelected && styles.presetChipTextActive]}>
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
-          {/* Amount Input */}
-          <Text style={styles.sectionLabel}>ENTER AMOUNT</Text>
-          <View style={styles.amountInputContainer}>
-            <Text style={styles.currencySymbol}>₹</Text>
-            <TextInput
-              style={styles.amountInput}
-              value={localAmount}
-              onChangeText={(text) => setLocalAmount(parseValueToString(text))}
-              keyboardType="number-pad"
-            />
-            <View style={styles.currencySelector}>
-              <Text style={styles.currencySelectorText}>INR</Text>
-              <Icon name="keyboard-arrow-down" size={moderateScale(18)} color="#4A5568" />
-            </View>
-          </View>
+        {/* Payment Methods */}
+        <Text style={styles.sectionLabel}>SELECT PAYMENT METHOD</Text>
+        <View style={styles.methodsWrapperCard}>
+          {paymentMethods.map((method, idx) => {
+            const isUnclickable = method.id === 'card' || method.id === 'net_banking';
+            const isLastItem = idx === paymentMethods.length - 1;
+            const isCryptoExpanded = expandedMethod === 'crypto' && method.id === 'crypto';
 
-          {/* Presets */}
-          <View style={styles.presetsRow}>
-            {presets.map((item, index) => {
-              const formattedPresetValue = parseInt(item.value.replace(/[^0-9]/g, ''), 10).toLocaleString('en-IN');
-              const isSelected = localAmount === formattedPresetValue;
-              return (
+            return (
+              <View key={method.id}>
                 <TouchableOpacity
-                  key={index}
-                  onPress={() => setLocalAmount(formattedPresetValue)}
-                  style={[styles.presetChip, isSelected && styles.presetChipActive]}
+                  onPress={() => handleRowPress(method)}
+                  activeOpacity={0.7}
+                  style={[
+                    styles.methodRow,
+                    (!isLastItem || isCryptoExpanded) && styles.methodBorder,
+                    isUnclickable && { opacity: 1 },
+                  ]}
+                  disabled={loading || isUnclickable}
                 >
-                  <Text style={[styles.presetChipText, isSelected && styles.presetChipTextActive]}>
-                    {item.label}
-                  </Text>
+                  <View style={styles.methodIconWrapper}>
+                    <Image source={method.imageSource} style={styles.methodImage} resizeMode="contain" />
+                  </View>
+                  <View style={styles.methodMeta}>
+                    <Text style={styles.methodTitle}>{method.title}</Text>
+                    <Text style={styles.methodSubtitle}>{method.subtitle}</Text>
+                  </View>
+                  <View style={styles.methodRight}>
+                    <View style={[styles.tagBadge, { backgroundColor: method.tagBg }]}>
+                      <Text style={[styles.tagBadgeText, { color: method.tagColor }]}>{method.tag}</Text>
+                    </View>
+                    <FeatherIcon
+                      name={isCryptoExpanded ? 'chevron-down' : 'chevron-right'}
+                      size={moderateScale(20)}
+                      color="#9CA3AF"
+                    />
+                  </View>
                 </TouchableOpacity>
-              );
-            })}
-          </View>
 
-          {/* Payment Methods */}
-          <Text style={styles.sectionLabel}>SELECT PAYMENT METHOD</Text>
-          <View style={styles.methodsWrapperCard}>
-            {paymentMethods.map((method, idx) => {
-              const isUnclickable = method.id === 'card' || method.id === 'net_banking';
-              const isLastItem = idx === paymentMethods.length - 1;
-              const isCryptoExpanded = expandedMethod === 'crypto' && method.id === 'crypto';
+                {/* Dropdown Options for Crypto */}
+                {isCryptoExpanded && (
+                  <View style={styles.dropdownContainer}>
+                    <TouchableOpacity
+                      style={[styles.dropdownItem, styles.methodBorder]}
+                      onPress={() =>
+                        handlePaymentSelect({ ...method, id: 'crypto_erc20', subtitle: 'USDT (ERC20)' })
+                      }
+                      disabled={true}
+                      activeOpacity={1}
+                    >
+                      <Text style={styles.dropdownText}>ERC20</Text>
+                      <FeatherIcon name="chevron-right" size={moderateScale(16)} color="#9CA3AF" />
+                    </TouchableOpacity>
 
-              return (
-                <View key={method.id}>
-                  <TouchableOpacity
-                    onPress={() => handleRowPress(method)}
-                    activeOpacity={0.7}
-                    style={[
-                      styles.methodRow, 
-                      // Add border if it's not the last item OR if crypto is expanded (adds top border to dropdown)
-                      (!isLastItem || isCryptoExpanded) && styles.methodBorder,
-                      isUnclickable && { opacity: 1 } // Visual cue that it is disabled
-                    ]}
-                    disabled={loading || isUnclickable} // Enforcing unclickable state
-                  >
-                    <View style={styles.methodIconWrapper}>
-                      <Image source={method.imageSource} style={styles.methodImage} resizeMode="contain" />
-                    </View>
-                    <View style={styles.methodMeta}>
-                      <Text style={styles.methodTitle}>{method.title}</Text>
-                      <Text style={styles.methodSubtitle}>{method.subtitle}</Text>
-                    </View>
-                    <View style={styles.methodRight}>
-                      <View style={[styles.tagBadge, { backgroundColor: method.tagBg }]}>
-                        <Text style={[styles.tagBadgeText, { color: method.tagColor }]}>{method.tag}</Text>
-                      </View>
-                      <FeatherIcon 
-                        name={isCryptoExpanded ? "chevron-down" : "chevron-right"} 
-                        size={moderateScale(20)} 
-                        color="#9CA3AF" 
-                      />
-                    </View>
-                  </TouchableOpacity>
-
-                  {/* Dropdown Options for Crypto */}
-                  {isCryptoExpanded && (
-                    <View style={styles.dropdownContainer}>
-                      <TouchableOpacity
-                        style={[styles.dropdownItem, styles.methodBorder]} // Using standard border line here
-                        onPress={() => handlePaymentSelect({ ...method, id: 'crypto_erc20', subtitle: 'USDT (ERC20)' })}
-                        disabled={true} // Makes it unclickable
-                        activeOpacity={1} // Prevents click visual feedback
-                      >
-                        <Text style={styles.dropdownText}>ERC20</Text>
-                        <FeatherIcon name="chevron-right" size={moderateScale(16)} color="#9CA3AF" />
-                      </TouchableOpacity>
-                      
-                      <TouchableOpacity
-                        style={styles.dropdownItem}
-                        onPress={() => handlePaymentSelect({ ...method, id: 'crypto_trc20', subtitle: 'USDT (TRC20)' })}
-                        disabled={true} // Makes it unclickable
-                        activeOpacity={1} // Prevents click visual feedback
-                      >
-                        <Text style={styles.dropdownText}>TRC20</Text>
-                        <FeatherIcon name="chevron-right" size={moderateScale(16)} color="#9CA3AF" />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
-              );
-            })}
-          </View>
-
-          {/* Security Banner & Promo Card */}
-          <View style={styles.securityBanner}>
-            <View style={styles.shieldIconContainer}>
-              <Image source={require('../../../assets/images/wallet/Security Icon.png')} />
-            </View>
-            <View style={styles.securityMeta}>
-              <Text style={styles.securityTitle}>100% Secure & Encrypted</Text>
-              <Text style={styles.securitySubtitle}>Your money is safe with bank-grade security and encryption.</Text>
-            </View>
-            <View style={styles.checkIconContainer}>
-              <Image source={require('../../../assets/images/wallet/Shield Security Icon.png')} />
-            </View>
-          </View>
-
-          <LinearGradient colors={['#2563EB', '#1D4ED8']} style={styles.promoCard}>
-            <View style={styles.promoLeft}>
-              <View style={styles.coinStackGraphic}>
-                <Image source={require('../../../assets/images/wallet/Promo Icon.png')} />
+                    <TouchableOpacity
+                      style={styles.dropdownItem}
+                      onPress={() =>
+                        handlePaymentSelect({ ...method, id: 'crypto_trc20', subtitle: 'USDT (TRC20)' })
+                      }
+                      disabled={true}
+                      activeOpacity={1}
+                    >
+                      <Text style={styles.dropdownText}>TRC20</Text>
+                      <FeatherIcon name="chevron-right" size={moderateScale(16)} color="#9CA3AF" />
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
-              <View style={styles.promoTexts}>
-                <Text style={styles.promoTitle}>Have a promo code?</Text>
-                <Text style={styles.promoSubtitle}>Apply code and get exciting rewards</Text>
-              </View>
+            );
+          })}
+        </View>
+
+        {/* Security Banner & Promo Card */}
+        <View style={styles.securityBanner}>
+          <View style={styles.shieldIconContainer}>
+            <Image source={require('../../../assets/images/wallet/Security Icon.png')} />
+          </View>
+          <View style={styles.securityMeta}>
+            <Text style={styles.securityTitle}>100% Secure & Encrypted</Text>
+            <Text style={styles.securitySubtitle}>Your money is safe with bank-grade security and encryption.</Text>
+          </View>
+          <View style={styles.checkIconContainer}>
+            <Image source={require('../../../assets/images/wallet/Shield Security Icon.png')} />
+          </View>
+        </View>
+
+        <LinearGradient colors={['#2563EB', '#1D4ED8']} style={styles.promoCard}>
+          <View style={styles.promoLeft}>
+            <View style={styles.coinStackGraphic}>
+              <Image source={require('../../../assets/images/wallet/Promo Icon.png')} />
             </View>
-            <TouchableOpacity style={styles.applyActionBtn}>
-              <Text style={styles.applyActionText}>Apply Now</Text>
-              <FeatherIcon name="chevron-right" size={moderateScale(14)} color="#FFF" style={{ marginLeft: moderateScale(2) }} />
-            </TouchableOpacity>
-          </LinearGradient>
-        </ScrollView>
-      </SafeAreaView>
+            <View style={styles.promoTexts}>
+              <Text style={styles.promoTitle}>Have a promo code?</Text>
+              <Text style={styles.promoSubtitle}>Apply code and get exciting rewards</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.applyActionBtn}>
+            <Text style={styles.applyActionText}>Apply Now</Text>
+            <FeatherIcon name="chevron-right" size={moderateScale(14)} color="#FFF" style={{ marginLeft: moderateScale(2) }} />
+          </TouchableOpacity>
+        </LinearGradient>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -712,12 +1068,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   tokenTicker: {
-    fontSize: moderateScale(16),
-    fontWeight: '600',
-    color: '#C7D2FE',
+   fontSize: theme.typography.size.sm,
+    fontWeight: theme.typography.weight.semibold,
+    color: '#fff',
   },
   fiatBalance: {
-    color: '#C7D2FE',
+   color: '#d1d5db',
     fontSize: moderateScale(13),
     marginTop: moderateScale(2),
   },
@@ -943,6 +1299,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
 });
+
 ////////////////////////////////////////////////////////////////////////////
 
 

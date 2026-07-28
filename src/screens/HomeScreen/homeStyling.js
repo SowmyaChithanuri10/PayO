@@ -988,7 +988,7 @@ viewWalletBtn: {
   },
   walletLabel: {
     color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(13),
     fontWeight: '500',
   },
   // viewWalletBtn: {

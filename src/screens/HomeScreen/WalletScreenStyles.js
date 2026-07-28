@@ -794,13 +794,13 @@ export default StyleSheet.create({
     fontWeight: theme.typography.weight.bold,
   },
   currencyText: {
-    color: '#fff',
-    fontSize: theme.typography.size.base,
+    color: theme.colors.white,
+    fontSize: theme.typography.size.sm,
     fontWeight: theme.typography.weight.semibold,
     marginLeft: scale(6),
   },
   fiatText: {
-    color: '#d1d5db',
+     color: '#fff',
     fontSize: theme.typography.size.sm,
     marginTop: verticalScale(4),
   },
