@@ -131,8 +131,8 @@ export const fetchConversionRates = createAsyncThunk(
       await new Promise(resolve => setTimeout(resolve, 0));
 
       return {
-        cryptoRate: 70.12,
-        expectedCrypto: amount / 70.12,
+        cryptoRate: 0.00012,
+        expectedCrypto: amount * 0.00012,
         processingFee: 0,
         upiId: 'payo@mockupi',
         qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?data=mock',

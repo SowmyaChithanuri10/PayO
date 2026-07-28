@@ -317,61 +317,122 @@ export default function CurvedTabs() {
   const [transactions, setTransactions] = useState([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
 
-  const tabWalletBalance = walletData?.Available_Balance || 0;
+  // const tabWalletBalance = walletData?.Available_Balance || 0;
 
-  // Fetch transactions history to evaluate account access criteria
-  const fetchTransactions = async () => {
-    setLoadingTransactions(true);
-    try {
-      const res = await api.get('/api/wallet/deposit-history');
-      const rawList = res?.data?.Transactions || [];
+  // // Fetch transactions history to evaluate account access criteria
+  // const fetchTransactions = async () => {
+  //   setLoadingTransactions(true);
+  //   try {
+  //     const res = await api.get('/api/wallet/deposit-history');
+  //     const rawList = res?.data?.Transactions || [];
 
-      const formattedData = rawList.map((item) => {
-        const isApproved = item.Payment_Status === 'Payment Approved';
-        const isFailed = item.Payment_Status === 'Payment Failed';
+  //     const formattedData = rawList.map((item) => {
+  //       const isApproved = item.Payment_Status === 'Payment Approved';
+  //       const isFailed = item.Payment_Status === 'Payment Failed';
 
-        let type = 'received';
-        if (isFailed) type = 'failed';
+  //       let type = 'received';
+  //       if (isFailed) type = 'failed';
 
-        return {
-          id: item.Transaction_UID,
-          gatewayOrderId: item.Gateway_Order_ID,
-          depositUid: item.Deposit_UID,
-          amount: parseFloat(item.Requested_Amount || 0),
-          status: item.Payment_Status,
-          createdAt: item.Payment_Date,
-          name: item.Gateway_Order_ID || item.Transaction_UID,
-          type: type,
-          isApproved,
-          isFailed,
-        };
-      });
+  //       return {
+  //         id: item.Transaction_UID,
+  //         gatewayOrderId: item.Gateway_Order_ID,
+  //         depositUid: item.Deposit_UID,
+  //         amount: parseFloat(item.Requested_Amount || 0),
+  //         status: item.Payment_Status,
+  //         createdAt: item.Payment_Date,
+  //         name: item.Gateway_Order_ID || item.Transaction_UID,
+  //         type: type,
+  //         isApproved,
+  //         isFailed,
+  //       };
+  //     });
 
-      setTransactions(formattedData);
-    } catch (err) {
-      console.log('Transaction fetch error in CurvedTabs:', err.message);
-    } finally {
-      setLoadingTransactions(false);
-    }
-  };
+  //     setTransactions(formattedData);
+  //   } catch (err) {
+  //     console.log('Transaction fetch error in CurvedTabs:', err.message);
+  //   } finally {
+  //     setLoadingTransactions(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
+  // useEffect(() => {
+  //   fetchTransactions();
+  // }, []);
 
-  const colors = useMemo(() => getThemeColors(isDarkMode), [isDarkMode]);
+  // const colors = useMemo(() => getThemeColors(isDarkMode), [isDarkMode]);
 
-  // Unrestrict access if transactions > 1 OR balance >= 100
-  const isRestricted = useMemo(() => {
-    const hasMultipleTransactions = transactions?.length > 1;
-    // const hasSufficientBalance = tabWalletBalance >= 100;
+  // // Unrestrict access if transactions > 1 OR balance >= 100
+  // const isRestricted = useMemo(() => {
+  //   const hasMultipleTransactions = transactions?.length > 1;
+  //   // const hasSufficientBalance = tabWalletBalance >= 100;
 
-    // Restricted ONLY if balance is low AND transaction count is 1 or fewer
-    return 
-    // !hasSufficientBalance 
-    // && 
-    !hasMultipleTransactions;
-  }, [tabWalletBalance, transactions]);
+  //   // Restricted ONLY if balance is low AND transaction count is 1 or fewer
+  //   return 
+  //   // !hasSufficientBalance 
+  //   // && 
+  //   !hasMultipleTransactions;
+  // }, [tabWalletBalance, transactions]);
+
+  // 1. Add state for total record count
+const [totalRecordsCount, setTotalRecordsCount] = useState(0);
+
+const tabWalletBalance = walletData?.Available_Balance || 0;
+
+// Fetch transactions history to evaluate account access criteria
+const fetchTransactions = async () => {
+  setLoadingTransactions(true);
+  try {
+    const res = await api.get('/api/wallet/deposit-history');
+    
+    // Extract TotalRecords directly from response
+    const count = res?.data?.TotalRecords || 0;
+    setTotalRecordsCount(count);
+
+    const rawList = res?.data?.Transactions || [];
+
+    const formattedData = rawList.map((item) => {
+      const isApproved = item.Payment_Status === 'Payment Approved';
+      const isFailed = item.Payment_Status === 'Payment Failed';
+
+      let type = 'received';
+      if (isFailed) type = 'failed';
+
+      return {
+        id: item.Transaction_UID,
+        gatewayOrderId: item.Gateway_Order_ID,
+        depositUid: item.Deposit_UID,
+        amount: parseFloat(item.Requested_Amount || 0),
+        status: item.Payment_Status,
+        createdAt: item.Payment_Date,
+        name: item.Gateway_Order_ID || item.Transaction_UID,
+        type: type,
+        isApproved,
+        isFailed,
+      };
+    });
+
+    setTransactions(formattedData);
+  } catch (err) {
+    console.log('Transaction fetch error in CurvedTabs:', err.message);
+  } finally {
+    setLoadingTransactions(false);
+  }
+};
+
+useEffect(() => {
+  fetchTransactions();
+}, []);
+
+const colors = useMemo(() => getThemeColors(isDarkMode), [isDarkMode]);
+
+// Turn off restricted mode (isRestricted = false) if totalRecordsCount > 0
+const isRestricted = useMemo(() => {
+  const hasTransactions = totalRecordsCount > 0;
+
+  // Restricted ONLY if user has 0 records
+  return !hasTransactions;
+}, [totalRecordsCount]);
+
 
   const getIconName = (routeName) => {
     switch (routeName) {
