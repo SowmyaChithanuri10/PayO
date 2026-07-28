@@ -185,6 +185,208 @@
 
 
 
+// import { StyleSheet } from 'react-native';
+
+// // 1. Importing responsive utilities
+// import {
+//   scale,
+//   verticalScale,
+//   moderateScale,
+// } from '../../utils/responsive';
+
+// // 2. Importing theme
+// import { theme } from '../../MainTheme/theme';
+
+// export default StyleSheet.create({
+//   safeArea: {
+//     flex: 1,
+//     backgroundColor: theme.colors.bgApp, // Clean white background
+//   },
+
+//   loader: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     backgroundColor: theme.colors.bgApp,
+//   },
+
+//   container: {
+//     flex: 1,
+//     paddingHorizontal: scale(16),
+//   },
+
+//   scrollContent: {
+//     flexGrow: 1,
+//     paddingBottom: verticalScale(40),
+//     paddingTop: verticalScale(16),
+//   },
+
+//   headerRow: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     marginBottom: verticalScale(24),
+//   },
+
+//   backBtn: {
+//     paddingRight: scale(12),
+//   },
+
+//   header: {
+//     color: theme.colors.textMain,
+//     fontSize: moderateScale(18),
+//     fontWeight: theme.typography.weight.semibold || '600',
+//     flex: 1,
+//   },
+
+//   receiptCard: {
+//     backgroundColor: '#ffffff', // White card
+//     borderRadius: theme.borderRadius.lg || 16,
+//     padding: scale(20),
+//     borderWidth: 1,
+//     borderColor: '#e5e7eb', // Light border
+//     ...theme.shadows.sm, // Subtle shadow
+//   },
+
+//   section: {
+//     marginBottom: verticalScale(12),
+//   },
+
+//   smallLabel: {
+//     color: theme.colors.textMuted,
+//     fontSize: moderateScale(12),
+//     marginBottom: verticalScale(12),
+//     textTransform: 'uppercase',
+//     fontWeight: theme.typography.weight.medium || '500',
+//   },
+
+//   row: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'flex-start',
+//   },
+
+//   userRow: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     flex: 1,
+//     paddingRight: scale(12),
+//   },
+
+//   iconBox: {
+//     width: scale(44),
+//     height: scale(44),
+//     borderRadius: scale(22),
+//     backgroundColor: '#f3f4f6', // Light gray background for icon
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+
+//   name: {
+//     color: theme.colors.textMain,
+//     fontSize: moderateScale(16),
+//     fontWeight: theme.typography.weight.semibold || '600',
+//     marginLeft: scale(12),
+//     maxWidth: scale(160),
+//     textTransform: 'capitalize',
+//   },
+
+//   timeText: {
+//     color: theme.colors.textMuted,
+//     fontSize: moderateScale(11),
+//     marginTop: verticalScale(4),
+//     marginLeft: scale(12),
+//   },
+
+//   amountContainer: {
+//     alignItems: 'flex-end',
+//   },
+
+//   amount: {
+//     color: theme.colors.textMain,
+//     fontSize: moderateScale(18),
+//     fontWeight: theme.typography.weight.bold || '700',
+//   },
+
+//   payo: {
+//     color: theme.colors.statusSuccess || '#10b981', // Green PAYO text
+//     fontSize: moderateScale(13),
+//     fontWeight: theme.typography.weight.semibold || '600',
+//   },
+
+//   divider: {
+//     height: 1,
+//     backgroundColor: '#e5e7eb',
+//     marginVertical: verticalScale(20),
+//   },
+
+//   paymentHeader: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     marginBottom: verticalScale(12),
+//   },
+
+//   paymentTitle: {
+//     color: theme.colors.textMain,
+//     fontSize: moderateScale(15),
+//     marginLeft: scale(8),
+//     fontWeight: theme.typography.weight.semibold || '600',
+//   },
+
+//   label: {
+//     color: theme.colors.textMuted,
+//     fontSize: moderateScale(13),
+//     marginTop: verticalScale(12),
+//   },
+
+//   valueRow: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     marginTop: verticalScale(6),
+//   },
+
+//   value: {
+//     color: theme.colors.textMain, // Dark text for readability
+//     fontSize: moderateScale(14),
+//     fontWeight: theme.typography.weight.medium || '500',
+//     flex: 1,
+//     marginRight: scale(12),
+//   },
+
+//   actionsRow: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'flex-start',
+//     marginTop: verticalScale(32),
+//     paddingTop: verticalScale(24),
+//     borderTopWidth: 1,
+//     borderTopColor: '#e5e7eb', // Light border top
+//   },
+
+//   actionItem: {
+//     alignItems: 'center',
+//     flex: 1,
+//     paddingHorizontal: scale(4),
+//   },
+
+//   circle: {
+//     width: scale(52),
+//     height: scale(52),
+//     borderRadius: scale(26),
+//     backgroundColor: '#f3f4f6', // Light gray button circle
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     marginBottom: verticalScale(8),
+//   },
+
+//   actionText: {
+//     color: theme.colors.textMain,
+//     fontSize: moderateScale(12),
+//     textAlign: 'center',
+//     fontWeight: theme.typography.weight.medium || '500',
+//   },
+// });
+
 import { StyleSheet } from 'react-native';
 
 // 1. Importing responsive utilities
@@ -200,7 +402,7 @@ import { theme } from '../../MainTheme/theme';
 export default StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: theme.colors.bgApp, // Clean white background
+    backgroundColor: theme.colors.bgApp,
   },
 
   loader: {
@@ -221,168 +423,179 @@ export default StyleSheet.create({
     paddingTop: verticalScale(16),
   },
 
+  // --- Header Styles ---
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: verticalScale(24),
+    justifyContent: 'space-between',
+    marginBottom: verticalScale(20),
   },
 
   backBtn: {
-    paddingRight: scale(12),
+    paddingRight: scale(8),
   },
 
-  header: {
-    color: theme.colors.textMain,
-    fontSize: moderateScale(18),
-    fontWeight: theme.typography.weight.semibold || '600',
+  headerCenter: {
     flex: 1,
+    paddingHorizontal: scale(8),
   },
 
-  receiptCard: {
-    backgroundColor: '#ffffff', // White card
-    borderRadius: theme.borderRadius.lg || 16,
-    padding: scale(20),
-    borderWidth: 1,
-    borderColor: '#e5e7eb', // Light border
-    ...theme.shadows.sm, // Subtle shadow
+  headerTitle: {
+    color: theme.colors.textMain,
+    fontSize: moderateScale(theme.typography.size.lg), // 18
+    fontWeight: theme.typography.weight.semibold,
   },
 
-  section: {
-    marginBottom: verticalScale(12),
-  },
-
-  smallLabel: {
-    color: theme.colors.textMuted,
+  headerSubtitle: {
+    color: theme.colors.grey,
     fontSize: moderateScale(12),
-    marginBottom: verticalScale(12),
-    textTransform: 'uppercase',
-    fontWeight: theme.typography.weight.medium || '500',
+    marginTop: verticalScale(2),
   },
 
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+  helpBtn: {
+    paddingLeft: scale(8),
   },
 
-  userRow: {
+  // --- Capture / Card Section ---
+  captureContainer: {
+    backgroundColor: 'transparent',
+    borderRadius: theme.borderRadius.lg,
+    overflow: 'hidden',
+  },
+
+  bannerCard: {
+    backgroundColor: theme.colors.bgLightPurple,
+    borderRadius: theme.borderRadius.lg,
+    padding: scale(18),
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    paddingRight: scale(12),
+    marginBottom: verticalScale(16),
+    borderWidth: 1,
+    borderColor: theme.colors.borderPurple,
   },
 
-  iconBox: {
-    width: scale(44),
-    height: scale(44),
-    borderRadius: scale(22),
-    backgroundColor: '#f3f4f6', // Light gray background for icon
+  bannerLeft: {
+    marginRight: scale(14),
+  },
+
+  statusCircle: {
+    width: scale(48),
+    height: scale(48),
+    borderRadius: scale(24),
+    backgroundColor: theme.colors.white,
     justifyContent: 'center',
     alignItems: 'center',
+    ...theme.shadows.sm,
   },
 
-  name: {
+  bannerRight: {
+    flex: 1,
+  },
+
+  bannerStatusText: {
     color: theme.colors.textMain,
-    fontSize: moderateScale(16),
-    fontWeight: theme.typography.weight.semibold || '600',
-    marginLeft: scale(12),
-    maxWidth: scale(160),
-    textTransform: 'capitalize',
+    fontSize: moderateScale(14),
+    fontWeight: theme.typography.weight.semibold,
   },
 
-  timeText: {
-    color: theme.colors.textMuted,
-    fontSize: moderateScale(11),
-    marginTop: verticalScale(4),
-    marginLeft: scale(12),
-  },
-
-  amountContainer: {
-    alignItems: 'flex-end',
-  },
-
-  amount: {
-    color: theme.colors.textMain,
-    fontSize: moderateScale(18),
-    fontWeight: theme.typography.weight.bold || '700',
-  },
-
-  payo: {
-    color: theme.colors.statusSuccess || '#10b981', // Green PAYO text
-    fontSize: moderateScale(13),
-    fontWeight: theme.typography.weight.semibold || '600',
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: '#e5e7eb',
-    marginVertical: verticalScale(20),
-  },
-
-  paymentHeader: {
+  amountRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: verticalScale(12),
+    alignItems: 'baseline',
+    marginVertical: verticalScale(2),
   },
 
-  paymentTitle: {
+  bannerAmountText: {
     color: theme.colors.textMain,
-    fontSize: moderateScale(15),
-    marginLeft: scale(8),
-    fontWeight: theme.typography.weight.semibold || '600',
+    fontSize: moderateScale(22),
+    fontWeight: theme.typography.weight.bold,
   },
 
-  label: {
-    color: theme.colors.textMuted,
-    fontSize: moderateScale(13),
-    marginTop: verticalScale(12),
+  bannerCurrencyText: {
+    color: theme.colors.primaryPurple,
+    fontSize: moderateScale(14),
+    fontWeight: theme.typography.weight.bold,
   },
 
-  valueRow: {
+  bannerSubText: {
+    color: theme.colors.grey,
+    fontSize: moderateScale(12),
+  },
+
+  // --- Details Card ---
+  detailsCard: {
+    backgroundColor: theme.colors.bgSurface,
+    borderRadius: theme.borderRadius.lg,
+    padding: scale(16),
+    borderWidth: 1,
+    borderColor: theme.colors.borderLight,
+    ...theme.shadows.sm,
+  },
+
+  detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: verticalScale(6),
+    paddingVertical: verticalScale(12),
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.borderLight,
   },
 
-  value: {
-    color: theme.colors.textMain, // Dark text for readability
-    fontSize: moderateScale(14),
-    fontWeight: theme.typography.weight.medium || '500',
-    flex: 1,
-    marginRight: scale(12),
+  detailLabel: {
+    color: theme.colors.grey,
+    fontSize: moderateScale(theme.typography.size.sm), // 14
+    fontWeight: theme.typography.weight.medium,
   },
 
+  detailValueBold: {
+    color: theme.colors.textMain,
+    fontSize: moderateScale(theme.typography.size.sm), // 14
+    fontWeight: theme.typography.weight.semibold,
+    textAlign: 'right',
+    flexShrink: 1,
+    marginLeft: scale(8),
+  },
+
+  statusValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  detailStatusText: {
+    fontSize: moderateScale(theme.typography.size.sm), // 14
+    fontWeight: theme.typography.weight.semibold,
+  },
+
+  // --- Bottom Action Row ---
   actionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginTop: verticalScale(32),
-    paddingTop: verticalScale(24),
+    alignItems: 'center',
+    marginTop: verticalScale(28),
+    paddingTop: verticalScale(20),
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb', // Light border top
+    borderTopColor: theme.colors.borderLight,
   },
 
   actionItem: {
     alignItems: 'center',
     flex: 1,
-    paddingHorizontal: scale(4),
   },
 
-  circle: {
-    width: scale(52),
-    height: scale(52),
-    borderRadius: scale(26),
-    backgroundColor: '#f3f4f6', // Light gray button circle
+  actionSquare: {
+    width: scale(48),
+    height: scale(48),
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.primaryBlue,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: verticalScale(8),
+    ...theme.shadows.sm,
   },
 
   actionText: {
     color: theme.colors.textMain,
-    fontSize: moderateScale(12),
+    fontSize: moderateScale(11),
     textAlign: 'center',
-    fontWeight: theme.typography.weight.medium || '500',
+    fontWeight: theme.typography.weight.medium,
   },
 });

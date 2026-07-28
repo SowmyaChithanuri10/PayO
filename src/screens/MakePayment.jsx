@@ -762,34 +762,35 @@ const MakePayment = ({ navigation }) => {
 
     setLoading(true);
     const generatedTxnId = generateTransactionId();
-     navigation.navigate('loadingtemp', 
+    //  navigation.navigate('loadingtemp', 
+    //   { transactionId: generatedTxnId ,amount:localData.amount ? localData.amount.toString() : '100' ,wallet_id: walletDataLocal?.Wallet_ID}
+    // );
+
+    try {
+      const response = await api.post('api/wallet/add-money', {
+        amount: localData.amount ? localData.amount.toString() : '100',
+        transactionId: generatedTxnId,
+        paymentMode: 'UPI',
+        gatewayName: 'Payo_Client',
+        userWallet: walletDataLocal?.Wallet_ID,
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        // Navigate after successful API response
+ navigation.navigate('loadingtemp', 
       { transactionId: generatedTxnId ,amount:localData.amount ? localData.amount.toString() : '100' ,wallet_id: walletDataLocal?.Wallet_ID}
-    );
-
-    // try {
-    //   const response = await api.post('api/wallet/add-money', {
-    //     amount: localData.amount ? localData.amount.toString() : '100',
-    //     transactionId: generatedTxnId,
-    //     paymentMode: 'UPI',
-    //     gatewayName: 'Payo_Client',
-    //     userWallet: walletDataLocal?.Wallet_ID,
-    //   });
-
-    //   if (response.status === 200 || response.status === 201) {
-    //     // Navigate after successful API response
-    //     navigation.navigate('loadingtemp',    { transactionId: generatedTxnId ,amount:localData.amount ? localData.amount.toString() : '100' ,wallet_id: walletDataLocal?.Wallet_ID});
-    //   } else {
-    //     Alert.alert('Payment Failed', 'Something went wrong. Please try again.');
-    //   }
-    // } catch (error) {
-    //   console.log('Add Money Error:', error.response?.data || error.message);
-    //   Alert.alert(
-    //     'Payment Failed',
-    //     error.response?.data?.message || 'Failed to process payment. Please try again.'
-    //   );
-    // } finally {
-    //   setLoading(false);
-    // }
+    );      } else {
+        Alert.alert('Payment Failed', 'Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      console.log('Add Money Error:', error.response?.data || error.message);
+      Alert.alert(
+        'Payment Failed',
+        error.response?.data?.message || 'Failed to process payment. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

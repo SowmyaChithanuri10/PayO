@@ -258,6 +258,7 @@ import Chats from '../screens/chats/Chats.jsx';
 
 import PaymentLoadingTemp from '../wallet/newloadingTemp.jsx';
 import PaymentSuccessTemp from '../wallet/successPaymentTemp.jsx';
+import KycDetailsCheck from '../screens/kycVerify/KycDetailsCheck.jsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -306,6 +307,8 @@ export default function AppNavigator() {
         <Stack.Screen name="KycComplete" component={KycComplete} />
         <Stack.Screen name="KycFail" component={KycFail} />
         <Stack.Screen name="KycNotStarted" component={KycNotStarted} />
+         <Stack.Screen name="KycDetailsCheck" component={KycDetailsCheck} />
+        
 
         {/* ✅ MAIN APP WITH BOTTOM TABS */}
         <Stack.Screen name="Main" component={BottomTabs} />

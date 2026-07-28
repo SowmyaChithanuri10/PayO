@@ -22,7 +22,8 @@ export const theme = {
     tagEthText: '#2563eb',
     tagPayoBg: '#f3e8ff',
     tagPayoText: '#9333ea',
-    grey:'#64748B'
+    grey:'#64748B',
+   white: '#fff',
   },
   typography: {
     // React Native handles font families differently, falling back to system defaults

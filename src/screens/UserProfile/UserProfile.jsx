@@ -413,7 +413,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import BottomNav from '../components/bottomNav';
 import { verticalScale } from '../../utils/responsive';
 
-export default function UserProfile({ navigation }) {
+export default function UserProfile({ route, navigation ,isEditable: propIsEditable}) {
+ const isEditable = propIsEditable ?? route.params?.isEditable ?? false;
+  
+  console.log(isEditable, "isEditable", route?.params);
   const [profiledata, setProfileData] = useState({});
   const [bankData, setBankData] = useState([]);
   const [address, setAddress] = useState('');
@@ -513,7 +516,7 @@ export default function UserProfile({ navigation }) {
             <Text style={styles.subtitle}>Manage your account and preferences</Text>
           </View>
           <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconBtn}>
+            <TouchableOpacity style={styles.iconBtn}  onPress={() => navigation.navigate('Notifications')} >
               <Icon name="bell" size={20} color="#4F46E5" />
               <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
             </TouchableOpacity>
@@ -529,7 +532,7 @@ export default function UserProfile({ navigation }) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 50 }} 
+          contentContainerStyle={{ paddingBottom: isEditable ? 120 : 50 }} 
         >
           {/* PROFILE CARD */}
           <ImageBackground
