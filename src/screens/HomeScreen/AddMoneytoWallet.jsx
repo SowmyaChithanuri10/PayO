@@ -858,7 +858,7 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
             </Text>
 
             <Text style={styles.fiatBalance}>
-              {balanceVisible ? `₹ ${inrBalance.toLocaleString('en-IN')}` : '****'}
+              {balanceVisible ? `₹ ${inrBalance.toLocaleString('en-IN')}` : ''}
             </Text>
           </View>
           <View style={styles.walletIconContainer}>

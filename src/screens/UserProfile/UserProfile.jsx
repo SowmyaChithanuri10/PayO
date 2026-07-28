@@ -518,7 +518,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
           <View style={styles.headerIcons}>
             <TouchableOpacity style={styles.iconBtn}  onPress={() => navigation.navigate('Notifications')} >
               <Icon name="bell" size={20} color="#4F46E5" />
-              <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
+              {/* <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View> */}
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.iconBtn}

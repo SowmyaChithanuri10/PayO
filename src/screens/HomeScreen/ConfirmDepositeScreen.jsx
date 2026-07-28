@@ -772,7 +772,7 @@ export default function ConfirmDepositScreen() {
               </View>
               <View>
                 <Text style={styles.priceLabel}>Current PAYO Price</Text>
-                <Text style={styles.priceValue}>₹{cryptoRate || 0}</Text>
+                <Text style={styles.priceValue}>{cryptoRate || 0}</Text>
               </View>
             </View>
             <View style={styles.priceChipRight}>

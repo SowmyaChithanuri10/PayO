@@ -1181,9 +1181,9 @@ export default function WalletScreen({ navigation }) {
                   source={require('../../../assets/images/walletscr/Icon (4).png')}
                   style={styles.customHeaderIcon}
                 />
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>3</Text>
-                </View>
+                {/* <View style={styles.badge}>
+                  <Text style={styles.badgeText}></Text>
+                </View> */}
               </TouchableOpacity>
 
               <TouchableOpacity
