@@ -853,90 +853,6 @@ export default StyleSheet.create({
     height: scale(18), 
   },
 
-  /* WALLET CARD */
-  // walletCard: {
-  //   marginHorizontal: scale(20),
-  //   marginTop: verticalScale(5),
-  //   borderRadius: moderateScale(20),
-  //   padding: scale(20),
-  //   position: 'relative',
-  //   elevation: 8,
-  //   shadowColor: theme.colors.primaryIndigo, // Updated to theme
-  //   shadowOffset: { width: 0, height: 4 },
-  //   shadowOpacity: 0.3,
-  //   shadowRadius: 8,
-  // },
-  // walletHeaderRow: {
-  //   flexDirection: 'row',
-  //   justifyContent: 'space-between',
-  //   alignItems: 'center',
-  //   marginBottom: verticalScale(15),
-  // },
-  // rowCenter: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  // },
-  // walletLabel: {
-  //   color: 'rgba(255, 255, 255, 0.9)',
-  //   fontSize: moderateScale(14),
-  //   fontWeight: '500',
-  // },
-  // viewWalletBtn: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   backgroundColor: 'rgba(255,255,255,0.15)',
-  //   paddingHorizontal: scale(10),
-  //   paddingVertical: verticalScale(4),
-  //   borderRadius: scale(20),
-  // },
-  // viewWalletText: {
-  //   color: '#fff',
-  //   fontSize: moderateScale(12),
-  //   marginRight: scale(4),
-  // },
-  // balanceRow: {
-  //   flexDirection: 'row',
-  //   alignItems: 'baseline',
-  // },
-  // balanceAmount: {
-  //   color: '#fff',
-  //   fontSize: moderateScale(32),
-  //   fontWeight: 'bold',
-  // },
-  // balanceCurrency: {
-  //   color: 'rgba(255,255,255,0.8)',
-  //   fontSize: moderateScale(16),
-  //   marginLeft: scale(8),
-  //   fontWeight: '600',
-  // },
-  // fiatAmount: {
-  //   color: 'rgba(255,255,255,0.7)',
-  //   fontSize: moderateScale(14),
-  //   marginTop: verticalScale(4),
-  // },
-  // addMoneyBtn: {
-  //   position: 'absolute',
-  //   bottom: scale(20),
-  //   right: scale(20),
-  //   backgroundColor: '#fff',
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   paddingHorizontal: scale(14),
-  //   paddingVertical: verticalScale(8),
-  //   borderRadius: scale(20),
-  //   elevation: 2,
-  // },
-  // addMoneyIcon: {
-  //   width: scale(14),
-  //   height: scale(14),
-  // },
-  // addMoneyText: {
-  //   color: theme.colors.primaryBlue, // Updated to theme
-  //   fontWeight: '600',
-  //   marginLeft: scale(6),
-  //   fontSize: moderateScale(13),
-  // },
-
   walletCard: {
     marginHorizontal: scale(20),
     marginTop: verticalScale(5),
@@ -959,12 +875,6 @@ export default StyleSheet.create({
     top: -scale(30),
     right: -scale(20),
   },
-  // walletHeaderRow: {
-  //   flexDirection: 'row',
-  //   justifyContent: 'space-between',
-  //   alignItems: 'center',
-  //   width: '100%',
-  // },
   walletHeaderRow: {
   flexDirection: 'row',
   justifyContent: 'space-between',
@@ -991,18 +901,6 @@ viewWalletBtn: {
     fontSize: moderateScale(13),
     fontWeight: '500',
   },
-  // viewWalletBtn: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   backgroundColor: 'transparent',
-  //   borderWidth: 1,
-  //   borderColor: 'rgba(255,255,255,0.4)',
-  //   paddingHorizontal: scale(14),
-  //   paddingVertical: verticalScale(6),
-  //   borderRadius: theme.borderRadius.full,
-    
-   
-  // },
   viewWalletText: {
     color: '#fff',
     fontSize: moderateScale(15),
@@ -1117,23 +1015,22 @@ viewWalletBtn: {
     color: theme.colors.textMain, // Updated to theme
     fontWeight: '500',
   },
-
   /* CAROUSEL / BANNERS */
   carouselContainer: {
     marginTop: verticalScale(24),
-    marginHorizontal: scale(20), 
+    marginHorizontal: scale(20), // This adds the protective gap on BOTH left and right edges
     position: 'relative', 
-    overflow: 'hidden', 
+    overflow: 'hidden', // This forces the second banner to cut off before touching the screen edge
+    //borderRadius: moderateScale(16), // Smooth edge for the clipping effect
   },
   bannerWrapper: {
-    width: windowWidth * 0.78, 
-    marginRight: 6, 
+    width: scale(304), // Fixed width from Figma
+    marginRight: scale(8), // Gap between banners
   },
   bannerCard: {
     width: '100%',
-    height: verticalScale(130), 
-    // borderRadius: moderateScale(16),
-    // backgroundColor: '#e5e7eb',
+    height: verticalScale(102), // Fixed height from Figma
+    borderRadius: moderateScale(16),
     overflow: 'hidden',
   },
   
@@ -1141,21 +1038,61 @@ viewWalletBtn: {
   bannerPagination: {
     position: 'absolute',
     bottom: verticalScale(14), 
-    left: scale(20), 
+    left: scale(16), // Adjusted slightly since the parent container now has a margin
     flexDirection: 'row',
     alignItems: 'center',
+    zIndex: 10,
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: scale(6),
+    height: scale(6),
+    borderRadius: scale(3),
     backgroundColor: 'rgba(255, 255, 255, 0.4)', 
-    marginRight: 6,
+    marginRight: scale(6),
   },
   dotActive: {
-    width: 18, 
+    width: scale(18), 
     backgroundColor: '#ffffff', 
   },
+
+  // /* CAROUSEL / BANNERS */
+  // carouselContainer: {
+  //   marginTop: verticalScale(24),
+  //   marginHorizontal: scale(20), 
+  //   position: 'relative', 
+  //   overflow: 'hidden', 
+  // },
+  // bannerWrapper: {
+  //   width: windowWidth * 0.78, 
+  //   marginRight: 6, 
+  // },
+  // bannerCard: {
+  //   width: '100%',
+  //   height: verticalScale(130), 
+  //   // borderRadius: moderateScale(16),
+  //   // backgroundColor: '#e5e7eb',
+  //   overflow: 'hidden',
+  // },
+  
+  // /* OVERLAID PAGINATION */
+  // bannerPagination: {
+  //   position: 'absolute',
+  //   bottom: verticalScale(14), 
+  //   left: scale(20), 
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  // },
+  // dot: {
+  //   width: 6,
+  //   height: 6,
+  //   borderRadius: 3,
+  //   backgroundColor: 'rgba(255, 255, 255, 0.4)', 
+  //   marginRight: 6,
+  // },
+  // dotActive: {
+  //   width: 18, 
+  //   backgroundColor: '#ffffff', 
+  // },
 
   /* COMMON CARD (Crypto Market & News uses this base) */
   card: {
@@ -1263,62 +1200,6 @@ viewWalletBtn: {
     fontSize: moderateScale(10),
     fontWeight: '600',
   },
-
-//   bottomNav: {
-//   position: 'absolute',
-//   bottom: 0,
-//   left: 0,
-//   right: 0,
-
-//   backgroundColor: '#2E1065',
-
-//   borderTopLeftRadius: moderateScale(30),
-//   borderTopRightRadius: moderateScale(30),
-
-//   flexDirection: 'row',
-//   justifyContent: 'space-around',
-//   alignItems: 'center',
-
-//   paddingHorizontal: wp('2%'),
-
-//   elevation: 20,
-//   zIndex: 999,
-// },
-
-//   navItem: {
-//   alignItems: 'center',
-//   justifyContent: 'center',
-//   flex: 1,
-//   paddingTop: hp('1%'),
-// },
-
-//   navLabel: {
-//     fontSize: moderateScale(9),
-//     marginTop: hp('0.5%'),
-//     fontWeight: '600',
-//   },
-
-//   navActive: {
-//     color: '#F472B6',
-//   },
-
-//   navInactive: {
-//     color: '#aaa',
-//   },
-
-//   centerIcon: {
-//     position: 'absolute',
-//     top: hp('-4.2%'),
-//     width: wp('18%'),
-//     height: wp('18%'),
-//     borderRadius: wp('9%'),
-//     backgroundColor: '#7C3AED',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     alignSelf: 'center',
-//     elevation: 25,
-//     zIndex: 1000,
-//   },
 });
 
 // import { StyleSheet } from 'react-native';

@@ -1041,6 +1041,9 @@ export default function WalletScreen({ navigation }) {
   const [qr, setQr] = useState(null);
   const [address, setAddress] = useState('');
   const [isModalVisible, setModalVisible] = useState(false);
+  
+  // NEW STATE: Toggle balance visibility
+  const [isBalanceVisible, setIsBalanceVisible] = useState(false);
 
   // Toggle balance visibility
   const [balanceVisible, setBalanceVisible] = useState(true);
@@ -1178,9 +1181,9 @@ export default function WalletScreen({ navigation }) {
                   source={require('../../../assets/images/walletscr/Icon (4).png')}
                   style={styles.customHeaderIcon}
                 />
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>3</Text>
-                </View>
+                {/* <View style={styles.badge}>
+                  <Text style={styles.badgeText}></Text>
+                </View> */}
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -1430,29 +1433,43 @@ export default function WalletScreen({ navigation }) {
 
 // import { theme, globalStyles } from '../../MainTheme/theme'; 
 // import AddMoneyModal from '../components/AddMoneyModal';
+// import { useFocusEffect } from '@react-navigation/native';
+// import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+// import { fetchWalletDetails, setWalletData } from '../../redux/features/depositSlice';
 
 // export default function WalletScreen({ navigation }) {
 //   const [wallet, setWallet] = useState(null);
-//   const [loading, setLoading] = useState(true);
+//   const [loading, setLoading] = useState(false);
 //   const [qr, setQr] = useState(null);
 //   const [address, setAddress] = useState('');
-  
 //   const [isModalVisible, setModalVisible] = useState(false);
 
-//   useEffect(() => {
-//     fetchWallet();
-//   }, []);
+//   const walletData = useAppSelector((state) => state.deposit.walletData);
+  
+//   console.log(walletData,"walletData676")
+//   // useFocusEffect(
+//   //   useCallback(() => {
+//   //     fetchWallet();
+//   //   }, [])
+//   // );
 
-//   const fetchWallet = async () => {
-//     try {
-//       const res = await api.get('/api/wallet/getwalletdashboard');
-//       setWallet(res?.data);
-//     } catch (error) {
-//       console.log('Wallet API error:', error?.response || error.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+//   // const fetchWallet = async () => {
+//   //   try {
+//   //     // 1. Call API only ONCE here
+//   //     const res = await api.get('/api/wallet/wallet-details');
+      
+//   //     // 2. Set local state (if needed)
+//   //     console.log(res.data?.data?.[0],"9059729791")
+//   //     setWallet(res.data?.data?.[0]);
+      
+//   //     // 3. Dispatch the response data straight to Redux
+//   //     dispatch(setWalletData(res.data?.data?.[0]));
+//   //   } catch (error) {
+//   //     console.log('Wallet API error:', error?.response || error.message);
+//   //   } finally {
+//   //     setLoading(false);
+//   //   }
+//   // };
 
 //   const progress = wallet?.dailyLimit > 0
 //     ? ((wallet?.dailyUsed || 0) / wallet?.dailyLimit) * 100
@@ -1478,7 +1495,7 @@ export default function WalletScreen({ navigation }) {
 //   };
 
 //   const handleCopy = () => {
-//     const walletAddress = wallet?.id;
+//     const walletAddress = walletData?.Wallet_ID;
 //     if (!walletAddress) return;
 
 //     Clipboard.setString(walletAddress);
@@ -1520,8 +1537,8 @@ export default function WalletScreen({ navigation }) {
 //       <ScrollView
 //         showsVerticalScrollIndicator={false}
 //         keyboardShouldPersistTaps="handled"
-//         contentContainerStyle={styles.scrollContent}>
-        
+//         contentContainerStyle={styles.scrollContent}
+//       >
 //         {/* INNER CONTAINER enforces strict padding so items don't touch screen edges */}
 //         <View style={styles.innerContainer}>
           
@@ -1530,14 +1547,15 @@ export default function WalletScreen({ navigation }) {
 //             <TouchableOpacity
 //               style={styles.headerIconBtn}
 //               activeOpacity={0.8}
-//               onPress={() => navigation.goBack()}>
-//               <Icon name="chevron-left" size={24} color={theme.colors.textMain} />
+//               onPress={() => navigation.goBack()}
+//             >
+//               <Icon name="chevron-left" size={24} color={theme.colors.primaryBlue} />
 //             </TouchableOpacity>
 
 //             <View style={styles.headerTitleContainer}>
 //               <Text style={styles.headerTitle}>Wallet ID</Text>
 //               <Text style={styles.headerSubtitle} numberOfLines={1}>
-//                 {wallet?.id || 'PXYZ6273849A'}
+//                 {walletData?.Wallet_ID}
 //               </Text>
 //             </View>
 
@@ -1561,47 +1579,51 @@ export default function WalletScreen({ navigation }) {
 
 //           {/* MAIN WALLET CARD */}
 //           <LinearGradient
-//             colors={[theme.colors.primaryPurple, theme.colors.primaryBlue]}
+//             colors={['#6366f1', '#4f46e5']} 
 //             start={{ x: 0, y: 0 }}
 //             end={{ x: 1, y: 1 }}
-//             style={styles.mainCard}>
-            
-//             <View style={styles.cardTopRow}>
-//               <View style={styles.activePill}>
-//                 <View style={styles.dot} />
-//                 <Text style={styles.activePillText}>Active Wallet</Text>
-//               </View>
-//               <Icon name="credit-card" size={32} color="#ffffff80" />
-//             </View>
+//             style={styles.mainCard}
+//           >
+//             <View style={styles.mainCardContent}>
+//               {/* LEFT SIDE: BALANCE AND METRICS */}
+//               <View style={styles.mainCardLeft}>
+//                 <View style={styles.activePill}>
+//                   <View style={styles.dot} />
+//                   <Text style={styles.activePillText}>Active Wallet</Text>
+//                 </View>
 
-//             <View style={styles.balanceSection}>
-//               <View style={styles.balanceLabelRow}>
-//                 <Text style={styles.balanceLabel}>Total Wallet Balance</Text>
-//                 <Icon name="eye-off" size={16} color="#d1d5db" style={{ marginLeft: 6 }} />
+//                 <View style={styles.balanceLabelRow}>
+//                   <Text style={styles.balanceLabel}>Total Wallet Balance</Text>
+//                   <Icon name="eye-off" size={14} color="#ffffffb3" style={{ marginLeft: 6 }} />
+//                 </View>
+                
+//                 <View style={styles.balanceValueRow}>
+//                   <Text style={styles.balanceText}>{wallet?.balance?.toLocaleString() || '0'}</Text>
+//                   <Text style={styles.currencyText}>PAYO</Text>
+//                 </View>
+                
+//                 <Text style={styles.fiatText}>≈ ₹0.00</Text>
 //               </View>
-              
-//               <View style={styles.balanceValueRow}>
-//                 <Text style={styles.balanceText}>{wallet?.balance?.toLocaleString() || '12,450'}</Text>
-//                 <Text style={styles.currencyText}>PAYO</Text>
-//               </View>
-              
-//               <View style={styles.bottomCardRow}>
-//                 <Text style={styles.fiatText}>≈ ₹8,71,500</Text>
+
+//               {/* RIGHT SIDE: 3D WALLET GRAPHIC & ACTION */}
+//               <View style={styles.mainCardRight}>
+//                 <Image 
+//                   source={require('../../../assets/images/profile/wallet_design.png')} 
+//                   style={styles.wallet3dImage} 
+//                 />
 //                 <TouchableOpacity
 //                   activeOpacity={0.9}
 //                   style={styles.addMoneyBtn}
-//                   onPress={() => navigation.navigate('AddMoneytoWallet')}>
-//                   <Image 
-//                     source={require('../../../assets/images/walletscr/icon-container.png')} 
-//                     style={styles.addMoneyIcon} 
-//                   />
+//                   onPress={() => navigation.navigate('AddMoneytoWallet')}
+//                 >
+//                   <Icon name="plus" size={16} color="#11f00e" style={{ marginRight: 4 ,}} />
 //                   <Text style={styles.addMoneyText}>Add Money</Text>
 //                 </TouchableOpacity>
 //               </View>
 //             </View>
 //           </LinearGradient>
 
-//           {/* COPY & SHARE BUTTONS */}
+//           {/* COPY & SHARE ACTIONS - BALANCED LAYOUT */}
 //           <View style={styles.actionRow}>
 //             <TouchableOpacity style={styles.actionBtn} activeOpacity={0.7} onPress={handleCopy}>
 //               <Text style={styles.actionBtnText}>Copy address</Text>
@@ -1625,20 +1647,21 @@ export default function WalletScreen({ navigation }) {
 //             colors={['#2563eb', '#38bdf8']}
 //             start={{ x: 0, y: 0 }}
 //             end={{ x: 1, y: 0 }}
-//             style={styles.promoBanner}>
+//             style={styles.promoBanner}
+//           >
 //             <View style={styles.promoContent}>
 //               <Text style={styles.promoEmoji}>🚀</Text>
 //               <View style={styles.promoTextContainer}>
 //                 <Text style={styles.promoTitle}>Invite Friends & Earn PAYO</Text>
 //                 <Text style={styles.promoSub}>Get ₹500 for every referral</Text>
 //               </View>
-//               <TouchableOpacity style={styles.promoBtn}>
+//               <TouchableOpacity onPress={()=>navigation.navigate('Receive')} style={styles.promoBtn}>
 //                 <Text style={styles.promoBtnText}>Refer Now {'>'}</Text>
 //               </TouchableOpacity>
 //             </View>
 //           </LinearGradient>
 
-//           {/* TOKEN HOLDINGS HEADER */}
+//           {/* TOKEN HOLDINGS SECTION */}
 //           <View style={styles.sectionHeader}>
 //             <Text style={styles.sectionTitle}>Token Holdings</Text>
 //             <TouchableOpacity>
@@ -1648,16 +1671,18 @@ export default function WalletScreen({ navigation }) {
 
 //           {/* REFERRAL REWARDS CARD */}
 //           <View style={[globalStyles.card, styles.dataCard]}>
-//             <View style={styles.dataCardRow}>
-//               <Text style={styles.cardTitleText}>Referral rewards</Text>
+//             <View style={[styles.dataCardRow, { alignItems: 'flex-start' }]}>
+//               <View style={{ flex: 1 }}>
+//                 <Text style={styles.cardTitleText}>Referral rewards</Text>
+//                 <Text style={[styles.cardSubText, { marginTop: 12 }]}>
+//                   • Unlocks in {wallet?.unlockInDays || 3} days
+//                 </Text>
+//               </View>
 //               <View style={{ alignItems: 'flex-end' }}>
 //                 <Text style={styles.cardAmountText}>{wallet?.referralRewards || '200.0'}</Text>
 //                 <Text style={styles.cardStatusTextPending}>Pending</Text>
+//                 <Text style={styles.cardStatusTextLocked}>Locked</Text>
 //               </View>
-//             </View>
-//             <View style={styles.dataCardRow}>
-//               <Text style={styles.cardSubText}>• Unlocks in {wallet?.unlockInDays || 3} days</Text>
-//               <Text style={styles.cardStatusTextLocked}>Locked</Text>
 //             </View>
 //           </View>
 
@@ -1680,13 +1705,14 @@ export default function WalletScreen({ navigation }) {
 //             </View>
 //           </View>
 
-//           {/* SEND PAYO BUTTON */}
+//           {/* SEND PAYO BUTTON - MATCHES SYMMETRICAL FULL WIDTH DESIGN WITH ABSOLUTE RIGHT ICON */}
 //           <TouchableOpacity
 //             style={styles.sendPrimaryBtn}
 //             activeOpacity={0.8}
-//             onPress={() => navigation.navigate('SendScreen')}>
+//             onPress={() => navigation.navigate('SendScreen')}
+//           >
 //             <Text style={styles.sendPrimaryBtnText}>Send PAYO</Text>
-//             <Icon name="arrow-right" size={20} color="#fff" />
+//             <Icon name="arrow-right" size={20} color="#fff" style={styles.rightIconAbsolute} />
 //           </TouchableOpacity>
 
 //           {/* BOTTOM PROMOS */}
@@ -1733,6 +1759,4 @@ export default function WalletScreen({ navigation }) {
 //     </SafeAreaView>
 //   );
 // }
-
-
 
