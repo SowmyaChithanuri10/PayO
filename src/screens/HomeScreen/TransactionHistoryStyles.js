@@ -351,7 +351,7 @@ export default StyleSheet.create({
   },
 
   status: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(10.5),
     marginTop: verticalScale(2),
     textTransform: 'capitalize',
     fontWeight: theme.typography.weight.medium || '500',

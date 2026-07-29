@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   detailsCard: {
     paddingVertical: verticalScale(8),
     borderWidth: 0,
-    backgroundColor: theme.colors.bgSurface,
+       backgroundColor: '#F2F4F4',
     marginTop: verticalScale(20), // Fixed: passed explicit density value
     marginBottom:verticalScale(20),
   },
@@ -303,10 +303,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: verticalScale(14),
+     borderBottomColor: '#9EA1A8',
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(0,0,0,0.06)',
+    backgroundColor: '#9EA1A8',
+  
     width: '100%',
   },
   detailValue: {

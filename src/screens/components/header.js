@@ -837,6 +837,7 @@ export default function Header() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [kycRecords, setKycRecords] = useState([]);
 
   const walletData = useAppSelector((state) => state.deposit.walletData);
   const tabWalletBalance = walletData?.Available_Balance || 0;
@@ -854,13 +855,21 @@ export default function Header() {
       console.log('Header transaction fetch error:', err.message);
     }
   };
+   const fetchKYCDetails = async () => {
+    try {
+      const response = await api.get('/api/kyc/details');
+      if (response?.data?.status === '200' || response?.data?.Data) {
+        setKycRecords(response?.data?.Data?.Total_Count);
+      }
+    } catch (error) {
+      Alert.alert('Error', error?.message || 'Failed to fetch KYC details.');
+    } finally {
+     
+    }
+  };
+  console.log(kycRecords,"kycRecords")
 
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
-
-  // Turn off restricted mode (isRestricted = false) if TotalRecords > 0
-  const isRestricted = useMemo(() => {
+   const isRestricted = useMemo(() => {
     const hasTransactions = totalRecords > 0;
 
     // Restricted ONLY if user has 0 records
@@ -947,7 +956,11 @@ export default function Header() {
     extrapolate: 'clamp',
   });
 
-  // Re-fetch transactions on sidebar open to keep data fresh
+  useEffect(() => {
+    fetchTransactions();
+    fetchKYCDetails();
+  }, []);
+
   useEffect(() => {
     if (sidebarVisible) {
       fetchTransactions();
@@ -980,7 +993,7 @@ export default function Header() {
     { label: 'Transactions', icon: 'refresh-cw', route: 'TransactionHistory', requiresAccess: true },
     { label: 'Rewards', icon: 'gift', route: 'ReferEarn', requiresAccess: true },
     { label: 'Referrals', icon: 'users', route: 'ReferEarn', requiresAccess: true },
-    { label: 'Verify KYC', icon: 'file', route: 'KYCVerification', requiresAccess: true },
+    { label: 'Verify KYC', icon: 'file', route: kycRecords ==0 ? "KYCVerification":'KycDetailsCheck', requiresAccess: true },
   ];
 
   const bottomMenuItems = [

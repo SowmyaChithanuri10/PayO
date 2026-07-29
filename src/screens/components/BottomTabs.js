@@ -310,129 +310,69 @@ import ProfileScreen from '../UserProfile/UserProfile';
 import { getThemeColors, styles } from './BottomTabStyling';
 import { useAppSelector } from '../../redux/hooks';
 
-export default function CurvedTabs() {
+export default function CurvedTabs({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark';
   const walletData = useAppSelector((state) => state.deposit.walletData);
-  
+
   const [transactions, setTransactions] = useState([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
+  const [totalRecordsCount, setTotalRecordsCount] = useState(0);
 
-  // const tabWalletBalance = walletData?.Available_Balance || 0;
+  const tabWalletBalance = walletData?.Available_Balance || 0;
 
-  // // Fetch transactions history to evaluate account access criteria
-  // const fetchTransactions = async () => {
-  //   setLoadingTransactions(true);
-  //   try {
-  //     const res = await api.get('/api/wallet/deposit-history');
-  //     const rawList = res?.data?.Transactions || [];
+  // Fetch transactions history to evaluate account access criteria
+  const fetchTransactions = async () => {
+    setLoadingTransactions(true);
+    try {
+      const res = await api.get('/api/wallet/deposit-history');
 
-  //     const formattedData = rawList.map((item) => {
-  //       const isApproved = item.Payment_Status === 'Payment Approved';
-  //       const isFailed = item.Payment_Status === 'Payment Failed';
+      // Extract TotalRecords directly from response
+      const count = res?.data?.TotalRecords || 0;
+      setTotalRecordsCount(count);
 
-  //       let type = 'received';
-  //       if (isFailed) type = 'failed';
+      const rawList = res?.data?.Transactions || [];
 
-  //       return {
-  //         id: item.Transaction_UID,
-  //         gatewayOrderId: item.Gateway_Order_ID,
-  //         depositUid: item.Deposit_UID,
-  //         amount: parseFloat(item.Requested_Amount || 0),
-  //         status: item.Payment_Status,
-  //         createdAt: item.Payment_Date,
-  //         name: item.Gateway_Order_ID || item.Transaction_UID,
-  //         type: type,
-  //         isApproved,
-  //         isFailed,
-  //       };
-  //     });
+      const formattedData = rawList.map((item) => {
+        const isApproved = item.Payment_Status === 'Payment Approved';
+        const isFailed = item.Payment_Status === 'Payment Failed';
 
-  //     setTransactions(formattedData);
-  //   } catch (err) {
-  //     console.log('Transaction fetch error in CurvedTabs:', err.message);
-  //   } finally {
-  //     setLoadingTransactions(false);
-  //   }
-  // };
+        let type = 'received';
+        if (isFailed) type = 'failed';
 
-  // useEffect(() => {
-  //   fetchTransactions();
-  // }, []);
+        return {
+          id: item.Transaction_UID,
+          gatewayOrderId: item.Gateway_Order_ID,
+          depositUid: item.Deposit_UID,
+          amount: parseFloat(item.Requested_Amount || 0),
+          status: item.Payment_Status,
+          createdAt: item.Payment_Date,
+          name: item.Gateway_Order_ID || item.Transaction_UID,
+          type: type,
+          isApproved,
+          isFailed,
+        };
+      });
 
-  // const colors = useMemo(() => getThemeColors(isDarkMode), [isDarkMode]);
+      setTransactions(formattedData);
+    } catch (err) {
+      console.log('Transaction fetch error in CurvedTabs:', err.message);
+    } finally {
+      setLoadingTransactions(false);
+    }
+  };
 
-  // // Unrestrict access if transactions > 1 OR balance >= 100
-  // const isRestricted = useMemo(() => {
-  //   const hasMultipleTransactions = transactions?.length > 1;
-  //   // const hasSufficientBalance = tabWalletBalance >= 100;
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
 
-  //   // Restricted ONLY if balance is low AND transaction count is 1 or fewer
-  //   return 
-  //   // !hasSufficientBalance 
-  //   // && 
-  //   !hasMultipleTransactions;
-  // }, [tabWalletBalance, transactions]);
+  const colors = useMemo(() => getThemeColors(isDarkMode), [isDarkMode]);
 
-  // 1. Add state for total record count
-const [totalRecordsCount, setTotalRecordsCount] = useState(0);
-
-const tabWalletBalance = walletData?.Available_Balance || 0;
-
-// Fetch transactions history to evaluate account access criteria
-const fetchTransactions = async () => {
-  setLoadingTransactions(true);
-  try {
-    const res = await api.get('/api/wallet/deposit-history');
-    
-    // Extract TotalRecords directly from response
-    const count = res?.data?.TotalRecords || 0;
-    setTotalRecordsCount(count);
-
-    const rawList = res?.data?.Transactions || [];
-
-    const formattedData = rawList.map((item) => {
-      const isApproved = item.Payment_Status === 'Payment Approved';
-      const isFailed = item.Payment_Status === 'Payment Failed';
-
-      let type = 'received';
-      if (isFailed) type = 'failed';
-
-      return {
-        id: item.Transaction_UID,
-        gatewayOrderId: item.Gateway_Order_ID,
-        depositUid: item.Deposit_UID,
-        amount: parseFloat(item.Requested_Amount || 0),
-        status: item.Payment_Status,
-        createdAt: item.Payment_Date,
-        name: item.Gateway_Order_ID || item.Transaction_UID,
-        type: type,
-        isApproved,
-        isFailed,
-      };
-    });
-
-    setTransactions(formattedData);
-  } catch (err) {
-    console.log('Transaction fetch error in CurvedTabs:', err.message);
-  } finally {
-    setLoadingTransactions(false);
-  }
-};
-
-useEffect(() => {
-  fetchTransactions();
-}, []);
-
-const colors = useMemo(() => getThemeColors(isDarkMode), [isDarkMode]);
-
-// Turn off restricted mode (isRestricted = false) if totalRecordsCount > 0
-const isRestricted = useMemo(() => {
-  const hasTransactions = totalRecordsCount > 0;
-
-  // Restricted ONLY if user has 0 records
-  return !hasTransactions;
-}, [totalRecordsCount]);
-
+  // Turn off restricted mode (isRestricted = false) if totalRecordsCount > 0
+  const isRestricted = useMemo(() => {
+    const hasTransactions = totalRecordsCount > 0;
+    // Restricted ONLY if user has 0 records
+    return !hasTransactions;
+  }, [totalRecordsCount]);
 
   const getIconName = (routeName) => {
     switch (routeName) {
@@ -454,9 +394,9 @@ const isRestricted = useMemo(() => {
     return labels[routeName] || routeName;
   };
 
-  const handleTabNavigation = (routeName, navigate) => {
+  const handleTabNavigation = (routeName, tabNavigate) => {
     const restrictedRoutes = ['Transactions', 'Profile', 'Send'];
-    
+
     if (isRestricted && restrictedRoutes.includes(routeName)) {
       Alert.alert(
         'Access Restricted',
@@ -465,17 +405,20 @@ const isRestricted = useMemo(() => {
           {
             text: 'OK',
             style: 'cancel',
-            onPress: () => console.log('OK Pressed'),
           },
           {
             text: 'Add Money',
-            onPress: () => navigate('AddMoneytoWallet'),
+            onPress: () => {
+              // Use root navigation stack to go to AddMoneytoWallet
+              navigation.navigate('AddMoneytoWallet');
+            },
           },
         ],
         { cancelable: true }
       );
     } else {
-      navigate(routeName);
+      // Execute standard tab navigation if allowed
+      tabNavigate(routeName);
     }
   };
 
@@ -494,7 +437,7 @@ const isRestricted = useMemo(() => {
         <View
           style={[
             isFocused ? styles.navActiveBg : styles.navInactiveIconContainer,
-            isFocused && { backgroundColor: colors.activeTabBg }
+            isFocused && { backgroundColor: colors.activeTabBg },
           ]}
         >
           <Icon
@@ -507,9 +450,9 @@ const isRestricted = useMemo(() => {
         <Text
           style={[
             styles.navLabel,
-            { 
+            {
               color: isFocused ? colors.activeText : colors.inactiveText,
-              fontWeight: isFocused ? '700' : '500'
+              fontWeight: isFocused ? '700' : '500',
             },
           ]}
         >
@@ -530,7 +473,7 @@ const isRestricted = useMemo(() => {
         style={styles.bottomBar}
         strokeColor={colors.navBackground}
         circleBackgroundColor={colors.navBackground}
-        height={moderateScale(80)} 
+        height={moderateScale(80)}
         circleWidth={moderateScale(60)}
         maxWidth={moderateScale(360)}
         borderTopLeftRadius={moderateScale(32)}
@@ -540,27 +483,26 @@ const isRestricted = useMemo(() => {
         initialRouteName="Home"
         screenOptions={{ headerShown: false }}
         tabBar={renderCustomTabBarButton}
-        
         renderCircle={({ navigate }) => (
           <View style={styles.circleContainer}>
             <View style={[styles.circleBackgroundPatch, { backgroundColor: colors.navBackground }]} />
-            
+
             <TouchableOpacity
               style={[
-                styles.btnCircle, 
-                { 
+                styles.btnCircle,
+                {
                   borderColor: isDarkMode ? '#10B981' : '#00A859',
-                  backgroundColor: colors.screenBackground 
+                  backgroundColor: colors.screenBackground,
                 },
-                isRestricted && { opacity: 0.5, backgroundColor: '#E5E7EB' }
+                isRestricted && { opacity: 0.5, backgroundColor: '#E5E7EB' },
               ]}
               activeOpacity={0.85}
               onPress={() => handleTabNavigation('Send', navigate)}
             >
-              <Icon 
-                name="maximize" 
-                size={moderateScale(24)} 
-                color={isRestricted ? '#9CA3AF' : (isDarkMode ? '#10B981' : '#00A859')} 
+              <Icon
+                name="maximize"
+                size={moderateScale(24)}
+                color={isRestricted ? '#9CA3AF' : isDarkMode ? '#10B981' : '#00A859'}
               />
             </TouchableOpacity>
           </View>
@@ -570,9 +512,9 @@ const isRestricted = useMemo(() => {
         <CurvedBottomBar.Screen name="Wallets" position="LEFT" component={WalletScreen} />
         <CurvedBottomBar.Screen name="Send" position="CENTER" component={SendScreen} />
         <CurvedBottomBar.Screen name="Transactions" position="RIGHT" component={TransactionHistory} />
-        <CurvedBottomBar.Screen 
-          name="Profile" 
-          position="RIGHT" 
+        <CurvedBottomBar.Screen
+          name="Profile"
+          position="RIGHT"
           component={(props) => <ProfileScreen {...props} isEditable={true} />}
         />
       </CurvedBottomBar.Navigator>
