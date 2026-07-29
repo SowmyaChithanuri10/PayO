@@ -414,46 +414,6 @@ const styles = StyleSheet.create({
     padding: moderateScale(16),
     paddingBottom: moderateScale(40),
   },
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: verticalScale(20),
-  },
-  backButtonCircle: {
-    width: scale(35),
-    height: scale(35),
-    borderRadius: scale(20),
-    backgroundColor: theme.colors.bgSurface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...theme.shadows.sm,
-  },
-  headerTextContainer: {
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: moderateScale(18),
-    fontWeight: theme.typography.weight.bold,
-    color: theme.colors.textMain,
-  },
-  headerSubtitle: {
-    fontSize: moderateScale(12),
-    color: theme.colors.textMuted,
-    marginTop: verticalScale(2),
-  },
-  helpButton: {
-    width: scale(40),
-    height: scale(40),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconSmall: {
-    width: scale(20),
-    height: scale(20),
-    resizeMode: 'contain',
-  },
   // Amount Card
   amountCard: {
     backgroundColor: theme.colors.bgLightPurple,

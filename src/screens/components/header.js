@@ -983,7 +983,7 @@ export default function Header() {
     };
   }, [sidebarVisible]);
 
-  const notificationCount = 3; 
+  const notificationCount = 0; 
 
   const menuItems = [
     { label: 'Dashboard', icon: 'home', route: 'HomeScreen', requiresAccess: false },

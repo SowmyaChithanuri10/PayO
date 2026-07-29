@@ -1854,7 +1854,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../api/axios';
 import styles from './homeStyling';
-import { moderateScale, windowWidth } from '../../utils/responsive';
+import {scale, moderateScale, windowWidth } from '../../utils/responsive';
 import Header from '../components/header';
 import { useAppDispatch } from '../../redux/hooks';
 import { setWalletData } from '../../redux/features/depositSlice';
@@ -1888,7 +1888,7 @@ export default function HomeScreen({ navigation }) {
   // 1. STATE DECLARATIONS
   const [balanceVisible, setBalanceVisible] = useState(true);
   const [available, setAvailable] = useState('');
-  const [avbRuppee, setAvbRuppee] = useState('');
+  const [avbRuppee, setAvbRuppee] = useState('0.00');
   const [expertCoins, setExpertCoins] = useState([]);
   const [marketNews, setMarketNews] = useState([]);
   const [newsCount, setNewsCount] = useState(3);
@@ -2114,10 +2114,10 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.actionsGridCard}>
             <View style={styles.actionsGrid}>
               {[
-                { id: 'send', image: require('../../../assets/images/Icon.png'), label: 'Send', route: 'SendScreen', params: { tab: 'scan' } },
-                { id: 'receive', image: require('../../../assets/images/Icon (1).png'), label: 'Receive', route: 'Receive' },
-                { id: 'scan', image: require('../../../assets/images/Icon (2).png'), label: 'Scan QR', route: 'SendScreen', params: { tab: 'scan' } },
-                { id: 'exchange', image: require('../../../assets/images/Icon (3).png'), label: 'Exchange', route: 'ExchangeScreen' }
+                { id: 'send', image: require('../../../assets/images/Icon_1.png'), label: 'Send', route: 'SendScreen', params: { tab: 'scan' } },
+                { id: 'receive', image: require('../../../assets/images/Icon_2.png'), label: 'Receive', route: 'Receive' },
+                { id: 'scan', image: require('../../../assets/images/Icon_3.png'), label: 'Scan QR', route: 'SendScreen', params: { tab: 'scan' } },
+                { id: 'exchange', image: require('../../../assets/images/Icon_4.png'), label: 'Exchange', route: 'ExchangeScreen' }
               ].map((action) => (
                 <TouchableOpacity 
                   key={action.id} 
@@ -2151,6 +2151,39 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         {/* Banners */}
+        <View style={styles.carouselContainer}>
+          <FlatList
+            ref={flatListRef}
+            data={bannerData}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={scale(304) + scale(8)} // Card width + Gap
+            decelerationRate="fast"
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+            renderItem={({ item }) => (
+              <View style={styles.bannerWrapper}>
+                <Image
+                  source={item.image}
+                  style={styles.bannerCard}
+                  resizeMode="cover"
+                />
+              </View>
+            )}
+          />
+          
+          <View style={styles.bannerPagination}>
+            {bannerData.map((_, i) => (
+              <View 
+                key={i} 
+                style={[styles.dot, activeBanner === i && styles.dotActive]} 
+              />
+            ))}
+          </View>
+        </View>
+
+        {/* Banners
                <View style={styles.carouselContainer}>
   <FlatList
     ref={flatListRef}
@@ -2181,7 +2214,7 @@ export default function HomeScreen({ navigation }) {
       />
     ))}
   </View>
-</View>
+</View> */}
 
         {/* Crypto Market */}
         <View style={styles.sectionContainer}>
