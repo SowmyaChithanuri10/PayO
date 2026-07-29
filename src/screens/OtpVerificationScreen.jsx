@@ -584,7 +584,7 @@ export default function OtpVerificationScreen({ route, navigation }) {
         }
         
         if (type === 'login') {
-          navigation.replace('Chats');
+          navigation.replace('Main');
           // navigation.replace('WalletScreen');
           // navigation.replace('KYCVerification')
 
