@@ -1037,7 +1037,7 @@ export default function RegisterMobileScreen({ navigation }) {
       });
 
       if (
-        response.data?.status === '200' ||
+        response.data?.status === '200' &&
         response.data?.message === 'OTP Sent Successfully'
       ) {
         
@@ -1063,7 +1063,21 @@ export default function RegisterMobileScreen({ navigation }) {
         }
         // -------------------------------------------------------------------
 
-      } else {
+      } 
+      else if(response.data?.status === '202' &&
+        response.data?.message === 'Mobile Verification Completed'){
+          setUserId(response?.data?.userId);
+
+       navigation.replace('Profile');
+      }
+        else if(response.data?.status === '202' &&
+        response.data?.message === 'Profile is comepleted! TPIN Generation is pending'){
+          setUserId(response?.data?.userId);
+
+        navigation.navigate('TransactionPin');
+      }
+      
+      else {
         setError(response.data?.message || 'Something went wrong');
       }
     } catch (error) {
