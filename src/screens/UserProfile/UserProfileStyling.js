@@ -1285,7 +1285,7 @@ profileCardBgImage: {
   },
   kycText: {
     color: theme.colors.statusDanger, 
-    fontSize: moderateScale(9),
+    fontSize: moderateScale(11),
     fontWeight: '700',
     letterSpacing: 0.5,
   },

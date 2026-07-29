@@ -1856,8 +1856,8 @@ import api from '../../api/axios';
 import styles from './homeStyling';
 import {scale, moderateScale, windowWidth } from '../../utils/responsive';
 import Header from '../components/header';
-import { useAppDispatch } from '../../redux/hooks';
-import { setWalletData } from '../../redux/features/depositSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { setProfileData, setWalletData } from '../../redux/features/depositSlice';
 import { PAYO_EXCHANGE_RATE } from '../../api/mainValuables';
 
 // // --- CONSTANTS & HELPERS MOVED OUTSIDE TO PREVENT RE-RENDERING BUGS --- //
@@ -1928,6 +1928,10 @@ export default function HomeScreen({ navigation }) {
     offset: BANNER_ITEM_WIDTH * index,
     index,
   }), []);
+
+    const walletData = useAppSelector((state) => state.deposit.walletData);
+    const profileData = useAppSelector((state) => state.deposit.profileData);
+  console.log(walletData,"062345",profileData)
 
   // 6. USE EFFECTS
   useEffect(() => {
@@ -2008,6 +2012,17 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+const fetchProfileData = async () => {
+  try {
+    const res = await api.get('/api/auth/user-profile');
+    if (res?.data?.Data) {
+      dispatch(setProfileData(res?.data?.Data));
+    }
+  } catch (err) {
+    console.log('Profile API error:', err.message);
+  }
+};
+
   // 8. FOCUS EFFECT
   useFocusEffect(
     useCallback(() => {
@@ -2015,6 +2030,7 @@ export default function HomeScreen({ navigation }) {
       fetchExpertCoins();
       fetchMarketNews();
       fetchWallet();
+      fetchProfileData();
 
       navigation.setOptions({
         gestureEnabled: false,
