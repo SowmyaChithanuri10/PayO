@@ -275,12 +275,14 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
+  StatusBar,
   Platform,
   KeyboardAvoidingView,
   FlatList,
   Alert,
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './AddBankDetailsStyles';

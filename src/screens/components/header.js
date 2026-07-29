@@ -807,7 +807,6 @@ import {
   Image,
   StyleSheet,
   Dimensions,
-  SafeAreaView,
   ScrollView,
   Alert,
   BackHandler,
@@ -822,6 +821,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
 import api from '../../api/axios';
 import styles from '../HomeScreen/homeStyling'; 
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // --- Custom Theme & Responsiveness Imports ---
 import { scale, verticalScale, moderateScale } from '../../utils/responsive';

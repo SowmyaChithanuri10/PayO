@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  SafeAreaView,
+  StatusBar,
   ScrollView,
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   PanResponder,
   Animated,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Defs, LinearGradient, Stop, Circle, Line as SvgLine } from 'react-native-svg';
 import {
   PinchGestureHandler,
