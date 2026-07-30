@@ -827,6 +827,7 @@ import styles from '../HomeScreen/homeStyling';
 import { scale, verticalScale, moderateScale } from '../../utils/responsive';
 import { theme } from '../../MainTheme/theme';
 import { useAppSelector } from '../../redux/hooks';
+import { capitalizeFirstLetter } from '../../api/mainValuables';
 
 const { width, height } = Dimensions.get('window');
 const DRAWER_WIDTH = width * 0.76;
@@ -838,7 +839,7 @@ export default function Header() {
   const [transactions, setTransactions] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [kycRecords, setKycRecords] = useState([]);
-
+  const profileDataRedux = useAppSelector((state) => state.deposit.profileData);
   const walletData = useAppSelector((state) => state.deposit.walletData);
   const tabWalletBalance = walletData?.Available_Balance || 0;
 
@@ -1134,8 +1135,8 @@ export default function Header() {
                       <Icon name="user" size={22} color={theme.colors.primaryBlue} />
                     </View>
                     <View style={sidebarStyles.nameContainer}>
-                      <Text style={sidebarStyles.usernameText}>Username 1</Text>
-                      <Text style={sidebarStyles.payoIdText}>PAYO-9831</Text>
+                      <Text style={sidebarStyles.usernameText}> {capitalizeFirstLetter(profileDataRedux?.Full_Name)}</Text>
+                      <Text style={sidebarStyles.payoIdText}>{walletData?.Wallet_ID}</Text>
                     </View>
                   </View>
 

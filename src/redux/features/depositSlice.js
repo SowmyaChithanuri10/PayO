@@ -120,8 +120,6 @@
 // } = depositSlice.actions;
 
 // export default depositSlice.reducer;
-
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchConversionRates = createAsyncThunk(
@@ -153,6 +151,9 @@ const initialState = {
   walletLoading: false,
   walletError: null,
 
+  // Profile State
+  profileData: null,
+
   // Store the entire payment method object
   paymentMethod: null,
 
@@ -181,6 +182,10 @@ const depositSlice = createSlice({
     // Synchronous action to store wallet details directly from API response
     setWalletData: (state, action) => {
       state.walletData = action.payload;
+    },
+    // Synchronous action to store profile details directly from API response
+    setProfileData: (state, action) => {
+      state.profileData = action.payload;
     },
     setAmount: (state, action) => {
       state.amount = action.payload;
@@ -223,6 +228,7 @@ const depositSlice = createSlice({
 
 export const {
   setWalletData,
+  setProfileData,
   setAmount,
   setPaymentMethod,
   applyPromoCode,
