@@ -790,7 +790,7 @@ const MakePayment = ({ navigation }) => {
       console.log('Add Money Error:', error.response?.data || error.message);
       Alert.alert(
         'Payment Failed',
-        error.response?.data?.message || 'Failed to process payment. Please try again.'
+        `${error.response?.data?.Message} for Further Transactions ` || 'Failed to process payment. Please try again.'
       );
     } finally {
       setLoading(false);
