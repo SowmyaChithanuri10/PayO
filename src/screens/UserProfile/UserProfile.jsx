@@ -399,6 +399,7 @@ import {
   Platform,
   Image,
   Switch,
+  StatusBar,
   ImageBackground
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

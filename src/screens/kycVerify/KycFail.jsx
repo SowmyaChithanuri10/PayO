@@ -92,12 +92,12 @@ import React from 'react';
 import {
   View,
   Text,
-  SafeAreaView,
   StatusBar,
   TouchableOpacity,
   Image,
 } from 'react-native';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from './KycFailStyles';
 
 export default function KycFail({ navigation }) {

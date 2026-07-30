@@ -135,6 +135,6 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(15),
     color: '#555555',
     textAlign: 'center',
-    lineHeight: moderateScale(18),
+    lineHeight: moderateScale(15) * 1.4,
   },
 });

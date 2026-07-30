@@ -1055,45 +1055,6 @@ viewWalletBtn: {
     backgroundColor: '#ffffff', 
   },
 
-  // /* CAROUSEL / BANNERS */
-  // carouselContainer: {
-  //   marginTop: verticalScale(24),
-  //   marginHorizontal: scale(20), 
-  //   position: 'relative', 
-  //   overflow: 'hidden', 
-  // },
-  // bannerWrapper: {
-  //   width: windowWidth * 0.78, 
-  //   marginRight: 6, 
-  // },
-  // bannerCard: {
-  //   width: '100%',
-  //   height: verticalScale(130), 
-  //   // borderRadius: moderateScale(16),
-  //   // backgroundColor: '#e5e7eb',
-  //   overflow: 'hidden',
-  // },
-  
-  // /* OVERLAID PAGINATION */
-  // bannerPagination: {
-  //   position: 'absolute',
-  //   bottom: verticalScale(14), 
-  //   left: scale(20), 
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  // },
-  // dot: {
-  //   width: 6,
-  //   height: 6,
-  //   borderRadius: 3,
-  //   backgroundColor: 'rgba(255, 255, 255, 0.4)', 
-  //   marginRight: 6,
-  // },
-  // dotActive: {
-  //   width: 18, 
-  //   backgroundColor: '#ffffff', 
-  // },
-
   /* COMMON CARD (Crypto Market & News uses this base) */
   card: {
     backgroundColor: theme.colors.bgSurface, // Updated to theme

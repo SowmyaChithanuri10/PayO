@@ -298,9 +298,11 @@ import {
   TextInput,
   Switch,
   Image,
-  ImageBackground,
-  SafeAreaView
+  StatusBar,
+  ImageBackground
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import * as Keychain from 'react-native-keychain';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';

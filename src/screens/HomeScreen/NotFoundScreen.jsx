@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  SafeAreaView,
   StatusBar,
   View,
   Text,
@@ -9,6 +8,8 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import LinearGradient from 'react-native-linear-gradient';

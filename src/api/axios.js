@@ -57,8 +57,9 @@ import { navigate } from '../navigation/navigationRef';
 // import { navigate } from './navigation/navigationRef'; // Import navigate helper
 
 const api = axios.create({
-  baseURL: 'https://subtitle-outscore-collapse.ngrok-free.dev',
-  // baseURL: 'https://purr-expediter-doorway.ngrok-free.dev',
+  //baseURL: 'https://subtitle-outscore-collapse.ngrok-free.dev',
+  //baseURL: 'http://10.10.10.82:3001',
+  baseURL: 'https://music-remission-stark.ngrok-free.dev',
   timeout: 60000,
   headers: {
     'Accept': 'application/json',

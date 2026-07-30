@@ -218,10 +218,7 @@ import {
   ScrollView,
 } from 'react-native';
 
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { SafeAreaView , useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Icon from 'react-native-vector-icons/Feather';
 import styles from './KycUnderReviewStyles';

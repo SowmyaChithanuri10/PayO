@@ -655,6 +655,7 @@ import { useRoute, useIsFocused } from "@react-navigation/native";
 import { useAuth } from '../../context/AuthContext';
 import Geolocation from 'react-native-geolocation-service';
 import api from '../../api/axios';
+import * as Keychain from 'react-native-keychain';
 
 
 export default function TransactionPinScreen({ navigation }) {
@@ -706,6 +707,14 @@ export default function TransactionPinScreen({ navigation }) {
       );
     });
   };
+
+    const saveToken = async (token) => {
+      try {
+        await Keychain.setGenericPassword('user', token);
+      } catch (e) {
+        console.log('Token save error:', e);
+      }
+    };
 
   useEffect(() => {
     navigation.setOptions({
@@ -777,6 +786,7 @@ export default function TransactionPinScreen({ navigation }) {
       if (response.data?.Status === "200") {
         Keyboard.dismiss();
         navigation.navigate('Biometric');
+        await saveToken(response?.data?.Token || response?.data?.token);
       } else {
         setError(response.data?.Message || 'PIN validation check failed on backend.');
       }

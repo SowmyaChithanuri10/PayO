@@ -201,7 +201,8 @@ export default function Onboarding3({ navigation }) {
         <Logo />
         <HeroIllustration />
         
-        <View style={{ height: verticalScale(130) }}>
+        <View style={{ minHeight: verticalScale(120), justifyContent: 'center' }}>
+        {/* <View style={{ height: verticalScale(120) }}> */}
           <ScrollView
             horizontal
             pagingEnabled

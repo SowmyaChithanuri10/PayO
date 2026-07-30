@@ -492,6 +492,7 @@ import {
   FlatList,
   ActivityIndicator,
   Image,
+  StatusBar,
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
