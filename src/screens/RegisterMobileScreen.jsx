@@ -1067,14 +1067,12 @@ export default function RegisterMobileScreen({ navigation }) {
       else if(response.data?.status === '202' &&
         response.data?.message === 'Mobile Verification Completed'){
           setUserId(response?.data?.userId);
-
-       navigation.replace('Profile');
+          navigation.replace('Profile');
       }
         else if(response.data?.status === '202' &&
         response.data?.message === 'Profile is completed! TPIN Generation is pending'){
                                     
           setUserId(response?.data?.userId);
-
         navigation.navigate('TransactionPin');
       }
       

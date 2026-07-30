@@ -413,12 +413,18 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomNav from '../components/bottomNav';
 import { verticalScale } from '../../utils/responsive';
+import { useAppSelector } from '../../redux/hooks';
+import { capitalizeFirstLetter } from '../../api/mainValuables';
 
 export default function UserProfile({ route, navigation ,isEditable: propIsEditable}) {
  const isEditable = propIsEditable ?? route.params?.isEditable ?? false;
   
   console.log(isEditable, "isEditable", route?.params);
   const [profiledata, setProfileData] = useState({});
+  const profileDataRedux = useAppSelector((state) => state.deposit.profileData);
+  const walletData = useAppSelector((state) => state.deposit.walletData);
+  
+  
   const [bankData, setBankData] = useState([]);
   const [address, setAddress] = useState('');
   const [qr, setQr] = useState(null);
@@ -451,14 +457,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
     }
   };
 
-  const fetchProfileData = async () => {
-    try {
-      const res = await api.get('/api/wallet/profile');
-      setProfileData(res?.data?.data);
-    } catch (err) {
-      console.log(err.message);
-    }
-  };
+  
 
   const fetchBankDetails = async () => {
     try {
@@ -471,13 +470,12 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
 
   useFocusEffect(
     useCallback(() => {
-      fetchProfileData();
       fetchBankDetails();
     }, [])
   );
 
   const handleCopy = () => {
-    const walletAddress = profiledata?.walletAddress || '0xDummyAddress123';
+    const walletAddress = walletData?.Wallet_ID || '0xDummyAddress123';
     if (!walletAddress) return;
     Clipboard.setString(walletAddress);
     if (Platform.OS === 'android') {
@@ -552,10 +550,12 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
             </View>
             
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{profiledata?.name || 'User 1'}</Text>
-              <Text style={styles.profilePhone}>+91 {profiledata?.mobile || '1324 567 890'}</Text>
+<Text style={styles.profileName}>
+  {capitalizeFirstLetter(profileDataRedux?.Full_Name)}
+</Text>
+              <Text style={styles.profilePhone}>{profileDataRedux?.Mobile_Number || '1324 567 890'}</Text>
               <View style={styles.kycBadge}>
-                <Text style={styles.kycText}>• KYC NOT VERIFIED</Text>
+                <Text style={styles.kycText}>• {profileDataRedux?.KYC_Status} </Text>
               </View>
             </View>
           </ImageBackground>
@@ -568,7 +568,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
               </View>
               <View>
                 <Text style={styles.statLabel}>Balance</Text>
-                <Text style={styles.statValue}>{profiledata?.balance || '100.0'} <Text style={styles.token}>PAYO</Text></Text>
+                <Text style={styles.statValue}>{profileDataRedux?.Available_Balance || '100.0'} <Text style={styles.token}>PAYO</Text></Text>
               </View>
             </View>
             <View style={styles.verticalDivider} />
@@ -578,7 +578,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
               </View>
               <View>
                 <Text style={styles.statLabel}>Transactions</Text>
-                <Text style={styles.statValue}>{profiledata?.transactionCount || '0'}</Text>
+                <Text style={styles.statValue}>{profileDataRedux?.Total_Transactions || '0'}</Text>
               </View>
             </View>
           </View>
@@ -590,7 +590,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
             </View>
             <View>
               <Text style={styles.referralLabel}>Your Referral Code</Text>
-              <Text style={styles.referralCode}>{profiledata?.referralCode || 'PAYO7630'}</Text>
+              <Text style={styles.referralCode}>{profileDataRedux?.Referral_Code || 'PAYO7630'}</Text>
             </View>
           </View>
 
@@ -624,15 +624,15 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
           <View style={styles.listCard}>
             <View style={styles.listItem}>
               <Text style={styles.listLabel}>Name</Text>
-              <Text style={styles.listValue}>{profiledata?.name || 'Raju'}</Text>
+              <Text style={styles.listValue}>{profileDataRedux?.Full_Name || 'Raju'}</Text>
             </View>
             <View style={styles.listItem}>
               <Text style={styles.listLabel}>Email</Text>
-              <Text style={styles.listValue}>{profiledata?.email || 'Raju@gmail.com'}</Text>
+              <Text style={styles.listValue}>{profileDataRedux?.Email_Address || 'Raju@gmail.com'}</Text>
             </View>
             <View style={[styles.listItem, { borderBottomWidth: 0, paddingBottom: verticalScale(14)}]}>
               <Text style={styles.listLabel}>Linked Mobile</Text>
-              <Text style={styles.listValue}>+91 {profiledata?.mobile || '8332 285 718'}</Text>
+              <Text style={styles.listValue}>+91 {profileDataRedux?.Mobile_Number || '8332 285 718'}</Text>
             </View>
           </View>
 
@@ -644,7 +644,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
           <View style={styles.listCard}>
             <TouchableOpacity style={styles.listItemTouch}>
               <Text style={styles.listLabel}>KYC Verification</Text>
-              <Text style={styles.dangerText}>Not Approved {'>'}</Text>
+              <Text style={styles.dangerText}>{profileDataRedux?.KYC_Status} {'>'}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.listItemTouch}>
               <Text style={styles.listLabel}>Personal Information</Text>
@@ -652,7 +652,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
             </TouchableOpacity>
             <View style={[styles.listItem, { borderBottomWidth: 0, paddingBottom: verticalScale(14) }]}>
               <Text style={styles.listLabel}>Linked Mobile</Text>
-              <Text style={styles.listValue}>+91 {profiledata?.mobile || '1324 567 890'}</Text>
+              <Text style={styles.listValue}>+91 {profileDataRedux?.Mobile_Number || '1324 567 890'}</Text>
             </View>
           </View>
 
@@ -681,7 +681,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
             </View>
             <View style={[styles.listItem, { borderBottomWidth: 0, paddingBottom: verticalScale(14), paddingTop: 12 }]}>
               <Text style={styles.listLabel}>Change Mobile No.</Text>
-              <Text style={styles.listValue}>+91 {profiledata?.mobile || '1324 567 890'}</Text>
+              <Text style={styles.listValue}>+91 {profileDataRedux?.Mobile_Number || '1324 567 890'}</Text>
             </View>
           </View>
 

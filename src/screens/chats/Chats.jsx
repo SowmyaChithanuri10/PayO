@@ -966,7 +966,6 @@ import {
 } from 'react-native';
 import axios from 'axios';
 //import DocumentPicker, { types } from 'react-native-document-picker';
-import { pick } from '@react-native-documents/picker';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import RNFS from 'react-native-fs';
 
