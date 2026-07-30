@@ -458,20 +458,20 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
 
   
 
-  const fetchBankDetails = async () => {
-    try {
-      const res = await api.get('/api/bank/all-banks');
-      setBankData(res?.data?.data || []);
-    } catch (err) {
-      console.log(err.message);
-    }
-  };
+  // const fetchBankDetails = async () => {
+  //   try {
+  //     const res = await api.get('/api/bank/all-banks');
+  //     setBankData(res?.data?.data || []);
+  //   } catch (err) {
+  //     console.log(err.message);
+  //   }
+  // };
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchBankDetails();
-    }, [])
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     fetchBankDetails();
+  //   }, [])
+  // );
 
   const handleCopy = () => {
     const walletAddress = walletData?.Wallet_ID || '0xDummyAddress123';
@@ -609,6 +609,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
           <TouchableOpacity
             style={styles.addBankPrimaryBtn}
             onPress={() => navigation.navigate('AddBankHome')}
+            disabled
           >
             <Icon name="plus-circle" size={18} color="#fff" style={styles.leftIcon} />
             <Text style={styles.addBankPrimaryText}>Add Bank Account</Text>
