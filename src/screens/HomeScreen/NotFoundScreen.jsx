@@ -21,7 +21,7 @@ const NotFoundScreen = () => {
   const navigation = useNavigation();
 
   const goBackToHome = () => {
-    navigation.navigate('Home');
+    navigation.navigate('Login');
   };
 
   return (

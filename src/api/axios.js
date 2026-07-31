@@ -53,8 +53,8 @@
 // api.js
 import axios from 'axios';
 import * as Keychain from 'react-native-keychain';
+import { Alert } from 'react-native';
 import { navigate } from '../navigation/navigationRef';
-// import { navigate } from './navigation/navigationRef'; // Import navigate helper
 
 const api = axios.create({
   //baseURL: 'https://subtitle-outscore-collapse.ngrok-free.dev',
@@ -84,10 +84,10 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// ✅ ADDED: Response Interceptor for Global Errors
+// Response Interceptor
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     // 1. Internet / Network Error (No response received)
     if (!error.response) {
       console.log('Network/Internet Error:', error.message);
@@ -97,11 +97,37 @@ api.interceptors.response.use(
 
     const { status } = error.response;
 
-    // 2. Global API Errors (404 Not Found or Server 500s)
-    if (status === 404 || status >= 500) {
-      console.log(`API Error [Status ${status}]: Navigating to 404 screen`);
-      navigate('NotFound', { errorType: status });
+    // 2. Session Expired / Unauthorized (401)
+    if (status === 401) {
+      console.log('Session Expired [401]: Clearing credentials and redirecting to Login');
+
+      // Clear cached keychain tokens
+      await Keychain.resetGenericPassword();
+
+      // Show Session Expired Alert
+      Alert.alert(
+        'Session Expired',
+        'Your session has expired. Please Login again to continue.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Navigate to Login screen
+              navigate('Login');
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+
+      return Promise.reject(error);
     }
+
+
+    // if (status === 404 || status >= 500) {
+    //   console.log(`API Error [Status ${status}]: Navigating to NotFound screen`);
+    //   navigate('NotFound', { errorType: status });
+    // }
 
     return Promise.reject(error);
   },

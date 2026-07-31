@@ -1071,7 +1071,7 @@ export default function WalletScreen({ navigation }) {
 
         // Convert INR to PAYO dynamically
         const rate = PAYO_EXCHANGE_RATE || 0.00012; // Uses fallback exchange rate if undefined
-        const calculatedPayo = (rupeeBalance * rate).toFixed(2);
+        const calculatedPayo = (rupeeBalance * rate).toFixed(3);
         setPayoBalance(calculatedPayo);
 
         // // Update Redux state if used globally

@@ -429,6 +429,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
   const [address, setAddress] = useState('');
   const [qr, setQr] = useState(null);
   const [biometricEnabled, setBiometricEnabled] = useState(true);
+  const isBankDisabled = true;
 
   useEffect(() => {
     const backAction = () => {
@@ -459,20 +460,20 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
 
   
 
-  const fetchBankDetails = async () => {
-    try {
-      const res = await api.get('/api/bank/all-banks');
-      setBankData(res?.data?.data || []);
-    } catch (err) {
-      console.log(err.message);
-    }
-  };
+  // const fetchBankDetails = async () => {
+  //   try {
+  //     const res = await api.get('/api/bank/all-banks');
+  //     setBankData(res?.data?.data || []);
+  //   } catch (err) {
+  //     console.log(err.message);
+  //   }
+  // };
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchBankDetails();
-    }, [])
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     fetchBankDetails();
+  //   }, [])
+  // );
 
   const handleCopy = () => {
     const walletAddress = walletData?.Wallet_ID || '0xDummyAddress123';
@@ -607,14 +608,50 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
           </View>
 
           {/* ADD BANK BUTTON */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.addBankPrimaryBtn}
             onPress={() => navigation.navigate('AddBankHome')}
+            disabled
           >
             <Icon name="plus-circle" size={18} color="#fff" style={styles.leftIcon} />
             <Text style={styles.addBankPrimaryText}>Add Bank Account</Text>
             <Icon name="chevron-right" size={18} color="#fff" style={styles.rightIcon} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+
+          {/* ADD BANK BUTTON */}
+{/* ADD BANK BUTTON */}
+{/* ADD BANK BUTTON */}
+<TouchableOpacity
+  style={[
+    styles.addBankPrimaryBtn,
+    isBankDisabled && styles.disabledBankBtn, // Dynamically applies disabled style
+  ]}
+  onPress={() => navigation.navigate('AddBankHome')}
+  disabled={isBankDisabled} // Dynamically disables touch interactions
+>
+  <Icon
+    name="plus-circle"
+    size={18}
+    color={isBankDisabled ? '#9CA3AF' : '#FFFFFF'} // Dynamic icon color
+    style={styles.leftIcon}
+  />
+  
+  <Text
+    style={[
+      styles.addBankPrimaryText,
+      isBankDisabled && styles.disabledBankBtnText, // Dynamic text color/style
+    ]}
+  >
+    Add Bank Account
+  </Text>
+  
+  <Icon
+    name="chevron-right"
+    size={18}
+    color={isBankDisabled ? '#9CA3AF' : '#FFFFFF'} // Dynamic icon color
+    style={styles.rightIcon}
+  />
+</TouchableOpacity>
 
           {/* PERSONAL INFO */}
           <View style={styles.sectionHeader}>

@@ -1937,7 +1937,7 @@ export default function HomeScreen({ navigation }) {
   useEffect(() => {
     const rupees = parseFloat(avbRuppee) || 0;
     const payo = rupees * PAYO_EXCHANGE_RATE; // Correct multiplication
-    setAvailable(payo.toFixed(2));
+    setAvailable(payo.toFixed(3));
   }, [avbRuppee]);
 
   useEffect(() => {
@@ -1961,14 +1961,14 @@ export default function HomeScreen({ navigation }) {
   }, [bannerData]);
 
   // 7. API CALLS
-  const fetchBalance = async () => {
-    try {
-      const response = await api.get('/api/wallet/balance');
-      setAvailable(response?.data?.balance || '0.0'); 
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const fetchBalance = async () => {
+  //   try {
+  //     const response = await api.get('/api/wallet/balance');
+  //     setAvailable(response?.data?.balance || '0.0'); 
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const fetchExpertCoins = async () => {
     try {
@@ -2026,7 +2026,6 @@ const fetchProfileData = async () => {
   // 8. FOCUS EFFECT
   useFocusEffect(
     useCallback(() => {
-      fetchBalance();
       fetchExpertCoins();
       fetchMarketNews();
       fetchWallet();

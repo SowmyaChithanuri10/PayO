@@ -266,7 +266,7 @@ const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
   return (
     <NavigationContainer
-    //  ref={navigationRef}
+     ref={navigationRef}
      >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
 

@@ -1874,17 +1874,17 @@ export default function CoinDetailsScreen({ route }) {
   const lastTranslateX = useRef(0);
   const maxTranslateX = useRef(0);
   const minTranslateX = useRef(0);
-
   const translateY = useRef(new Animated.Value(0)).current;
   const lastTranslateY = useRef(0);
   const maxTranslateY = useRef(0);
   const minTranslateY = useRef(0);
-
   const symbol = `${route?.params?.coin?.symbol?.toUpperCase()}USDT`;
   
-  // Responsive chart size
   const chartHeight = windowHeight * 0.34;
   const chartWidth = windowWidth * 0.78;
+
+  const isBuyDisabled = true;  // toggle based on your logic
+  const isSellDisabled = true;  // toggle based on your logic
 
   useEffect(() => {
     fetchCoinData();
@@ -2755,12 +2755,35 @@ export default function CoinDetailsScreen({ route }) {
           </View>
 
           <View style={styles.tradeButtons}>
-            <TouchableOpacity style={styles.buyBtn}>
-              <Text style={styles.tradeText}>Buy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.sellBtn}>
-              <Text style={styles.tradeText}>Sell</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+  style={[
+    styles.buyBtn,
+    isBuyDisabled && styles.disabledBtn,
+  ]}
+  // onPress={handleBuy}
+  disabled={isBuyDisabled}
+>
+  <Text
+    style={[
+      styles.tradeText,
+      isBuyDisabled && styles.disabledTradeText,
+    ]} > Buy </Text>
+</TouchableOpacity>
+
+<TouchableOpacity
+  style={[
+    styles.sellBtn,
+    isSellDisabled && styles.disabledBtn,
+  ]}
+  // onPress={handleSell}
+  disabled={isSellDisabled}
+>
+  <Text
+    style={[
+      styles.tradeText, isSellDisabled && styles.disabledTradeText,
+    ]}
+  > Sell</Text>
+</TouchableOpacity>
           </View>
         </View>
 
@@ -2929,23 +2952,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: scale(8),
   },
-  buyBtn: {
-    backgroundColor: theme.colors.statusSuccess,
-    paddingHorizontal: scale(19),
-    paddingVertical: verticalScale(8),
-    borderRadius: theme.borderRadius.sm,
-  },
-  sellBtn: {
-    backgroundColor: theme.colors.statusDanger,
-    paddingHorizontal: scale(19),
-    paddingVertical: verticalScale(8),
-    borderRadius: theme.borderRadius.sm,
-  },
-  tradeText: {
-    color: theme.colors.white,
-    fontWeight: theme.typography.weight.bold,
-    fontSize: theme.typography.size.sm,
-  },
+ buyBtn: {
+  backgroundColor: theme.colors.statusSuccess,
+  paddingHorizontal: scale(19),
+  paddingVertical: verticalScale(8),
+  borderRadius: theme.borderRadius.sm,
+},
+sellBtn: {
+  backgroundColor: theme.colors.statusDanger,
+  paddingHorizontal: scale(19),
+  paddingVertical: verticalScale(8),
+  borderRadius: theme.borderRadius.sm,
+},
+tradeText: {
+  color: theme.colors.white,
+  fontWeight: theme.typography.weight.bold,
+  fontSize: theme.typography.size.sm,
+},
+
+// ADD THESE TWO STYLES BELOW
+disabledBtn: {
+  backgroundColor: '#E5E7EB', // Neutral gray background
+  elevation: 0,               // Removes Android shadow
+  shadowOpacity: 0,           // Removes iOS shadow
+},
+disabledTradeText: {
+  color: '#9CA3AF',           // Muted gray text
+},
   price: {
     color: theme.colors.textMain,
     fontSize: theme.typography.size.xxxl,
