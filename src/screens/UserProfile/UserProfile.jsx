@@ -475,6 +475,9 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
   //   }, [])
   // );
 
+  const paymentAddress = walletData?.Wallet_ID  || 'Payo_9000000001'; // Fallback / actual variable
+  const qrCodePaymentUrl = walletData?.QR_Code_Link_Payments;
+
   const handleCopy = () => {
     const walletAddress = walletData?.Wallet_ID || '0xDummyAddress123';
     if (!walletAddress) return;
@@ -484,23 +487,65 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
     }
   };
 
-  const handleShare = async () => {
+  // const handleShare = async () => {
+  //   try {
+  //     const result = await fetchQr();
+  //     if (!result) return;
+  //     const { qrImage, address } = result;
+  //     const base64Data = qrImage.replace(/^data:image\/png;base64,/, '');
+  //     const filePath = `${RNFS.CachesDirectoryPath}/payo_qr.png`;
+  //     await RNFS.writeFile(filePath, base64Data, 'base64');
+  //     await Share.open({
+  //       url: 'file://' + filePath,
+  //       message: `Send PAYO to this WalletID:\n${address}`,
+  //     });
+  //   } catch (error) {
+  //     console.log('Share error:', error);
+  //   }
+  // };
+
+  const handleSharePaymentAddress = async () => {
     try {
-      const result = await fetchQr();
-      if (!result) return;
-      const { qrImage, address } = result;
-      const base64Data = qrImage.replace(/^data:image\/png;base64,/, '');
-      const filePath = `${RNFS.CachesDirectoryPath}/payo_qr.png`;
-      await RNFS.writeFile(filePath, base64Data, 'base64');
-      await Share.open({
-        url: 'file://' + filePath,
-        message: `Send PAYO to this WalletID:\n${address}`,
-      });
+      let localImagePath = null;
+
+      // 1. Download QR Code image to cache if URL exists
+      if (qrCodePaymentUrl) {
+        const filePath = `${RNFS.CachesDirectoryPath}/payment_qr_${Date.now()}.png`;
+
+        const downloadResult = await RNFS.downloadFile({
+          fromUrl: qrCodePaymentUrl,
+          toFile: filePath,
+        }).promise;
+
+        if (downloadResult.statusCode === 200) {
+          localImagePath = Platform.OS === 'android' ? `file://${filePath}` : filePath;
+        }
+      }
+
+      // 2. Format share text message
+      const shareMessage = 
+        `Here is my PAYO payment address:\n\n` +
+        `Address: ${paymentAddress}\n\n` +
+        `Scan the QR code or use the address above to send payments directly.`;
+
+      // 3. Build share options
+      const shareOptions = {
+        title: 'Share Payment Address',
+        message: shareMessage,
+        ...(localImagePath && { url: localImagePath }),
+        type: 'image/png',
+      };
+
+      // 4. Open share modal
+      await Share.open(shareOptions);
     } catch (error) {
-      console.log('Share error:', error);
+      // Ignore user-dismissed modal errors
+      if (error?.message !== 'User did not share') {
+        console.log('Share Payment Address Error:', error);
+      }
     }
   };
-
+  
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F4F6F9' }} edges={['top', 'bottom']}>
       <View style={styles.container}>
@@ -601,7 +646,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
               <Text style={styles.actionBtnText}>Copy address</Text>
               <Image source={require('../../../assets/images/profile/Content Copy Icon.png')} style={styles.copyIcon} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtnOutline} onPress={handleShare}>
+            <TouchableOpacity style={styles.actionBtnOutline} onPress={handleSharePaymentAddress}>
               <Text style={styles.actionBtnText}>Share address</Text>
               <Image source={require('../../../assets/images/profile/share.png')} style={styles.shareIcon} />
             </TouchableOpacity>
@@ -617,10 +662,6 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
             <Text style={styles.addBankPrimaryText}>Add Bank Account</Text>
             <Icon name="chevron-right" size={18} color="#fff" style={styles.rightIcon} />
           </TouchableOpacity> */}
-
-          {/* ADD BANK BUTTON */}
-{/* ADD BANK BUTTON */}
-{/* ADD BANK BUTTON */}
 <TouchableOpacity
   style={[
     styles.addBankPrimaryBtn,

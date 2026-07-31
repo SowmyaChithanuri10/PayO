@@ -517,20 +517,20 @@ export default function NotificationScreen({ navigation }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
+  // useEffect(() => {
+  //   fetchNotifications();
+  // }, []);
 
-  const fetchNotifications = async () => {
-    try {
-      const res = await api.get('/api/notifications/notifications');
-      setData(res.data);
-    } catch (err) {
-      console.log('API ERROR:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchNotifications = async () => {
+  //   try {
+  //     const res = await api.get('/api/notifications/notifications');
+  //     setData(res.data);
+  //   } catch (err) {
+  //     console.log('API ERROR:', err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const filterData = () => {
     const now = new Date();
