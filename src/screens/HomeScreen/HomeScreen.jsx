@@ -2386,8 +2386,8 @@ export default function HomeScreen({ navigation }) {
   const scrollRef = useRef(null);
   const flatListRef = useRef(null);
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
- const newsSectionRef = useRef(null);
- const newsItemRefs = useRef({});
+  const newsSectionRef = useRef(null);
+  const newsItemRefs = useRef({});
   const newsItemYPositions = useRef({});
 
   // 3. HOOKS & REDUX

@@ -515,7 +515,7 @@ import MainHeader from '../../screens/components/MainHeader'; // Adjust the rela
 export default function NotificationScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Today');
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // useEffect(() => {
   //   fetchNotifications();
