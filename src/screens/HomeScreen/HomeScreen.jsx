@@ -2812,7 +2812,7 @@ console.log(available,avbRuppee,"098")
 
       </ScrollView>
     </SafeAreaView>
-      <Chats />
+      {/* <Chats /> */}
       </>
   );
 }
