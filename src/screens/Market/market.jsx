@@ -471,9 +471,51 @@ const MarketScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <Header />
+      {/* <Header /> */}
+        <View style={styles.header}>
+                  <TouchableOpacity
+                    style={styles.headerIconBtn}
+                    activeOpacity={0.8}
+                    onPress={() => navigation.goBack()}
+                  >
+                    <Icon name="chevron-left" size={24} color={theme.colors.primaryBlue} />
+                  </TouchableOpacity>
+      
+                  <View style={styles.headerTitleContainer}>
+                    <Text style={styles.headerTitle}>Market</Text>
+                    <Text style={styles.headerSubtitle} numberOfLines={1}>
+                      Explore the Market
+                    </Text>
+                  </View>
+      
+                  <View style={styles.headerRight}>
+                    <TouchableOpacity
+                      style={styles.headerActionBtn}
+                      activeOpacity={0.8}
+                      onPress={() => navigation.navigate('Notifications')}
+                    >
+                      <Image
+                        source={require('../../../assets/images/walletscr/Icon (4).png')}
+                        style={styles.customHeaderIcon}
+                      />
+                      {/* <View style={styles.badge}>
+                        <Text style={styles.badgeText}></Text>
+                      </View> */}
+                    </TouchableOpacity>
+      
+                    <TouchableOpacity
+                      style={[styles.headerActionBtn, { marginLeft: 8 }]}
+                      activeOpacity={0.8}
+                    >
+                      <Image
+                        source={require('../../../assets/images/walletscr/Settings Icon.png')}
+                        style={styles.customHeaderIcon}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
 
-      <View style={styles.headerRow}>
+      {/* <View style={styles.headerRow}>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => navigation.canGoBack() && navigation.goBack()}>
@@ -485,7 +527,7 @@ const MarketScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <Text style={styles.header}>Market</Text>
-      </View>
+      </View> */}
 
       <FlatList
         data={coins}
@@ -510,18 +552,67 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(16),
   },
 
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: verticalScale(12),
-  },
+  // headerRow: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   marginBottom: verticalScale(12),
+  // },
 
-  header: {
-    color: theme.colors.textMain, // Changed to textMain to be visible on white
-    fontSize: theme.typography.size.xl,
-    fontWeight: theme.typography.weight.bold,
-    marginLeft: scale(12),
-  },
+  // header: {
+  //   color: theme.colors.textMain, // Changed to textMain to be visible on white
+  //   fontSize: theme.typography.size.xl,
+  //   fontWeight: theme.typography.weight.bold,
+  //   marginLeft: scale(12),
+  // },
+
+   header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: verticalScale(10),
+       marginTop: verticalScale(20),
+    },
+    headerIconBtn: {
+      width: moderateScale(40),
+      height: moderateScale(40),
+      borderRadius: moderateScale(20),
+      backgroundColor: '#fff',
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...theme.shadows.sm,
+    },
+    headerActionBtn: {
+      width: moderateScale(40),
+      height: moderateScale(40),
+      borderRadius: moderateScale(20),
+      backgroundColor: '#fff',
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...theme.shadows.sm,
+    },
+    customHeaderIcon: {
+      width: moderateScale(20),
+      height: moderateScale(20),
+      resizeMode: 'contain',
+    },
+    headerTitleContainer: {
+      flex: 1,
+      marginLeft: scale(12),
+    },
+    headerTitle: {
+      fontSize: theme.typography.size.lg,
+      fontWeight: theme.typography.weight.bold,
+      color: theme.colors.textMain,
+    },
+    headerSubtitle: {
+      fontSize: theme.typography.size.xs,
+      color: theme.colors.textMain,
+      marginTop: verticalScale(2),
+    },
+    headerRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
 
   loaderContainer: {
     flex: 1,
