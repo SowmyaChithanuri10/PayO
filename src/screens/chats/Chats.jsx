@@ -2806,7 +2806,7 @@ const Chats = () => {
       // Fetch full details if transaction ID is available
       if (transactionId && transactionId !== 'N/A' && transactionId !== 'null' && transactionId !== null) {
         try {
-          const detailsResponse = await apiClient.get(`/receipts/${transactionId}`);
+          // const detailsResponse = await apiClient.get(`/receipts/${transactionId}`);
           if (detailsResponse.data && detailsResponse.data.success) {
             const details = detailsResponse.data.data || detailsResponse.data;
             addMessage({
@@ -3527,12 +3527,12 @@ const Chats = () => {
 const styles = StyleSheet.create({
   floatingButton: {
     position: 'absolute',
-    bottom: 60,
-    right: 24,
-    width: 55,
-    height: 55,
+    bottom: 110,
+    right: 25,
+    width: 65,
+    height: 65,
     borderRadius: 32,
-    backgroundColor: '#6366F1',
+    backgroundColor: '#000000b9',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
@@ -3587,6 +3587,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
+    paddingBottom:120
   },
   sheetHeader: {
     paddingHorizontal: 20,

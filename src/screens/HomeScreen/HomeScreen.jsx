@@ -1859,6 +1859,7 @@ import Header from '../components/header';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setProfileData, setWalletData } from '../../redux/features/depositSlice';
 import { PAYO_EXCHANGE_RATE } from '../../api/mainValuables';
+import Chats from '../chats/Chats';
 
 // // --- CONSTANTS & HELPERS MOVED OUTSIDE TO PREVENT RE-RENDERING BUGS --- //
 // const PAYO_EXCHANGE_RATE = 0.00012; // 1 INR = 0.00012 PAYO
@@ -2067,6 +2068,7 @@ const fetchProfileData = async () => {
   };
 
   return (
+     <>
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#f4f6f9" barStyle="dark-content" />
 
@@ -2313,7 +2315,10 @@ const fetchProfileData = async () => {
         </View>
 
       </ScrollView>
+      
     </SafeAreaView>
+    <Chats />
+    </>
   );
 }
 const localStyles = StyleSheet.create({

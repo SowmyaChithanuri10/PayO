@@ -515,22 +515,22 @@ import MainHeader from '../../screens/components/MainHeader'; // Adjust the rela
 export default function NotificationScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Today');
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
+  // useEffect(() => {
+  //   fetchNotifications();
+  // }, []);
 
-  const fetchNotifications = async () => {
-    try {
-      const res = await api.get('/api/notifications/notifications');
-      setData(res.data);
-    } catch (err) {
-      console.log('API ERROR:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchNotifications = async () => {
+  //   try {
+  //     const res = await api.get('/api/notifications/notifications');
+  //     setData(res.data);
+  //   } catch (err) {
+  //     console.log('API ERROR:', err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const filterData = () => {
     const now = new Date();
