@@ -12,7 +12,7 @@ export default StyleSheet.create({
     flex: 1,
     paddingHorizontal: scale(16),
     // Add dynamic padding for Android status bar
-    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + verticalScale(0) : 0,
+    //paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + verticalScale(0) : 0,
   },
   
   // --- Header ---

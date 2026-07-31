@@ -672,6 +672,7 @@ import {
   TextInput,
   Alert,
   ScrollView,
+  StatusBar,
 } from 'react-native';
 
 import api from '../../api/axios';

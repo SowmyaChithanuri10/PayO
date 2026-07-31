@@ -462,7 +462,6 @@
 
 import React, { useEffect } from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -477,6 +476,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import { moderateScale } from 'react-native-size-matters';

@@ -1448,7 +1448,7 @@ export default function LoginScreen({ navigation }) {
   const insets = useSafeAreaInsets();
 
   // --- UI STATE ---
-  const [mobile, setMobile] = useState('9391181139');
+  const [mobile, setMobile] = useState('9000000001');
   const [message, setMessage] = useState('');
   const [isConnected, setIsConnected] = useState(true);
   const [loading, setLoading] = useState(false); // Added loading state

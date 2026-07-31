@@ -5,11 +5,12 @@ import {
   View,
   Text,
   TouchableOpacity,
-  SafeAreaView,
+  StatusBar,
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import { Dropdown } from 'react-native-element-dropdown';
 import Icon from 'react-native-vector-icons/Feather';

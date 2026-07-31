@@ -1070,7 +1070,8 @@ export default function RegisterMobileScreen({ navigation }) {
           navigation.replace('Profile');
       }
         else if(response.data?.status === '202' &&
-        response.data?.message === 'Profile is comepleted! TPIN Generation is pending'){
+        response.data?.message === 'Profile is completed! TPIN Generation is pending'){
+                                    
           setUserId(response?.data?.userId);
         navigation.navigate('TransactionPin');
       }

@@ -103,12 +103,12 @@ import React from 'react';
 import {
   View,
   Text,
-  SafeAreaView,
   StatusBar,
   TouchableOpacity,
   Image,
 } from 'react-native';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import styles from './KycCompleteStyles'; 
 

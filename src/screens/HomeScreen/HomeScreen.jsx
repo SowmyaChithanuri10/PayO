@@ -2106,7 +2106,7 @@ const fetchProfileData = async () => {
               <Text style={styles.balanceAmount}>{balanceVisible ? available : '****'}</Text>
               <Text style={styles.balanceCurrency}>PAYO</Text>
             </View>
-            <Text style={styles.fiatAmount}>{balanceVisible ? `₹ ${avbRuppee}` : ''}</Text>
+            <Text style={styles.fiatAmount}>{balanceVisible ? `₹ ${avbRuppee}` : ' '}</Text>
           </View>
 
           <View style={styles.bottomActionRow}>
