@@ -783,7 +783,7 @@ export default function TransactionPinScreen({ navigation }) {
         }
       });
 
-      if (response.data?.Status === "200") {
+      if (response.data?.Status === "201") {
         Keyboard.dismiss();
         navigation.navigate('Biometric');
         await saveToken(response?.data?.Token || response?.data?.token);
