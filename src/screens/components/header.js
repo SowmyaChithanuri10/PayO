@@ -868,7 +868,6 @@ export default function Header() {
      
     }
   };
-  console.log(kycRecords,"kycRecords")
 
    const isRestricted = useMemo(() => {
     const hasTransactions = totalRecords > 0;

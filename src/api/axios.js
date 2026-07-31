@@ -50,21 +50,120 @@
 // };
 
 
-// api.js
+
+// import axios from 'axios';
+// import * as Keychain from 'react-native-keychain';
+// import { Alert } from 'react-native';
+// import { navigate } from '../navigation/navigationRef';
+
+// const api = axios.create({
+//   //baseURL: 'https://subtitle-outscore-collapse.ngrok-free.dev',
+//   //baseURL: 'http://10.10.10.82:3001',
+//   baseURL: 'https://music-remission-stark.ngrok-free.dev',
+//   timeout: 60000,
+//   headers: {
+//     'Accept': 'application/json',
+//   },
+// });
+
+// // Request Interceptor
+// api.interceptors.request.use(
+//   async (config) => {
+//     const credentials = await Keychain.getGenericPassword();
+
+//     if (credentials) {
+//       config.headers.Authorization = `Bearer ${credentials.password}`;
+//     }
+
+//     console.log('REQUEST URL =>', `${config.baseURL}${config.url}`);
+//     console.log('METHOD =>', config.method);
+//     console.log('HEADERS =>', config.headers);
+
+//     return config;
+//   },
+//   (error) => Promise.reject(error),
+// );
+
+// // Response Interceptor
+// api.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     // 1. Internet / Network Error (No response received)
+//     if (!error.response) {
+//       console.log('Network/Internet Error:', error.message);
+//       navigate('NotFound', { errorType: 'NETWORK_ERROR' });
+//       return Promise.reject(error);
+//     }
+
+//     const { status } = error.response;
+
+//     // 2. Session Expired / Unauthorized (401)
+//     if (status === 401) {
+//       console.log('Session Expired [401]: Clearing credentials and redirecting to Login');
+
+//       // Clear cached keychain tokens
+//       await Keychain.resetGenericPassword();
+
+//       // Show Session Expired Alert
+//       Alert.alert(
+//         'Session Expired',
+//         'Your session has expired. Please Login again to continue.',
+//         [
+//           {
+//             text: 'OK',
+//             onPress: () => {
+//               // Navigate to Login screen
+//               navigate('Onboarding3');
+//             },
+//           },
+//         ],
+//         { cancelable: false }
+//       );
+
+//       return Promise.reject(error);
+//     }
+
+
+//     // if (status === 404 || status >= 500) {
+//     //   console.log(`API Error [Status ${status}]: Navigating to NotFound screen`);
+//     //   navigate('NotFound', { errorType: status });
+//     // }
+
+//     return Promise.reject(error);
+//   },
+// );
+
+// export default api;
+
+// export const getToken = async () => {
+//   try {
+//     const credentials = await Keychain.getGenericPassword();
+//     if (credentials) {
+//       return credentials.password;
+//     }
+//     return null;
+//   } catch (error) {
+//     console.log('GetToken error:', error);
+//     return null;
+//   }
+// };
+
+
 import axios from 'axios';
 import * as Keychain from 'react-native-keychain';
 import { Alert } from 'react-native';
-import { navigate } from '../navigation/navigationRef';
+import { navigate, resetRoot } from '../navigation/navigationRef';
 
 const api = axios.create({
-  //baseURL: 'https://subtitle-outscore-collapse.ngrok-free.dev',
-  //baseURL: 'http://10.10.10.82:3001',
   baseURL: 'https://music-remission-stark.ngrok-free.dev',
   timeout: 60000,
   headers: {
     'Accept': 'application/json',
   },
 });
+
+// Flag to prevent multiple session expired alerts from stacking
+let isShowingSessionAlert = false;
 
 // Request Interceptor
 api.interceptors.request.use(
@@ -74,11 +173,6 @@ api.interceptors.request.use(
     if (credentials) {
       config.headers.Authorization = `Bearer ${credentials.password}`;
     }
-
-    console.log('REQUEST URL =>', `${config.baseURL}${config.url}`);
-    console.log('METHOD =>', config.method);
-    console.log('HEADERS =>', config.headers);
-
     return config;
   },
   (error) => Promise.reject(error),
@@ -98,36 +192,33 @@ api.interceptors.response.use(
     const { status } = error.response;
 
     // 2. Session Expired / Unauthorized (401)
-    if (status === 401) {
-      console.log('Session Expired [401]: Clearing credentials and redirecting to Login');
+  if (status === 401) {
+  console.log('Session Expired [401]: Clearing credentials');
 
-      // Clear cached keychain tokens
-      await Keychain.resetGenericPassword();
+  await Keychain.resetGenericPassword();
 
-      // Show Session Expired Alert
-      Alert.alert(
-        'Session Expired',
-        'Your session has expired. Please Login again to continue.',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Navigate to Login screen
-              navigate('Login');
-            },
+  if (!isShowingSessionAlert) {
+    isShowingSessionAlert = true;
+
+    Alert.alert(
+      'Session Expired',
+      'Your session has expired. Please Login again to continue.',
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            isShowingSessionAlert = false;
+            // Use resetRoot instead of navigate
+            resetRoot('Login');
           },
-        ],
-        { cancelable: false }
-      );
+        },
+      ],
+      { cancelable: false }
+    );
+  }
 
-      return Promise.reject(error);
-    }
-
-
-    // if (status === 404 || status >= 500) {
-    //   console.log(`API Error [Status ${status}]: Navigating to NotFound screen`);
-    //   navigate('NotFound', { errorType: status });
-    // }
+  return Promise.reject(error);
+}
 
     return Promise.reject(error);
   },
@@ -147,25 +238,3 @@ export const getToken = async () => {
     return null;
   }
 };
-
-// ✅ REQUEST INTERCEPTOR (no change needed, just safe)
-// api.interceptors.request.use(
-//   async (config) => {
-//     try {
-//       const credentials = await Keychain.getGenericPassword();
-
-//       if (credentials) {
-//         const token = credentials.password;
-//         config.headers.Authorization = `Bearer ${token}`;
-//       }
-
-//       return config;
-//     } catch (error) {
-//       console.log('Interceptor error:', error);
-//       return config;
-//     }
-//   },
-//   (error) => Promise.reject(error)
-// );
-
-// export default api;
