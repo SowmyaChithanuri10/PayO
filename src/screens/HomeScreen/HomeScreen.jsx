@@ -1989,15 +1989,13 @@ export default function HomeScreen({ navigation }) {
 
   const fetchMarketNews = async () => {
     try {
-      const res = await api.get('/api/news/crypto-news');
-      setMarketNews(res?.data?.data || []);
+      const res = await api.get('/api/news/news');
+      // Mapping to the response structure: res.data.Data.Articles
+      setMarketNews(res?.data?.Data?.Articles || []);
     } catch (error) {
       console.log(error);
-      setMarketNews([
-        { title: 'Bitcoin crosses new resistance level', publishedAt: new Date(), symbol: 'BTC' },
-        { title: 'Ethereum ETF attracts record inflows', publishedAt: new Date(Date.now() - 600000), symbol: 'ETH' },
-        { title: 'PAYO announces new wallet features', publishedAt: new Date(Date.now() - 3600000), symbol: 'PAYO' },
-      ]);
+      // Fallback empty array or static data in case of failure
+      setMarketNews([]);
     }
   };
 
@@ -2289,21 +2287,22 @@ const fetchProfileData = async () => {
           </View>
 
           {marketNews?.slice(0, newsCount)?.map((item, index) => {
+            // The API doesn't provide a coin symbol, so it will fall back to 'BTC' 
             const coinColors = getCoinColor(item.symbol || 'BTC');
             return (
               <TouchableOpacity 
                 key={index} 
                 style={[styles.card, styles.newsCard]} 
-                onPress={() => Linking.openURL(item.url || 'https://google.com')}
+                onPress={() => Linking.openURL(item.Url || 'https://google.com')}
               >
                 <Image 
-                  source={{ uri: item.image || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&q=80&w=200' }} 
+                  source={{ uri: item.UrlToImage || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&q=80&w=200' }} 
                   style={styles.newsImage} 
                 />
                 <View style={styles.newsContent}>
-                  <Text style={styles.newsHeadline} numberOfLines={2}>{item.title}</Text>
+                  <Text style={styles.newsHeadline} numberOfLines={2}>{item.Title}</Text>
                   <View style={styles.newsMetaRow}>
-                    <Text style={styles.newsTime}>{getTimeAgo(item.publishedAt)}</Text>
+                    <Text style={styles.newsTime}>{getTimeAgo(item.PublishedAt)}</Text>
                     <View style={[styles.tagPill, {backgroundColor: coinColors.bg}]}>
                       <Text style={[styles.tagText, {color: coinColors.text}]}>{item.symbol || 'BTC'}</Text>
                     </View>
