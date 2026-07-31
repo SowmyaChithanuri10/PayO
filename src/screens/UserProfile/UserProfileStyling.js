@@ -1438,6 +1438,18 @@ rightIcon: {
   right: scale(16), // Pins the icon to the right inner padding edge
 },
 
+disabledBankBtn: {
+  backgroundColor: '#E5E7EB', // Neutral gray background
+  borderColor: '#D1D5DB',
+  elevation: 0,               // Remove Android shadow
+  shadowOpacity: 0,           // Remove iOS shadow
+},
+disabledBankBtnText: {
+  color: '#9CA3AF',           // Muted gray text
+  fontSize: 16,
+  fontWeight: '600',
+},
+
   // --- New Primary Logout Button Style ---
   logoutPrimaryBtn: {
     flexDirection: 'row',
