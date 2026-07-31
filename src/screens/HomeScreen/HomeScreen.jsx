@@ -2350,6 +2350,7 @@ import Header from '../components/header';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setProfileData, setWalletData } from '../../redux/features/depositSlice';
 import { PAYO_EXCHANGE_RATE } from '../../api/mainValuables';
+import Chats from '../chats/Chats';
 
 const BANNER_ITEM_WIDTH = (windowWidth * 0.78) + 16;
 
@@ -2387,7 +2388,7 @@ export default function HomeScreen({ navigation }) {
   const flatListRef = useRef(null);
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
   const newsSectionRef = useRef(null);
-  const newsItemRefs = useRef({});
+ const newsItemRefs = useRef({});
   const newsItemYPositions = useRef({});
 
   // 3. HOOKS & REDUX
@@ -2501,8 +2502,7 @@ export default function HomeScreen({ navigation }) {
 
   // 8. USE EFFECTS
   useEffect(() => {
-    const rupees = parseFloat(avbRuppee) || 0;
-    const PAYO_EXCHANGE_RATE = 1; // Adjust rate multiplier if defined elsewhere
+    const rupees = parseFloat(avbRuppee) || 0; // Adjust rate multiplier if defined elsewhere
     const payo = rupees * PAYO_EXCHANGE_RATE;
     setAvailable(payo.toFixed(3));
   }, [avbRuppee]);
@@ -2575,8 +2575,9 @@ export default function HomeScreen({ navigation }) {
       navigation.navigate(route, params);
     }
   };
-
+console.log(available,avbRuppee,"098")
   return (
+    <>
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#f4f6f9" barStyle="dark-content" />
 
@@ -2811,6 +2812,8 @@ export default function HomeScreen({ navigation }) {
 
       </ScrollView>
     </SafeAreaView>
+      <Chats />
+      </>
   );
 }
 
