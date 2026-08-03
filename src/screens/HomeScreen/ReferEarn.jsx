@@ -656,12 +656,12 @@ const ReferEarn = ({ navigation }) => {
         {/* Action Buttons Row */}
         <View style={styles.actionButtonsRow}>
           <TouchableOpacity style={styles.actionBtn} onPress={handleCopy} activeOpacity={0.8}>
-            <Text style={styles.actionBtnText}>Copy address</Text>
+            <Text style={styles.actionBtnText}>Copy Referral</Text>
             <Icon name="copy" size={moderateScale(16)} color="#333" style={styles.actionBtnIcon} />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionBtn} onPress={handleShareReferral} activeOpacity={0.8}>
-            <Text style={styles.actionBtnText}>Share address</Text>
+            <Text style={styles.actionBtnText}>Share Referral</Text>
             <Icon name="external-link" size={moderateScale(16)} color="#333" style={styles.actionBtnIcon} />
           </TouchableOpacity>
         </View>

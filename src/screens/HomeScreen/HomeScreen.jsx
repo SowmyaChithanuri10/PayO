@@ -2420,8 +2420,9 @@ export default function HomeScreen({ navigation }) {
   // 6. API CALLS WRAPPED IN useCallback
   const fetchExpertCoins = useCallback(async () => {
     try {
-      const res = await api.get('/api/market/overview');
-      setExpertCoins(res?.data?.data?.slice(0, 5) || []);
+      // const res = await api.get('/api/market/overview');
+      const res = await api.get('/api/market/crypto')
+      setExpertCoins(res?.data?.Data?.data?.slice(0, 5) || []);
     } catch (error) {
       console.log('Expert coins error:', error?.message);
       setExpertCoins([
@@ -2463,6 +2464,17 @@ export default function HomeScreen({ navigation }) {
   const fetchProfileData = useCallback(async () => {
     try {
       const res = await api.get('/api/auth/user-profile');
+      if (res?.data?.Data) {
+        dispatch(setProfileData(res?.data?.Data));
+      }
+    } catch (err) {
+      console.log('Profile API error:', err.message);
+    }
+  }, [dispatch]);
+
+   const fetchDashBoardData = useCallback(async () => {
+    try {
+      const res = await api.get('/api/auth/dashboard');
       if (res?.data?.Data) {
         dispatch(setProfileData(res?.data?.Data));
       }
@@ -2542,6 +2554,7 @@ export default function HomeScreen({ navigation }) {
       fetchMarketNews();
       fetchWallet();
       fetchProfileData();
+      fetchDashBoardData();
 
       navigation.setOptions({ gestureEnabled: false });
 
@@ -2575,7 +2588,7 @@ export default function HomeScreen({ navigation }) {
       navigation.navigate(route, params);
     }
   };
-console.log(available,avbRuppee,"098")
+
   return (
     <>
     <SafeAreaView style={styles.container}>
@@ -2812,7 +2825,7 @@ console.log(available,avbRuppee,"098")
 
       </ScrollView>
     </SafeAreaView>
-      {/* <Chats /> */}
+      <Chats />
       </>
   );
 }
