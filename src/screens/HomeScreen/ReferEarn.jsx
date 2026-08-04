@@ -484,9 +484,10 @@ import RNFS from 'react-native-fs';
 
 
 const ReferEarn = ({ navigation }) => {
-  const walletData = useAppSelector((state) => state.deposit.walletData);
-  const referralCode = walletData?.Referral_Code;
-  const qrCodeUrl = walletData?.QR_Code_Link_Referral;
+    const profileData = useAppSelector((state) => state.deposit.profileData);
+  
+  const referralCode = profileData?.Referral_Code;
+  const qrCodeUrl = profileData?.QR_Code_Link_Referral;
 
   const totalReferrals = 6;
   const totalRewards = 100;

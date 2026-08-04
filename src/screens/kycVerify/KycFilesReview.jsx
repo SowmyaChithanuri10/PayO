@@ -1204,7 +1204,7 @@ import {
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
-//import Pdf from 'react-native-pdf';
+import Pdf from 'react-native-pdf';
 import styles from './KycFilesReviewStyles';
 
 // API imports

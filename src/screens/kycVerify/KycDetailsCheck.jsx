@@ -2423,7 +2423,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { theme } from '../../MainTheme/theme';
 import { scale, verticalScale, moderateScale } from '../../utils/responsive';
 import api from '../../api/axios';
-//import Pdf from 'react-native-pdf';
+import Pdf from 'react-native-pdf';
 import { WebView } from 'react-native-webview';
 
 const { width: windowWidth } = Dimensions.get('window');

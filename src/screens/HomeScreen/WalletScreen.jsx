@@ -1073,9 +1073,7 @@ export default function WalletScreen({ navigation }) {
         const rate = PAYO_EXCHANGE_RATE || 0.00012; // Uses fallback exchange rate if undefined
         const calculatedPayo = (rupeeBalance * rate).toFixed(3);
         setPayoBalance(calculatedPayo);
-
-        // // Update Redux state if used globally
-        // dispatch(setWalletData(data));
+        dispatch(setWalletData(data));
       }
     } catch (error) {
       console.log('Wallet API error:', error?.response || error.message);
@@ -1110,7 +1108,7 @@ export default function WalletScreen({ navigation }) {
   };
 
   const handleCopy = () => {
-    const walletAddress = wallet?.Wallet_ID || walletData?.Wallet_ID;
+    const walletAddress = wallet?.Wallet_ID;
     if (!walletAddress) return;
 
     Clipboard.setString(walletAddress);
@@ -1168,7 +1166,7 @@ export default function WalletScreen({ navigation }) {
             <View style={styles.headerTitleContainer}>
               <Text style={styles.headerTitle}>Wallet ID</Text>
               <Text style={styles.headerSubtitle} numberOfLines={1}>
-                {wallet?.Wallet_ID || walletData?.Wallet_ID || 'N/A'}
+                {wallet?.Wallet_ID}
               </Text>
             </View>
 
