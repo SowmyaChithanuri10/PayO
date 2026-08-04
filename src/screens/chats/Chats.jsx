@@ -2263,28 +2263,8 @@ apiClient.interceptors.response.use(
 // 3. MAIN COMPONENT
 // ==========================================
 const Chats = () => {
-
-
- const [walletData,setWalletData]=useState(null);
-
-   const fetchWallet = async () => {
-      try {
-        const res = await api.get('/api/wallet/wallet-details');
-        if (res.data?.data?.[0]) {
-          setWalletData(res.data?.data?.[0]?.Wallet_ID)
-         
-        }
-      } catch (error) {
-        console.log('Wallet API error:', error?.response || error.message);
-      }
-    };
-    
-    
-  // Get wallet data from Redux
   
-  // const walletData = useSelector((state) => state.deposit.walletData);
-  // const walletData = useAppSelector((state) => state.deposit.walletData);
-  // console.log(walletData)
+  const walletData = useAppSelector((state) => state.deposit.walletData);
   const reduxAmount = useSelector((state) => state.deposit.amount);
   const reduxCurrency = useSelector((state) => state.deposit.currency) || 'INR';
 
@@ -2363,10 +2343,6 @@ const Chats = () => {
 
   }, [messages, isProcessing, isChatOpen]);
 
-
-  useEffect(()=>{
-    fetchWallet()
-  },[])
   // ==========================================
   // 4. FILE PICKER FUNCTIONS
   // ==========================================

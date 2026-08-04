@@ -2324,7 +2324,6 @@
 // }
 
 
-
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   View,
@@ -2348,11 +2347,9 @@ import styles from './homeStyling';
 import { moderateScale, scale, windowWidth } from '../../utils/responsive';
 import Header from '../components/header';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { setProfileData, setWalletData } from '../../redux/features/depositSlice';
+import { setDashboardStats, setProfileData, setWalletData } from '../../redux/features/depositSlice';
 import { PAYO_EXCHANGE_RATE } from '../../api/mainValuables';
 import Chats from '../chats/Chats';
-
-const BANNER_ITEM_WIDTH = (windowWidth * 0.78) + 16;
 
 const getCoinColor = (symbol) => {
   const sym = symbol?.toUpperCase();
@@ -2388,15 +2385,11 @@ export default function HomeScreen({ navigation }) {
   const flatListRef = useRef(null);
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
   const newsSectionRef = useRef(null);
- const newsItemRefs = useRef({});
-  const newsItemYPositions = useRef({});
+  const newsItemRefs = useRef({});
 
-  // 3. HOOKS & REDUX
   const dispatch = useAppDispatch();
-  const walletData = useAppSelector((state) => state.deposit.walletData);
-  const profileData = useAppSelector((state) => state.deposit.profileData);
+  const dashboardStats = useAppSelector(state => state.deposit.dashboardStats);
 
-  // 4. MEMOIZED DATA
   const bannerData = useMemo(() => [
     { id: '1', image: require('../../../assets/images/banner1.png') },
     { id: '2', image: require('../../../assets/images/banner2.png') },
@@ -2404,11 +2397,30 @@ export default function HomeScreen({ navigation }) {
     { id: '4', image: require('../../../assets/images/banner4.png') },
   ], []);
 
+  /**
+   * RESTRICTION LOGIC:
+   * Active ONLY when BOTH totalTransactions > 0 AND successfulTransactions > 0.
+   * In all other conditions, features are restricted.
+   */
   const isRestricted = useMemo(() => {
-    const numericValue = parseFloat(String(avbRuppee).replace(/[^\d.]/g, ''));
-    if (isNaN(numericValue)) return true; 
-    return numericValue < 100;
-  }, [avbRuppee]);
+    const totalTransactions = dashboardStats?.totalTransactions ?? 0;
+    const successfulTransactions = dashboardStats?.successfulTransactions ?? 0;
+
+    return !(totalTransactions > 0 && successfulTransactions > 0);
+  }, [dashboardStats]);
+
+  // Alert handler when tapping restricted features
+  const showAccessRestrictedAlert = () => {
+    Alert.alert(
+      'Access Restricted',
+      'You are unable to access this feature. Please add money to your wallet.',
+      [
+        { text: 'OK', style: 'cancel' },
+        { text: 'Add Money', onPress: () => navigation.navigate('AddMoneytoWallet') },
+      ],
+      { cancelable: true }
+    );
+  };
 
   // 5. CALLBACKS FOR FLATLIST
   const onViewableItemsChanged = useCallback(({ viewableItems }) => {
@@ -2448,61 +2460,61 @@ export default function HomeScreen({ navigation }) {
     }
   }, []);
 
-  const fetchWallet = useCallback(async () => {
+  const fetchDashBoardData = useCallback(async () => {
     try {
-      const res = await api.get('/api/wallet/wallet-details');
-      if (res.data?.data?.[0]) {
-        setAvbRuppee(res.data?.data?.[0]?.Available_Balance);
-        dispatch(setWalletData(res.data?.data?.[0]));
-      }
-    } catch (error) {
-      console.log('Wallet API error:', error?.response || error.message);
-    }
-  }, [dispatch]);
+      const res = await api.get('/api/auth/dashboard');
+      const dashboardData = res?.data?.Data;
 
-  const fetchProfileData = useCallback(async () => {
-    try {
-      const res = await api.get('/api/auth/user-profile');
-      if (res?.data?.Data) {
-        dispatch(setProfileData(res?.data?.Data));
+      if (dashboardData) {
+        if (dashboardData.Profile) {
+          dispatch(setProfileData(dashboardData.Profile));
+        }
+
+        if (dashboardData.Wallet) {
+          dispatch(setWalletData(dashboardData.Wallet));
+          setAvbRuppee(dashboardData.Wallet.Available_Balance ?? 0);
+        }
+
+        dispatch(
+          setDashboardStats({
+            successfulTransactions: dashboardData.Successful_Transactions,
+            totalTransactions: dashboardData.Total_Transactions,
+            kycStatus: dashboardData.KYC_Status,
+          })
+        );
       }
     } catch (err) {
-      console.log('Profile API error:', err.message);
+      console.log('Dashboard API error:', err?.response || err.message);
     }
   }, [dispatch]);
 
   // 7. VIEW MORE HANDLER WITH SCROLL LOGIC
- const handleViewMore = () => {
-  const targetIndex = newsCount; // Index of the first new item about to load
+  const handleViewMore = () => {
+    const targetIndex = newsCount;
+    setNewsCount((prev) => prev + 15);
 
-  // Increase the list count
-  setNewsCount((prev) => prev + 15);
+    setTimeout(() => {
+      const targetElement = newsItemRefs.current[targetIndex];
+      const containerElement = newsSectionRef.current;
 
-  // Wait briefly for React Native to mount the new item
-  setTimeout(() => {
-    const targetElement = newsItemRefs.current[targetIndex];
-    const containerElement = newsSectionRef.current;
-
-    if (targetElement && containerElement && scrollRef.current) {
-      // Measures item position relative to section container/ScrollView
-      targetElement.measureLayout(
-        containerElement,
-        (x, y, width, height) => {
-          // Calculate target offset on main ScrollView
-          scrollRef.current.scrollTo({
-            y: y, 
-            animated: true,
-          });
-        },
-        (error) => console.log('Measure failed:', error)
-      );
-    }
-  }, 100);
-};
+      if (targetElement && containerElement && scrollRef.current) {
+        targetElement.measureLayout(
+          containerElement,
+          (x, y) => {
+            scrollRef.current.scrollTo({
+              y: y,
+              animated: true,
+            });
+          },
+          (error) => console.log('Measure failed:', error)
+        );
+      }
+    }, 100);
+  };
 
   // 8. USE EFFECTS
   useEffect(() => {
-    const rupees = parseFloat(avbRuppee) || 0; // Adjust rate multiplier if defined elsewhere
+    const rupees = parseFloat(avbRuppee) || 0;
     const payo = rupees * PAYO_EXCHANGE_RATE;
     setAvailable(payo.toFixed(3));
   }, [avbRuppee]);
@@ -2534,14 +2546,12 @@ export default function HomeScreen({ navigation }) {
     useCallback(() => {
       const checkToken = async () => {
         const token = await getToken();
-        console.log("77 Token:", token);
       };
       checkToken();
 
       fetchExpertCoins();
       fetchMarketNews();
-      fetchWallet();
-      fetchProfileData();
+      fetchDashBoardData();
 
       navigation.setOptions({ gestureEnabled: false });
 
@@ -2556,264 +2566,263 @@ export default function HomeScreen({ navigation }) {
       );
 
       return () => backHandler.remove();
-    }, [navigation, fetchExpertCoins, fetchMarketNews, fetchWallet, fetchProfileData])
+    }, [navigation, fetchExpertCoins, fetchMarketNews, fetchDashBoardData])
   );
 
   // 10. QUICK ACTION HANDLER
   const handleQuickAction = (route, params) => {
     if (isRestricted) {
-      Alert.alert(
-        'Access Restricted',
-        'You are unable to access this. Please add money to your wallet.',
-        [
-          { text: 'OK', style: 'cancel' },
-          { text: 'Add Money', onPress: () => navigation.navigate('AddMoneytoWallet') },
-        ],
-        { cancelable: true }
-      );
+      showAccessRestrictedAlert();
     } else {
       navigation.navigate(route, params);
     }
   };
-console.log(available,avbRuppee,"098")
+
+  // 11. VIEW WALLET HANDLER
+  const handleViewWallet = () => {
+    if (isRestricted) {
+      showAccessRestrictedAlert();
+    } else {
+      navigation.navigate('WalletScreen');
+    }
+  };
+
   return (
     <>
-    <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#f4f6f9" barStyle="dark-content" />
+      <SafeAreaView style={styles.container}>
+        <StatusBar backgroundColor="#f4f6f9" barStyle="dark-content" />
 
-      <Header />
+        <Header />
 
-      <ScrollView 
-        ref={scrollRef} 
-        showsVerticalScrollIndicator={false} 
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Gradient Wallet Card */}
-        <LinearGradient 
-          colors={['#6366f1', '#4f46e5']} 
-          start={{ x: 0, y: 0 }} 
-          end={{ x: 1, y: 1 }} 
-          style={styles.walletCard}
+        <ScrollView 
+          ref={scrollRef} 
+          showsVerticalScrollIndicator={false} 
+          contentContainerStyle={styles.scrollContent}
         >
-          <View style={styles.cardLightHighlight} />
-          
-          <View style={styles.walletHeaderRow}>
-            <View style={styles.rowCenter}>
-              <Text style={styles.walletLabel}>Total Wallet Balance</Text>
-              <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)} style={{ marginLeft: 20 }}>
-                <Icon name={balanceVisible ? 'eye-off' : 'eye'} size={18} color="rgba(255,255,255,0.8)" />
+          {/* Gradient Wallet Card */}
+          <LinearGradient 
+            colors={['#6366f1', '#4f46e5']} 
+            start={{ x: 0, y: 0 }} 
+            end={{ x: 1, y: 1 }} 
+            style={styles.walletCard}
+          >
+            <View style={styles.cardLightHighlight} />
+            
+            <View style={styles.walletHeaderRow}>
+              <View style={styles.rowCenter}>
+                <Text style={styles.walletLabel}>Total Wallet Balance</Text>
+                <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)} style={{ marginLeft: 20 }}>
+                  <Icon name={balanceVisible ? 'eye-off' : 'eye'} size={18} color="rgba(255,255,255,0.8)" />
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity 
+                style={[styles.viewWalletBtn, isRestricted && { opacity: 0.5 }]}
+                activeOpacity={0.8}
+                onPress={handleViewWallet}
+              >
+                <Text style={styles.viewWalletText}>View Wallet</Text>
+                <Icon name="chevron-right" size={14} color="#fff" />
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity 
-              style={styles.viewWalletBtn}
-              activeOpacity={0.8}
-              onPress={() => navigation.navigate('WalletScreen')}
-            >
-              <Text style={styles.viewWalletText}>View Wallet</Text>
-              <Icon name="chevron-right" size={14} color="#fff" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.balanceContainer}>
-            <View style={styles.balanceRow}>
-              <Text style={styles.balanceAmount}>{balanceVisible ? available : '****'}</Text>
-              <Text style={styles.balanceCurrency}>PAYO</Text>
+            <View style={styles.balanceContainer}>
+              <View style={styles.balanceRow}>
+                <Text style={styles.balanceAmount}>{balanceVisible ? available : '****'}</Text>
+                <Text style={styles.balanceCurrency}>PAYO</Text>
+              </View>
+              <Text style={styles.fiatAmount}>{balanceVisible ? `₹ ${avbRuppee}` : ' '}</Text>
             </View>
-            <Text style={styles.fiatAmount}>{balanceVisible ? `₹ ${avbRuppee}` : ' '}</Text>
+
+            <View style={styles.bottomActionRow}>
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('AddMoneytoWallet')} 
+                style={styles.addMoneyBtn}
+                activeOpacity={0.9}
+              >
+                <Icon name="plus" size={22} color="#22c55e" style={{ marginRight: 6 }} />
+                <Text style={styles.addMoneyText}>Add Money</Text>
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+
+          {/* Quick Actions Container */}
+          <View style={[styles.sectionContainer, isRestricted && localStyles.restrictedCardBackground]}>
+            <Text style={[styles.sectionHeading, isRestricted && localStyles.Text]}>Quick Actions</Text>
+            
+            <View style={styles.actionsGridCard}>
+              <View style={styles.actionsGrid}>
+                {[
+                  { id: 'send', image: require('../../../assets/images/Icon_1.png'), label: 'Send', route: 'SendScreen', params: { tab: 'scan' } },
+                  { id: 'receive', image: require('../../../assets/images/Icon_2.png'), label: 'Receive', route: 'Receive' },
+                  { id: 'scan', image: require('../../../assets/images/Icon_3.png'), label: 'Scan QR', route: 'SendScreen', params: { tab: 'scan' } },
+                  { id: 'exchange', image: require('../../../assets/images/Icon_4.png'), label: 'Exchange', route: 'ExchangeScreen' }
+                ].map((action) => (
+                  <TouchableOpacity 
+                    key={action.id} 
+                    style={styles.actionItem}
+                    activeOpacity={isRestricted ? 1 : 0.7}
+                    onPress={() => handleQuickAction(action.route, action.params)}
+                  >
+                    <View style={[
+                      styles.actionIconBtn, 
+                      isRestricted && { backgroundColor: '#E5E7EB', shadowOpacity: 0, elevation: 0 }
+                    ]}>
+                      <Image 
+                        source={action.image} 
+                        style={[styles.actionImageFormat, isRestricted && { tintColor: '#9CA3AF' }]} 
+                        resizeMode="contain"
+                      />
+                    </View>
+                    <Text style={[styles.actionLabel, isRestricted && { color: '#9CA3AF' }]}>{action.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {isRestricted && (
+                <View style={localStyles.lockOverlay}>
+                  <Icon name="lock" size={15} color="#6B7280" style={localStyles.lockIcon} />
+                  <Text style={localStyles.lockText}>Unlock by adding money to your Wallet</Text>
+                </View>
+              )}
+            </View>
           </View>
 
-          <View style={styles.bottomActionRow}>
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('AddMoneytoWallet')} 
-              style={styles.addMoneyBtn}
-              activeOpacity={0.9}
-            >
-              <Icon name="plus" size={22} color="#22c55e" style={{ marginRight: 6 }} />
-              <Text style={styles.addMoneyText}>Add Money</Text>
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
-
-        {/* Quick Actions Container */}
-        <View style={[styles.sectionContainer, isRestricted && localStyles.restrictedCardBackground]}>
-          <Text style={[styles.sectionHeading, isRestricted && localStyles.Text]}>Quick Actions</Text>
-          
-          <View style={styles.actionsGridCard}>
-            <View style={styles.actionsGrid}>
-              {[
-                { id: 'send', image: require('../../../assets/images/Icon_1.png'), label: 'Send', route: 'SendScreen', params: { tab: 'scan' } },
-                { id: 'receive', image: require('../../../assets/images/Icon_2.png'), label: 'Receive', route: 'Receive' },
-                { id: 'scan', image: require('../../../assets/images/Icon_3.png'), label: 'Scan QR', route: 'SendScreen', params: { tab: 'scan' } },
-                { id: 'exchange', image: require('../../../assets/images/Icon_4.png'), label: 'Exchange', route: 'ExchangeScreen' }
-              ].map((action) => (
-                <TouchableOpacity 
-                  key={action.id} 
-                  style={styles.actionItem}
-                  activeOpacity={isRestricted ? 1 : 0.7}
-                  onPress={() => handleQuickAction(action.route, action.params)}
-                >
-                  <View style={[
-                    styles.actionIconBtn, 
-                    isRestricted && { backgroundColor: '#E5E7EB', shadowOpacity: 0, elevation: 0 }
-                  ]}>
-                    <Image 
-                      source={action.image} 
-                      style={[styles.actionImageFormat, isRestricted && { tintColor: '#9CA3AF' }]} 
-                      resizeMode="contain"
-                    />
-                  </View>
-                  <Text style={[styles.actionLabel, isRestricted && { color: '#9CA3AF' }]}>{action.label}</Text>
-                </TouchableOpacity>
+          {/* Banners */}
+          <View style={styles.carouselContainer}>
+            <FlatList
+              ref={flatListRef}
+              data={bannerData}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              snapToInterval={scale(304) + scale(8)}
+              decelerationRate="fast"
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={viewabilityConfig}
+              renderItem={({ item }) => (
+                <View style={styles.bannerWrapper}>
+                  <Image
+                    source={item.image}
+                    style={styles.bannerCard}
+                    resizeMode="cover"
+                  />
+                </View>
+              )}
+            />
+            
+            <View style={styles.bannerPagination}>
+              {bannerData.map((_, i) => (
+                <View 
+                  key={i} 
+                  style={[styles.dot, activeBanner === i && styles.dotActive]} 
+                />
               ))}
             </View>
-
-            {isRestricted && (
-              <View style={localStyles.lockOverlay}>
-                <Icon name="lock" size={15} color="#6B7280" style={localStyles.lockIcon} />
-                <Text style={localStyles.lockText}>Unlock by adding ₹100 or more to your Wallet</Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {/* Banners */}
-        <View style={styles.carouselContainer}>
-          <FlatList
-            ref={flatListRef}
-            data={bannerData}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            snapToInterval={scale(304) + scale(8)}
-            decelerationRate="fast"
-            onViewableItemsChanged={onViewableItemsChanged}
-            viewabilityConfig={viewabilityConfig}
-            renderItem={({ item }) => (
-              <View style={styles.bannerWrapper}>
-                <Image
-                  source={item.image}
-                  style={styles.bannerCard}
-                  resizeMode="cover"
-                />
-              </View>
-            )}
-          />
-          
-          <View style={styles.bannerPagination}>
-            {bannerData.map((_, i) => (
-              <View 
-                key={i} 
-                style={[styles.dot, activeBanner === i && styles.dotActive]} 
-              />
-            ))}
-          </View>
-        </View>
-
-        {/* Crypto Market */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionHeading}>Crypto Market</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('MarketScreen')}>
-              <Text style={styles.viewAllText}>View All {">"}</Text>
-            </TouchableOpacity>
           </View>
 
-          <View style={styles.card}>
-            <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderText, {flex: 2}]}>COIN</Text>
-              <Text style={[styles.tableHeaderText, {flex: 2, textAlign: 'right'}]}>PRICE</Text>
-              <Text style={[styles.tableHeaderText, {flex: 1.5, textAlign: 'right'}]}>24H</Text>
+          {/* Crypto Market */}
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionHeading}>Crypto Market</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('MarketScreen')}>
+                <Text style={styles.viewAllText}>View All {">"}</Text>
+              </TouchableOpacity>
             </View>
 
-            {expertCoins.map((coin, index) => {
-              const isPositive = coin.priceChangePercentage24h >= 0;
-              const coinColors = getCoinColor(coin.symbol);
+            <View style={styles.card}>
+              <View style={styles.tableHeader}>
+                <Text style={[styles.tableHeaderText, {flex: 2}]}>COIN</Text>
+                <Text style={[styles.tableHeaderText, {flex: 2, textAlign: 'right'}]}>PRICE</Text>
+                <Text style={[styles.tableHeaderText, {flex: 1.5, textAlign: 'right'}]}>24H</Text>
+              </View>
+
+              {expertCoins.map((coin, index) => {
+                const isPositive = coin.priceChangePercentage24h >= 0;
+                const coinColors = getCoinColor(coin.symbol);
+                return (
+                  <TouchableOpacity 
+                    key={index} 
+                    style={styles.tableRow}
+                    onPress={() => navigation.navigate('CoinDetailsScreen', { coin })}
+                  >
+                    <View style={[styles.tableCell, {flex: 2, flexDirection: 'row', alignItems: 'center'}]}>
+                      <View style={[styles.coinIcon, {backgroundColor: coinColors.text}]}>
+                        <Text style={styles.coinIconText}>{coin.symbol?.charAt(0)}</Text>
+                      </View>
+                      <View>
+                        <Text style={styles.coinSymbol}>{coin.symbol?.toUpperCase()}</Text>
+                        <Text style={styles.coinName}>{coin.name || coin.symbol}</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.tableCell, styles.coinPrice, {flex: 2, textAlign: 'right'}]}>
+                      ₹{coin.price?.toLocaleString()}
+                    </Text>
+                    <Text style={[styles.tableCell, {flex: 1.5, textAlign: 'right', color: isPositive ? '#10b981' : '#ef4444', fontWeight: '600'}]}>
+                      {isPositive ? '▲' : '▼'} {Math.abs(coin.priceChangePercentage24h).toFixed(1)}%
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Crypto News */}
+          <View ref={newsSectionRef} style={styles.sectionContainer}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionHeading}>Crypto News</Text>
+              {marketNews?.length > newsCount && (
+                <TouchableOpacity onPress={handleViewMore}>
+                  <Text style={styles.viewAllText}>View More {">"}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {marketNews?.slice(0, newsCount)?.map((item, index) => {
+              const detectSymbol = (title = '') => {
+                const upper = title.toUpperCase();
+                if (upper.includes('BTC') || upper.includes('BITCOIN')) return 'BTC';
+                if (upper.includes('ETH') || upper.includes('ETHEREUM')) return 'ETH';
+                if (upper.includes('BNB') || upper.includes('BINANCE')) return 'BNB';
+                if (upper.includes('SOL') || upper.includes('SOLANA')) return 'SOL';
+                return item.symbol || 'CRYPTO';
+              };
+
+              const currentSymbol = detectSymbol(item.Title);
+              const coinColors = getCoinColor(currentSymbol);
+
               return (
                 <TouchableOpacity 
                   key={index} 
-                  style={styles.tableRow}
-                  onPress={() => navigation.navigate('CoinDetailsScreen', { coin })}
+                  ref={(el) => (newsItemRefs.current[index] = el)}
+                  style={[styles.card, styles.newsCard]} 
+                  onPress={() => Linking.openURL(item.Url || 'https://google.com')}
                 >
-                  <View style={[styles.tableCell, {flex: 2, flexDirection: 'row', alignItems: 'center'}]}>
-                    <View style={[styles.coinIcon, {backgroundColor: coinColors.text}]}>
-                      <Text style={styles.coinIconText}>{coin.symbol?.charAt(0)}</Text>
-                    </View>
-                    <View>
-                      <Text style={styles.coinSymbol}>{coin.symbol?.toUpperCase()}</Text>
-                      <Text style={styles.coinName}>{coin.name || coin.symbol}</Text>
+                  <Image 
+                    source={{ uri: item.UrlToImage || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&q=80&w=200' }} 
+                    style={styles.newsImage} 
+                  />
+                  <View style={styles.newsContent}>
+                    <Text style={styles.newsHeadline} numberOfLines={2}>
+                      {item.Title}
+                    </Text>
+                    <View style={styles.newsMetaRow}>
+                      <Text style={styles.newsTime}>{getTimeAgo(item.PublishedAt)}</Text>
+                      <View style={[styles.tagPill, { backgroundColor: coinColors.bg }]}>
+                        <Text style={[styles.tagText, { color: coinColors.text }]}>
+                          {currentSymbol}
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                  <Text style={[styles.tableCell, styles.coinPrice, {flex: 2, textAlign: 'right'}]}>
-                    ₹{coin.price?.toLocaleString()}
-                  </Text>
-                  <Text style={[styles.tableCell, {flex: 1.5, textAlign: 'right', color: isPositive ? '#10b981' : '#ef4444', fontWeight: '600'}]}>
-                    {isPositive ? '▲' : '▼'} {Math.abs(coin.priceChangePercentage24h).toFixed(1)}%
-                  </Text>
                 </TouchableOpacity>
               );
             })}
           </View>
-        </View>
-
-        {/* Crypto News */}
-      <View ref={newsSectionRef} style={styles.sectionContainer}>
-  <View style={styles.sectionHeaderRow}>
-    <Text style={styles.sectionHeading}>Crypto News</Text>
-    {marketNews?.length > newsCount && (
-      <TouchableOpacity onPress={handleViewMore}>
-        <Text style={styles.viewAllText}>View More {">"}</Text>
-      </TouchableOpacity>
-    )}
-  </View>
-
-  {marketNews?.slice(0, newsCount)?.map((item, index) => {
-    const detectSymbol = (title = '') => {
-      const upper = title.toUpperCase();
-      if (upper.includes('BTC') || upper.includes('BITCOIN')) return 'BTC';
-      if (upper.includes('ETH') || upper.includes('ETHEREUM')) return 'ETH';
-      if (upper.includes('BNB') || upper.includes('BINANCE')) return 'BNB';
-      if (upper.includes('SOL') || upper.includes('SOLANA')) return 'SOL';
-      return item.symbol || 'CRYPTO';
-    };
-
-    const currentSymbol = detectSymbol(item.Title);
-    const coinColors = getCoinColor(currentSymbol);
-
-    return (
-      <TouchableOpacity 
-        key={index} 
-        // Store ref to each individual card
-        ref={(el) => (newsItemRefs.current[index] = el)}
-        style={[styles.card, styles.newsCard]} 
-        onPress={() => Linking.openURL(item.Url || 'https://google.com')}
-      >
-        <Image 
-          source={{ uri: item.UrlToImage || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&q=80&w=200' }} 
-          style={styles.newsImage} 
-        />
-        <View style={styles.newsContent}>
-          <Text style={styles.newsHeadline} numberOfLines={2}>
-            {item.Title}
-          </Text>
-          <View style={styles.newsMetaRow}>
-            <Text style={styles.newsTime}>{getTimeAgo(item.PublishedAt)}</Text>
-            <View style={[styles.tagPill, { backgroundColor: coinColors.bg }]}>
-              <Text style={[styles.tagText, { color: coinColors.text }]}>
-                {currentSymbol}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  })}
-</View>
-
-      </ScrollView>
-    </SafeAreaView>
-      {/* <Chats /> */}
-      </>
+        </ScrollView>
+      </SafeAreaView>
+      <Chats />
+    </>
   );
 }
 
@@ -2822,15 +2831,15 @@ const localStyles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     borderColor: '#E5E7EB',
     borderWidth: 1,
-    paddingHorizontal:20,
-    paddingVertical:20,
-    marginHorizontal:20,
-    marginVertical:20,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    marginHorizontal: 20,
+    marginVertical: 20,
     borderRadius: 16,
   },
-  Text:{
-opacity:0.4,
- fontSize: moderateScale(18),
+  Text: {
+    opacity: 0.4,
+    fontSize: moderateScale(18),
     fontWeight: '700',
   },
   lockOverlay: {
@@ -2840,21 +2849,19 @@ opacity:0.4,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
-    marginTop:10
+    marginTop: 10,
   },
   lockIcon: {
     marginRight: 8,
-    marginTop:12
+    marginTop: 12,
   },
   lockText: {
     fontSize: 13,
     fontWeight: '700',
     color: '#000102',
-    marginTop:13
-
+    marginTop: 13,
   },
 });
-
 
 
 // import React, { useState, useCallback, useRef, useEffect } from 'react';

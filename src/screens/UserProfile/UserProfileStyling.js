@@ -1275,19 +1275,56 @@ profileCardBgImage: {
     color: theme.colors.textMuted, 
     marginTop: verticalScale(2),
   },
+  // kycBadge: {
+  //   backgroundColor: '#ff000023', // Soft green color matching successful verification layout style
+  //   alignSelf: 'flex-start',
+  //   paddingHorizontal: scale(8),
+  //   paddingVertical: verticalScale(4),
+  //   borderRadius: scale(4),
+  //   marginTop: verticalScale(6),
+  // },
+  // kycText: {
+  //   color: theme.colors.statusDanger, 
+  //   fontSize: moderateScale(11),
+  //   fontWeight: '700',
+  //   letterSpacing: 0.5,
+  // },
+
   kycBadge: {
-    backgroundColor: '#ff000023', // Soft green color matching successful verification layout style
     alignSelf: 'flex-start',
     paddingHorizontal: scale(8),
     paddingVertical: verticalScale(4),
     borderRadius: scale(4),
     marginTop: verticalScale(6),
   },
+  kycBadgeSuccess: {
+    backgroundColor: '#D1FAE5', // Soft green background
+  },
+  kycBadgeDanger: {
+    backgroundColor: '#FEE2E2', // Soft red background
+  },
   kycText: {
-    color: theme.colors.statusDanger, 
     fontSize: moderateScale(11),
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  kycTextSuccess: {
+    color: '#10B981', // Emerald / Green text
+  },
+  kycTextDanger: {
+    color: theme.colors.statusDanger, // Red text
+  },
+
+  // --- List Text Styles ---
+  dangerText: {
+    fontSize: moderateScale(13),
+    color: theme.colors.statusDanger, 
+    fontWeight: '500',
+  },
+  successText: {
+    fontSize: moderateScale(13),
+    color: '#10B981', // Green text for list item
+    fontWeight: '500',
   },
 
   // --- Balance & Transactions ---
@@ -1532,11 +1569,11 @@ disabledBankBtnText: {
     color: theme.colors.textMain, 
     fontWeight: '400',
   },
-  dangerText: {
-    fontSize: moderateScale(13),
-    color: theme.colors.statusDanger, 
-    fontWeight: '400',
-  },
+  // dangerText: {
+  //   fontSize: moderateScale(13),
+  //   color: theme.colors.statusDanger, 
+  //   fontWeight: '400',
+  // },
 
   // --- Security Banner ---
   // --- Security Banner (Updated for Precise Layout matching Image) ---
