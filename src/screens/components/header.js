@@ -798,8 +798,7 @@
 
 
 
-
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -817,7 +816,7 @@ import {
   StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
 import api from '../../api/axios';
 import styles from '../HomeScreen/homeStyling'; 
@@ -832,7 +831,6 @@ import { capitalizeFirstLetter } from '../../api/mainValuables';
 const { width, height } = Dimensions.get('window');
 const DRAWER_WIDTH = width * 0.76;
 
-
 export default function Header() {
   const navigation = useNavigation();
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -841,7 +839,6 @@ export default function Header() {
   const [kycRecords, setKycRecords] = useState([]);
   const profileDataRedux = useAppSelector((state) => state.deposit.profileData);
   const walletData = useAppSelector((state) => state.deposit.walletData);
-  const tabWalletBalance = walletData?.Available_Balance || 0;
 
   // Fetch transaction history to check total records count
   const fetchTransactions = async () => {
@@ -856,23 +853,26 @@ export default function Header() {
       console.log('Header transaction fetch error:', err.message);
     }
   };
-   const fetchKYCDetails = async () => {
+
+  const fetchKYCDetails = async () => {
     try {
       const response = await api.get('/api/kyc/details');
       if (response?.data?.status === '200' || response?.data?.Data) {
         setKycRecords(response?.data?.Data?.Total_Count);
       }
     } catch (error) {
-      Alert.alert('Error', error?.message || 'Failed to fetch KYC details.');
-    } finally {
-     
+      console.log('Header KYC fetch error:', error?.message);
     }
   };
 
-   const isRestricted = useMemo(() => {
-    const hasTransactions = totalRecords > 0;
+  // Helper function to refresh all drawer data
+  const refreshHeaderData = useCallback(() => {
+    fetchTransactions();
+    fetchKYCDetails();
+  }, []);
 
-    // Restricted ONLY if user has 0 records
+  const isRestricted = useMemo(() => {
+    const hasTransactions = totalRecords > 0;
     return !hasTransactions;
   }, [totalRecords]);
 
@@ -881,6 +881,9 @@ export default function Header() {
   const isDrawerOpen = useRef(false);
 
   const openDrawer = () => {
+    // Refresh APIs immediately when drawer is triggered
+    refreshHeaderData();
+
     panX.flattenOffset();
     setSidebarVisible(true);
     Animated.timing(panX, {
@@ -918,6 +921,7 @@ export default function Header() {
       onPanResponderGrant: () => {
         panX.extractOffset();
         if (!isDrawerOpen.current) {
+          refreshHeaderData();
           setSidebarVisible(true); 
         }
       },
@@ -956,16 +960,11 @@ export default function Header() {
     extrapolate: 'clamp',
   });
 
-  useEffect(() => {
-    fetchTransactions();
-    fetchKYCDetails();
-  }, []);
-
-  useEffect(() => {
-    if (sidebarVisible) {
-      fetchTransactions();
-    }
-  }, [sidebarVisible]);
+  useFocusEffect(
+    useCallback(() => {
+      refreshHeaderData();
+    }, [refreshHeaderData])
+  );
 
   // Safe Hardware Back Interception
   useEffect(() => {
@@ -993,7 +992,7 @@ export default function Header() {
     { label: 'Transactions', icon: 'refresh-cw', route: 'TransactionHistory', requiresAccess: true },
     { label: 'Rewards', icon: 'gift', route: 'ReferEarn', requiresAccess: true },
     { label: 'Referrals', icon: 'users', route: 'ReferEarn', requiresAccess: true },
-    { label: 'Verify KYC', icon: 'file', route: kycRecords ==0 ? "KYCVerification":'KycDetailsCheck', requiresAccess: true },
+    { label: 'Verify KYC', icon: 'file', route: kycRecords == 0 ? "KYCVerification" : 'KycDetailsCheck', requiresAccess: true },
   ];
 
   const bottomMenuItems = [
@@ -1200,709 +1199,6 @@ export default function Header() {
   );
 }
 
-// export default function Header() {
-//   const navigation = useNavigation();
-//   const [sidebarVisible, setSidebarVisible] = useState(false);
-//   // const [walletBalance, setWalletBalance] = useState(1000);
-//   const walletData = useAppSelector((state) => state.deposit.walletData);
-    
-//     const tabWalletBalance = walletData?.Available_Balance
-
-//   const isRestricted = useMemo(() => {
-//     return tabWalletBalance < 100;
-//   }, [tabWalletBalance]);
-
-//   // Animation values for smooth swiping
-//   const panX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
-//   const isDrawerOpen = useRef(false);
-
-//   const openDrawer = () => {
-//     panX.flattenOffset();
-//     setSidebarVisible(true);
-//     Animated.timing(panX, {
-//       toValue: 0,
-//       duration: 250,
-//       useNativeDriver: true,
-//     }).start(() => {
-//       isDrawerOpen.current = true;
-//     });
-//   };
-
-//   const closeDrawer = () => {
-//     panX.flattenOffset();
-//     Animated.timing(panX, {
-//       toValue: -DRAWER_WIDTH,
-//       duration: 250,
-//       useNativeDriver: true,
-//     }).start(() => {
-//       setSidebarVisible(false);
-//       isDrawerOpen.current = false;
-//     });
-//   };
-
-//   // Unified PanResponder for both Opening and Closing
-//   const panResponder = useRef(
-//     PanResponder.create({
-//       onMoveShouldSetPanResponder: (evt, gestureState) => {
-//         // Prevent vertical scrolling from triggering the drawer
-//         if (Math.abs(gestureState.dy) > Math.abs(gestureState.dx)) return false;
-
-//         const isLeftEdgeSwipe = !isDrawerOpen.current && gestureState.x0 < 30 && gestureState.dx > 10;
-//         const isClosingSwipe = isDrawerOpen.current && gestureState.dx < -10;
-        
-//         return isLeftEdgeSwipe || isClosingSwipe;
-//       },
-//       onPanResponderGrant: () => {
-//         panX.extractOffset();
-//         if (!isDrawerOpen.current) {
-//           setSidebarVisible(true); 
-//         }
-//       },
-//       onPanResponderMove: (evt, gestureState) => {
-//         panX.setValue(gestureState.dx);
-//       },
-//       onPanResponderRelease: (evt, gestureState) => {
-//         panX.flattenOffset();
-//         const { vx, dx } = gestureState;
-
-//         // Decide whether to open or close based on velocity and swipe distance
-//         let toOpen = isDrawerOpen.current;
-//         if (vx > 0.5 || dx > DRAWER_WIDTH / 3) {
-//           toOpen = true;
-//         } else if (vx < -0.5 || dx < -DRAWER_WIDTH / 3) {
-//           toOpen = false;
-//         }
-
-//         if (toOpen) {
-//           openDrawer();
-//         } else {
-//           closeDrawer();
-//         }
-//       },
-//     })
-//   ).current;
-
-//   // Interpolate values to constrain movement limits and fade background
-//   const clampedTranslationX = panX.interpolate({
-//     inputRange: [-DRAWER_WIDTH, 0],
-//     outputRange: [-DRAWER_WIDTH, 0],
-//     extrapolate: 'clamp',
-//   });
-
-//   // Controls the dark background fading in and out
-//   const overlayOpacity = panX.interpolate({
-//     inputRange: [-DRAWER_WIDTH, 0],
-//     outputRange: [0, 0.75], 
-//     extrapolate: 'clamp',
-//   });
-
-//   // Handle Wallet Balance Fetching
-//   useEffect(() => {
-//     const checkSidebarBalance = async () => {
-//       try {
-//         const response = await api.get('/api/wallet/balance');
-//         const parsedBalance = parseFloat(String(response?.data?.balance || '0').replace(/[^\d.]/g, ''));
-//         setWalletBalance(isNaN(parsedBalance) ? 0 : parsedBalance);
-//       } catch (error) {
-//         console.log('Sidebar wallet balance sync check failed:', error);
-//       }
-//     };
-    
-//     if (sidebarVisible) {
-//       checkSidebarBalance();
-//     }
-//   }, [sidebarVisible]);
-
-//   // Safe Hardware Back Interception
-//   useEffect(() => {
-//     const handleBackButton = () => {
-//       if (sidebarVisible) {
-//         closeDrawer();
-//         return true; 
-//       }
-//       return false; 
-//     };
-
-//     const subscription = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-//     return () => {
-//       subscription.remove();
-//     };
-//   }, [sidebarVisible]);
-
-//   // Configurations
-//   const notificationCount = 3; 
-
-//   const menuItems = [
-//     { label: 'Dashboard', icon: 'home', route: 'HomeScreen', requiresAccess: false },
-//     { label: 'Wallet', icon: 'credit-card', route: 'WalletScreen', requiresAccess: false },
-//     { label: 'Markets', icon: 'trending-up', route: 'MarketScreen', requiresAccess: true },
-//     { label: 'Portfolio', icon: 'bar-chart-2', route: 'PortfolioScreen', requiresAccess: true },
-//     { label: 'Transactions', icon: 'refresh-cw', route: 'TransactionHistory', requiresAccess: true },
-//     { label: 'Rewards', icon: 'gift', route: 'ReferEarn', requiresAccess: true },
-//     { label: 'Referrals', icon: 'users', route: 'ReferEarn', requiresAccess: true },
-//     { label: 'Verify KYC', icon: 'file', route: 'KYCVerification', requiresAccess: true },
-//   ];
-
-//   const bottomMenuItems = [
-//     { label: 'Settings', icon: 'settings', route: 'SettingsScreen', requiresAccess: false },
-//     { label: 'Support', icon: 'help-circle', route: 'SupportScreen', requiresAccess: false },
-//     { label: 'Logout', icon: 'log-out', route: 'Login', isLogout: true, requiresAccess: false },
-//   ];
-
-//   // Action Handlers
-//   const handleLogout = async () => {
-//     try {
-//       closeDrawer();
-//       await Keychain.resetGenericPassword();
-//       navigation.reset({
-//         index: 0,
-//         routes: [{ name: 'Login' }],
-//       });
-//     } catch (error) {
-//       console.log('Logout error:', error);
-//     }
-//   };
-
-//   const handleNavigation = (item) => {
-//     if (item.isLogout) {
-//       handleLogout();
-//       return;
-//     }
-
-//     if (isRestricted && item.requiresAccess) {
-//       closeDrawer(); 
-//       Alert.alert(
-//         'Access Restricted',
-//         'You are unable to access this. Please add money to your wallet.',
-//         [
-//           { text: 'OK', style: 'cancel' },
-//           { text: 'Add Money', onPress: () => navigation.navigate('AddMoneytoWallet') },
-//         ]
-//       );
-//       return;
-//     }
-    
-//     closeDrawer();
-//     if (item.route) {
-//       navigation.navigate(item.route);
-//     }
-//   };
-
-//   const handleTopProfilePress = () => {
-//     if (isRestricted) {
-//       Alert.alert(
-//         'Access Restricted',
-//         'You are unable to access this. Please add money to your wallet.',
-//         [
-//           { text: 'OK', style: 'cancel' },
-//           { text: 'Add Money', onPress: () => navigation.navigate('AddMoneytoWallet') },
-//         ]
-//       );
-//     } else {
-//       navigation.navigate('UserProfile');
-//     }
-//   };
-
-//   return (
-//     <>
-//       <View style={styles.header}>
-//         <TouchableOpacity 
-//           style={styles.iconButton} 
-//           onPress={openDrawer} 
-//           activeOpacity={0.7}
-//         >
-//           <Icon name="menu" size={24} color={theme.colors.textMain} />
-//         </TouchableOpacity>
-        
-//         <Image 
-//           source={require('../../../assets/images/LogoContainer.png')} 
-//           style={styles.logo} 
-//           resizeMode="contain" 
-//         />
-        
-//         <View style={styles.headerRight}>
-//           <TouchableOpacity 
-//             style={styles.iconButton} 
-//             onPress={() => navigation.navigate('Notifications')} 
-//             activeOpacity={0.7}
-//           >
-//             <Image 
-//               source={require('../../../assets/images/Icon (4).png')} 
-//               style={styles.headerNotificationIcon} 
-//               resizeMode="contain"
-//             />
-//             {notificationCount > 0 && (
-//               <View style={styles.badge}>
-//                 <Text style={styles.badgeText}>{notificationCount}</Text>
-//               </View>
-//             )}
-//           </TouchableOpacity>
-
-//           <TouchableOpacity 
-//             style={styles.profileIconContainer} 
-//             onPress={handleTopProfilePress} 
-//             activeOpacity={0.7}
-//           >
-//             <Image 
-//               source={require('../../../assets/images/Profile Icon.png')} 
-//               style={[styles.headerProfileImg, isRestricted && { opacity: 0.5 }]} 
-//               resizeMode="contain"
-//             />
-//           </TouchableOpacity>
-//         </View>
-//       </View>
-
-//       {/* Invisible Left Edge Swipe Detector for Opening Sidebar */}
-//       <View 
-//         style={sidebarStyles.leftEdgeDetector} 
-//         {...panResponder.panHandlers} 
-//         pointerEvents={sidebarVisible ? 'none' : 'auto'}
-//       />
-
-//       {/* Inline Sidebar Overlay Drawer */}
-//       {sidebarVisible && (
-//         <View style={sidebarStyles.overlay}>
-//           {/* Touch-to-Close Dark Backdrop Layer */}
-//           <TouchableWithoutFeedback onPress={closeDrawer}>
-//             <Animated.View style={[sidebarStyles.backdropTouch, { opacity: overlayOpacity }]} />
-//           </TouchableWithoutFeedback>
-
-//           <Animated.View 
-//             style={[
-//               sidebarStyles.drawerContainer,
-//               { transform: [{ translateX: clampedTranslationX }] }
-//             ]} 
-//             {...panResponder.panHandlers}
-//           >
-//             {/* Dynamic Status Bar Fix implemented here inside headerBackground */}
-//             <View style={sidebarStyles.headerBackground}>
-//               <SafeAreaView>
-//                 <View style={sidebarStyles.profileHeader}>
-//                   <View style={sidebarStyles.userInfoRow}>
-//                     <View style={sidebarStyles.avatarCircle}>
-//                       <Icon name="user" size={22} color={theme.colors.primaryBlue} />
-//                     </View>
-//                     <View style={sidebarStyles.nameContainer}>
-//                       <Text style={sidebarStyles.usernameText}>Username 1</Text>
-//                       <Text style={sidebarStyles.payoIdText}>PAYO-9831</Text>
-//                     </View>
-//                   </View>
-
-//                   {/* Added "X" Close Button */}
-//                   <TouchableOpacity onPress={closeDrawer} style={sidebarStyles.closeBtn} activeOpacity={0.7}>
-//                     <Icon name="x" size={22} color={theme.colors.bgSurface} />
-//                   </TouchableOpacity>
-//                 </View>
-//               </SafeAreaView>
-//             </View>
-
-//             <ScrollView 
-//               style={sidebarStyles.menuList}
-//               contentContainerStyle={sidebarStyles.scrollContent}
-//               showsVerticalScrollIndicator={false}
-//             >
-//               {menuItems?.map((item, index) => {
-//                 const itemLocked = isRestricted && item.requiresAccess;
-//                 return (
-//                   <TouchableOpacity
-//                     key={index}
-//                     style={[sidebarStyles.menuItem, itemLocked && { opacity: 0.4 }]}
-//                     onPress={() => handleNavigation(item)}
-//                     activeOpacity={itemLocked ? 0.9 : 0.7}
-//                   >
-//                     <View style={sidebarStyles.menuItemLeftSection}>
-//                       <View style={sidebarStyles.iconWrapper}>
-//                         <Icon name={item.icon} size={18} color={theme.colors.primaryBlue} />
-//                       </View>
-//                       <Text style={sidebarStyles.menuItemLabel}>{item.label}</Text>
-//                     </View>
-//                     {itemLocked && (
-//                       <Icon name="lock" size={14} color={theme.colors.grey} style={sidebarStyles.lockMargin} />
-//                     )}
-//                   </TouchableOpacity>
-//                 );
-//               })}
-
-//               <View style={sidebarStyles.horizontalDivider} />
-
-//               {bottomMenuItems.map((item, index) => (
-//                 <TouchableOpacity
-//                   key={index}
-//                   style={sidebarStyles.menuItem}
-//                   onPress={() => handleNavigation(item)}
-//                 >
-//                   <View style={sidebarStyles.menuItemLeftSection}>
-//                     <View style={[sidebarStyles.iconWrapper, item.isLogout && sidebarStyles.logoutIconWrapper]}>
-//                       <Icon name={item.icon} size={18} color={item.isLogout ? theme.colors.statusDanger : theme.colors.primaryBlue} />
-//                     </View>
-//                     <Text style={[sidebarStyles.menuItemLabel, item.isLogout && sidebarStyles.logoutText]}>
-//                       {item.label}
-//                     </Text>
-//                   </View>
-//                 </TouchableOpacity>
-//               ))}
-//             </ScrollView>
-
-//           </Animated.View>
-//         </View>
-//       )}
-//     </>
-//   );
-// }
-
-// export default function Header() {
-//   const navigation = useNavigation();
-//   const [sidebarVisible, setSidebarVisible] = useState(false);
-//   const [transactions, setTransactions] = useState([]);
-
-//   const walletData = useAppSelector((state) => state.deposit.walletData);
-//   const tabWalletBalance = walletData?.Available_Balance || 0;
-
-//   // Fetch transaction history to check count criteria
-//   const fetchTransactions = async () => {
-//     try {
-//       const res = await api.get('/api/wallet/deposit-history');
-//       const rawList = res?.data?.Transactions || [];
-//       setTransactions(rawList);
-//     } catch (err) {
-//       console.log('Header transaction fetch error:', err.message);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchTransactions();
-//   }, []);
-
-//   // Unrestrict access if transactions > 1 OR balance >= 100
-//   const isRestricted = useMemo(() => {
-//     const hasMultipleTransactions = transactions?.length > 1;
-//     // const hasSufficientBalance = tabWalletBalance >= 100;
-
-//     return 
-//     // !hasSufficientBalance && 
-//     !hasMultipleTransactions;
-//   }, [tabWalletBalance, transactions]);
-
-//   // Animation values for smooth swiping
-//   const panX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
-//   const isDrawerOpen = useRef(false);
-
-//   const openDrawer = () => {
-//     panX.flattenOffset();
-//     setSidebarVisible(true);
-//     Animated.timing(panX, {
-//       toValue: 0,
-//       duration: 250,
-//       useNativeDriver: true,
-//     }).start(() => {
-//       isDrawerOpen.current = true;
-//     });
-//   };
-
-//   const closeDrawer = () => {
-//     panX.flattenOffset();
-//     Animated.timing(panX, {
-//       toValue: -DRAWER_WIDTH,
-//       duration: 250,
-//       useNativeDriver: true,
-//     }).start(() => {
-//       setSidebarVisible(false);
-//       isDrawerOpen.current = false;
-//     });
-//   };
-
-//   // Unified PanResponder for both Opening and Closing
-//   const panResponder = useRef(
-//     PanResponder.create({
-//       onMoveShouldSetPanResponder: (evt, gestureState) => {
-//         if (Math.abs(gestureState.dy) > Math.abs(gestureState.dx)) return false;
-
-//         const isLeftEdgeSwipe = !isDrawerOpen.current && gestureState.x0 < 30 && gestureState.dx > 10;
-//         const isClosingSwipe = isDrawerOpen.current && gestureState.dx < -10;
-        
-//         return isLeftEdgeSwipe || isClosingSwipe;
-//       },
-//       onPanResponderGrant: () => {
-//         panX.extractOffset();
-//         if (!isDrawerOpen.current) {
-//           setSidebarVisible(true); 
-//         }
-//       },
-//       onPanResponderMove: (evt, gestureState) => {
-//         panX.setValue(gestureState.dx);
-//       },
-//       onPanResponderRelease: (evt, gestureState) => {
-//         panX.flattenOffset();
-//         const { vx, dx } = gestureState;
-
-//         let toOpen = isDrawerOpen.current;
-//         if (vx > 0.5 || dx > DRAWER_WIDTH / 3) {
-//           toOpen = true;
-//         } else if (vx < -0.5 || dx < -DRAWER_WIDTH / 3) {
-//           toOpen = false;
-//         }
-
-//         if (toOpen) {
-//           openDrawer();
-//         } else {
-//           closeDrawer();
-//         }
-//       },
-//     })
-//   ).current;
-
-//   const clampedTranslationX = panX.interpolate({
-//     inputRange: [-DRAWER_WIDTH, 0],
-//     outputRange: [-DRAWER_WIDTH, 0],
-//     extrapolate: 'clamp',
-//   });
-
-//   const overlayOpacity = panX.interpolate({
-//     inputRange: [-DRAWER_WIDTH, 0],
-//     outputRange: [0, 0.75], 
-//     extrapolate: 'clamp',
-//   });
-
-//   // Re-fetch transactions on sidebar open to keep data fresh
-//   useEffect(() => {
-//     if (sidebarVisible) {
-//       fetchTransactions();
-//     }
-//   }, [sidebarVisible]);
-
-//   // Safe Hardware Back Interception
-//   useEffect(() => {
-//     const handleBackButton = () => {
-//       if (sidebarVisible) {
-//         closeDrawer();
-//         return true; 
-//       }
-//       return false; 
-//     };
-
-//     const subscription = BackHandler.addEventListener('hardwareBackPress', handleBackButton);
-//     return () => {
-//       subscription.remove();
-//     };
-//   }, [sidebarVisible]);
-
-//   const notificationCount = 3; 
-
-//   const menuItems = [
-//     { label: 'Dashboard', icon: 'home', route: 'HomeScreen', requiresAccess: false },
-//     { label: 'Wallet', icon: 'credit-card', route: 'WalletScreen', requiresAccess: false },
-//     { label: 'Markets', icon: 'trending-up', route: 'MarketScreen', requiresAccess: true },
-//     { label: 'Portfolio', icon: 'bar-chart-2', route: 'PortfolioScreen', requiresAccess: true },
-//     { label: 'Transactions', icon: 'refresh-cw', route: 'TransactionHistory', requiresAccess: true },
-//     { label: 'Rewards', icon: 'gift', route: 'ReferEarn', requiresAccess: true },
-//     { label: 'Referrals', icon: 'users', route: 'ReferEarn', requiresAccess: true },
-//     { label: 'Verify KYC', icon: 'file', route: 'KYCVerification', requiresAccess: true },
-//   ];
-
-//   const bottomMenuItems = [
-//     { label: 'Settings', icon: 'settings', route: 'SettingsScreen', requiresAccess: false },
-//     { label: 'Support', icon: 'help-circle', route: 'SupportScreen', requiresAccess: false },
-//     { label: 'Logout', icon: 'log-out', route: 'Login', isLogout: true, requiresAccess: false },
-//   ];
-
-//   const handleLogout = async () => {
-//     try {
-//       closeDrawer();
-//       await Keychain.resetGenericPassword();
-//       navigation.reset({
-//         index: 0,
-//         routes: [{ name: 'Login' }],
-//       });
-//     } catch (error) {
-//       console.log('Logout error:', error);
-//     }
-//   };
-
-//   const handleNavigation = (item) => {
-//     if (item.isLogout) {
-//       handleLogout();
-//       return;
-//     }
-
-//     if (isRestricted && item.requiresAccess) {
-//       closeDrawer(); 
-//       Alert.alert(
-//         'Access Restricted',
-//         'You are unable to access this. Please add money to your wallet.',
-//         [
-//           { text: 'OK', style: 'cancel' },
-//           { text: 'Add Money', onPress: () => navigation.navigate('AddMoneytoWallet') },
-//         ]
-//       );
-//       return;
-//     }
-    
-//     closeDrawer();
-//     if (item.route) {
-//       navigation.navigate(item.route);
-//     }
-//   };
-
-//   const handleTopProfilePress = () => {
-//     if (isRestricted) {
-//       Alert.alert(
-//         'Access Restricted',
-//         'You are unable to access this. Please add money to your wallet.',
-//         [
-//           { text: 'OK', style: 'cancel' },
-//           { text: 'Add Money', onPress: () => navigation.navigate('AddMoneytoWallet') },
-//         ]
-//       );
-//     } else {
-//       navigation.navigate('UserProfile');
-//     }
-//   };
-
-//   return (
-//     <>
-//       <View style={styles.header}>
-//         <TouchableOpacity 
-//           style={styles.iconButton} 
-//           onPress={openDrawer} 
-//           activeOpacity={0.7}
-//         >
-//           <Icon name="menu" size={24} color={theme.colors.textMain} />
-//         </TouchableOpacity>
-        
-//         <Image 
-//           source={require('../../../assets/images/LogoContainer.png')} 
-//           style={styles.logo} 
-//           resizeMode="contain" 
-//         />
-        
-//         <View style={styles.headerRight}>
-//           <TouchableOpacity 
-//             style={styles.iconButton} 
-//             onPress={() => navigation.navigate('Notifications')} 
-//             activeOpacity={0.7}
-//           >
-//             <Image 
-//               source={require('../../../assets/images/Icon (4).png')} 
-//               style={styles.headerNotificationIcon} 
-//               resizeMode="contain"
-//             />
-//             {notificationCount > 0 && (
-//               <View style={styles.badge}>
-//                 <Text style={styles.badgeText}>{notificationCount}</Text>
-//               </View>
-//             )}
-//           </TouchableOpacity>
-
-//           <TouchableOpacity 
-//             style={styles.profileIconContainer} 
-//             onPress={handleTopProfilePress} 
-//             activeOpacity={0.7}
-//           >
-//             <Image 
-//               source={require('../../../assets/images/Profile Icon.png')} 
-//               style={[styles.headerProfileImg, isRestricted && { opacity: 0.5 }]} 
-//               resizeMode="contain"
-//             />
-//           </TouchableOpacity>
-//         </View>
-//       </View>
-
-//       {/* Invisible Left Edge Swipe Detector for Opening Sidebar */}
-//       <View 
-//         style={sidebarStyles.leftEdgeDetector} 
-//         {...panResponder.panHandlers} 
-//         pointerEvents={sidebarVisible ? 'none' : 'auto'}
-//       />
-
-//       {/* Inline Sidebar Overlay Drawer */}
-//       {sidebarVisible && (
-//         <View style={sidebarStyles.overlay}>
-//           {/* Touch-to-Close Dark Backdrop Layer */}
-//           <TouchableWithoutFeedback onPress={closeDrawer}>
-//             <Animated.View style={[sidebarStyles.backdropTouch, { opacity: overlayOpacity }]} />
-//           </TouchableWithoutFeedback>
-
-//           <Animated.View 
-//             style={[
-//               sidebarStyles.drawerContainer,
-//               { transform: [{ translateX: clampedTranslationX }] }
-//             ]} 
-//             {...panResponder.panHandlers}
-//           >
-//             <View style={sidebarStyles.headerBackground}>
-//               <SafeAreaView>
-//                 <View style={sidebarStyles.profileHeader}>
-//                   <View style={sidebarStyles.userInfoRow}>
-//                     <View style={sidebarStyles.avatarCircle}>
-//                       <Icon name="user" size={22} color={theme.colors.primaryBlue} />
-//                     </View>
-//                     <View style={sidebarStyles.nameContainer}>
-//                       <Text style={sidebarStyles.usernameText}>Username 1</Text>
-//                       <Text style={sidebarStyles.payoIdText}>PAYO-9831</Text>
-//                     </View>
-//                   </View>
-
-//                   <TouchableOpacity onPress={closeDrawer} style={sidebarStyles.closeBtn} activeOpacity={0.7}>
-//                     <Icon name="x" size={22} color={theme.colors.bgSurface} />
-//                   </TouchableOpacity>
-//                 </View>
-//               </SafeAreaView>
-//             </View>
-
-//             <ScrollView 
-//               style={sidebarStyles.menuList}
-//               contentContainerStyle={sidebarStyles.scrollContent}
-//               showsVerticalScrollIndicator={false}
-//             >
-//               {menuItems?.map((item, index) => {
-//                 const itemLocked = isRestricted && item.requiresAccess;
-//                 return (
-//                   <TouchableOpacity
-//                     key={index}
-//                     style={[sidebarStyles.menuItem, itemLocked && { opacity: 0.4 }]}
-//                     onPress={() => handleNavigation(item)}
-//                     activeOpacity={itemLocked ? 0.9 : 0.7}
-//                   >
-//                     <View style={sidebarStyles.menuItemLeftSection}>
-//                       <View style={sidebarStyles.iconWrapper}>
-//                         <Icon name={item.icon} size={18} color={theme.colors.primaryBlue} />
-//                       </View>
-//                       <Text style={sidebarStyles.menuItemLabel}>{item.label}</Text>
-//                     </View>
-//                     {itemLocked && (
-//                       <Icon name="lock" size={14} color={theme.colors.grey} style={sidebarStyles.lockMargin} />
-//                     )}
-//                   </TouchableOpacity>
-//                 );
-//               })}
-
-//               <View style={sidebarStyles.horizontalDivider} />
-
-//               {bottomMenuItems.map((item, index) => (
-//                 <TouchableOpacity
-//                   key={index}
-//                   style={sidebarStyles.menuItem}
-//                   onPress={() => handleNavigation(item)}
-//                 >
-//                   <View style={sidebarStyles.menuItemLeftSection}>
-//                     <View style={[sidebarStyles.iconWrapper, item.isLogout && sidebarStyles.logoutIconWrapper]}>
-//                       <Icon name={item.icon} size={18} color={item.isLogout ? theme.colors.statusDanger : theme.colors.primaryBlue} />
-//                     </View>
-//                     <Text style={[sidebarStyles.menuItemLabel, item.isLogout && sidebarStyles.logoutText]}>
-//                       {item.label}
-//                     </Text>
-//                   </View>
-//                 </TouchableOpacity>
-//               ))}
-//             </ScrollView>
-
-//           </Animated.View>
-//         </View>
-//       )}
-//     </>
-//   );
-// }
-
 const sidebarStyles = StyleSheet.create({
   overlay: {
     position: 'absolute',
@@ -1949,7 +1245,7 @@ const sidebarStyles = StyleSheet.create({
     paddingBottom: verticalScale(24),
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // Changed to properly align profile info on the left and the close button on the right
+    justifyContent: 'space-between',
   },
   userInfoRow: {
     flexDirection: 'row',
@@ -1985,7 +1281,7 @@ const sidebarStyles = StyleSheet.create({
   scrollContent: {
     paddingTop: verticalScale(16),
     paddingHorizontal: scale(16),
-    paddingBottom: verticalScale(100), // Increased padding significantly so scroll clears the bottom navigation
+    paddingBottom: verticalScale(100),
   },
   menuItem: {
     flexDirection: 'row',
@@ -2028,6 +1324,7 @@ const sidebarStyles = StyleSheet.create({
     marginVertical: verticalScale(16),
   },
 });
+
 ////////////////////////////////////
 //v1
 // import React, { useState, useEffect, useMemo, useRef } from 'react';
