@@ -2344,7 +2344,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useFocusEffect } from '@react-navigation/native';
 import api, { getToken } from '../../api/axios';
 import styles from './homeStyling';
-import { moderateScale, scale, windowWidth } from '../../utils/responsive';
+import { moderateScale, scale } from '../../utils/responsive';
 import Header from '../components/header';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setDashboardStats, setProfileData, setWalletData } from '../../redux/features/depositSlice';
@@ -2388,7 +2388,7 @@ export default function HomeScreen({ navigation }) {
   const newsItemRefs = useRef({});
 
   const dispatch = useAppDispatch();
-  const dashboardStats = useAppSelector(state => state.deposit.dashboardStats);
+  const dashboardStats = useAppSelector((state) => state.deposit.dashboardStats);
 
   const bannerData = useMemo(() => [
     { id: '1', image: require('../../../assets/images/banner1.png') },
@@ -2402,25 +2402,36 @@ export default function HomeScreen({ navigation }) {
    * Active ONLY when BOTH totalTransactions > 0 AND successfulTransactions > 0.
    * In all other conditions, features are restricted.
    */
+  const totalTransactions = dashboardStats?.totalTransactions ?? 0;
+  const successfulTransactions = dashboardStats?.successfulTransactions ?? 0;
+
   const isRestricted = useMemo(() => {
-    const totalTransactions = dashboardStats?.totalTransactions ?? 0;
-    const successfulTransactions = dashboardStats?.successfulTransactions ?? 0;
-
     return !(totalTransactions > 0 && successfulTransactions > 0);
-  }, [dashboardStats]);
+  }, [totalTransactions, successfulTransactions]);
 
-  // Alert handler when tapping restricted features
-  const showAccessRestrictedAlert = () => {
-    Alert.alert(
-      'Access Restricted',
-      'You are unable to access this feature. Please add money to your wallet.',
-      [
-        { text: 'OK', style: 'cancel' },
-        { text: 'Add Money', onPress: () => navigation.navigate('AddMoneytoWallet') },
-      ],
-      { cancelable: true }
-    );
-  };
+  const isPendingApproval = useMemo(() => {
+    return totalTransactions > 0 && successfulTransactions === 0;
+  }, [totalTransactions, successfulTransactions]);
+
+  // Professional access restricted handler
+  const showAccessRestrictedAlert = useCallback(() => {
+    if (isPendingApproval) {
+      Alert.alert(
+        'Account Pending Verification',
+        'Your transaction has been received. Please wait for approval from the administrator to unlock full feature access.',
+        [{ text: 'okay', style: 'default' }]
+      );
+    } else {
+      Alert.alert(
+        'Access Restricted',
+        'You need an active deposit to access this feature. Please complete a deposit into your wallet.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Add Money', onPress: () => navigation.navigate('AddMoneytoWallet') },
+        ]
+      );
+    }
+  }, [isPendingApproval, navigation]);
 
   // 5. CALLBACKS FOR FLATLIST
   const onViewableItemsChanged = useCallback(({ viewableItems }) => {
@@ -2545,7 +2556,7 @@ export default function HomeScreen({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       const checkToken = async () => {
-        const token = await getToken();
+        await getToken();
       };
       checkToken();
 
@@ -2648,7 +2659,9 @@ export default function HomeScreen({ navigation }) {
 
           {/* Quick Actions Container */}
           <View style={[styles.sectionContainer, isRestricted && localStyles.restrictedCardBackground]}>
-            <Text style={[styles.sectionHeading, isRestricted && localStyles.Text]}>Quick Actions</Text>
+            <Text style={[styles.sectionHeading, isRestricted && localStyles.sectionHeadingRestricted]}>
+              Quick Actions
+            </Text>
             
             <View style={styles.actionsGridCard}>
               <View style={styles.actionsGrid}>
@@ -2661,7 +2674,7 @@ export default function HomeScreen({ navigation }) {
                   <TouchableOpacity 
                     key={action.id} 
                     style={styles.actionItem}
-                    activeOpacity={isRestricted ? 1 : 0.7}
+                    activeOpacity={isRestricted ? 0.9 : 0.7}
                     onPress={() => handleQuickAction(action.route, action.params)}
                   >
                     <View style={[
@@ -2680,10 +2693,18 @@ export default function HomeScreen({ navigation }) {
               </View>
 
               {isRestricted && (
-                <View style={localStyles.lockOverlay}>
+                <TouchableOpacity 
+                  style={localStyles.lockOverlay} 
+                  activeOpacity={0.9} 
+                  onPress={showAccessRestrictedAlert}
+                >
                   <Icon name="lock" size={15} color="#6B7280" style={localStyles.lockIcon} />
-                  <Text style={localStyles.lockText}>Unlock by adding money to your Wallet</Text>
-                </View>
+                  <Text style={localStyles.lockText}>
+                    {isPendingApproval 
+                      ? 'Deposit approval pending verification' 
+                      : 'Unlock by adding money to your Wallet'}
+                  </Text>
+                </TouchableOpacity>
               )}
             </View>
           </View>
@@ -2837,7 +2858,7 @@ const localStyles = StyleSheet.create({
     marginVertical: 20,
     borderRadius: 16,
   },
-  Text: {
+  sectionHeadingRestricted: {
     opacity: 0.4,
     fontSize: moderateScale(18),
     fontWeight: '700',
