@@ -681,7 +681,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 
 export default function AddMoneytoWallet({ visible, onClose, navigation }) {
   const dispatch = useAppDispatch();
-  const [localAmount, setLocalAmount] = useState('100');
+  const [localAmount, setLocalAmount] = useState('');
   const [balanceVisible, setBalanceVisible] = useState(true);
   const [expandedMethod, setExpandedMethod] = useState(null);
   
@@ -692,22 +692,22 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
   const walletData = useAppSelector((state) => state.deposit.walletData);
 
   // Fetch balance dynamically if redux state isn't populated
-  const fetchWalletBalance = async () => {
-    try {
-      const res = await api.get('/api/wallet/wallet-details');
-      if (res?.data?.success && res?.data?.data?.[0]) {
-        dispatch(setWalletData(res.data.data[0]));
-      }
-    } catch (error) {
-      console.log('Error fetching wallet balance:', error?.message);
-    }
-  };
+  // const fetchWalletBalance = async () => {
+  //   try {
+  //     const res = await api.get('/api/wallet/wallet-details');
+  //     if (res?.data?.success && res?.data?.data?.[0]) {
+  //       dispatch(setWalletData(res.data.data[0]));
+  //     }
+  //   } catch (error) {
+  //     console.log('Error fetching wallet balance:', error?.message);
+  //   }
+  // };
 
-  useEffect(() => {
-    // if (!walletData?.Available_Balance) {
-      fetchWalletBalance();
-    // }
-  }, []);
+  // useEffect(() => {
+  //   // if (!walletData?.Available_Balance) {
+  //     fetchWalletBalance();
+  //   // }
+  // }, []);
 
   // Compute live balance calculations from walletData
   const inrBalance = parseFloat(walletData?.Available_Balance || 0);
@@ -876,6 +876,7 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
             value={localAmount}
             onChangeText={(text) => setLocalAmount(parseValueToString(text))}
             keyboardType="number-pad"
+            placeholder='0'
           />
           <View style={styles.currencySelector}>
             <Text style={styles.currencySelectorText}>INR</Text>

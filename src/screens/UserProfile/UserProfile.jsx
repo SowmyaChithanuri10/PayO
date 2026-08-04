@@ -423,7 +423,12 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
   const [profiledata, setProfileData] = useState({});
   const profileDataRedux = useAppSelector((state) => state.deposit.profileData);
   const walletData = useAppSelector((state) => state.deposit.walletData);
-  
+  const dashboardStats = useAppSelector((state) => state.deposit.dashboardStats);
+
+  const kycStatusText = dashboardStats?.kycStatus || 'KYC Pending';
+  const isKycCompleted = kycStatusText === 'KYC Completed';
+
+  console.log(profileDataRedux,"profileDataRedux",dashboardStats,walletData)
   
   const [bankData, setBankData] = useState([]);
   const [address, setAddress] = useState('');
@@ -458,22 +463,6 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
     }
   };
 
-  
-
-  // const fetchBankDetails = async () => {
-  //   try {
-  //     const res = await api.get('/api/bank/all-banks');
-  //     setBankData(res?.data?.data || []);
-  //   } catch (err) {
-  //     console.log(err.message);
-  //   }
-  // };
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     fetchBankDetails();
-  //   }, [])
-  // );
 
   const paymentAddress = walletData?.Wallet_ID  || 'Payo_9000000001'; // Fallback / actual variable
   const qrCodePaymentUrl = walletData?.QR_Code_Link_Payments;
@@ -600,8 +589,10 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
   {capitalizeFirstLetter(profileDataRedux?.Full_Name)}
 </Text>
               <Text style={styles.profilePhone}>{profileDataRedux?.Mobile_Number || '1324 567 890'}</Text>
-              <View style={styles.kycBadge}>
-                <Text style={styles.kycText}>• {profileDataRedux?.KYC_Status} </Text>
+             <View style={[styles.kycBadge, isKycCompleted ? styles.kycBadgeSuccess : styles.kycBadgeDanger]}>
+                <Text style={[styles.kycText, isKycCompleted ? styles.kycTextSuccess : styles.kycTextDanger]}>
+                  • {kycStatusText}
+                </Text>
               </View>
             </View>
           </ImageBackground>
@@ -614,7 +605,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
               </View>
               <View>
                 <Text style={styles.statLabel}>Balance</Text>
-                <Text style={styles.statValue}>{profileDataRedux?.Available_Balance || '100.0'} <Text style={styles.token}>PAYO</Text></Text>
+                <Text style={styles.statValue}>{walletData?.Available_Balance || '100.0'} <Text style={styles.token}>PAYO</Text></Text>
               </View>
             </View>
             <View style={styles.verticalDivider} />
@@ -624,7 +615,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
               </View>
               <View>
                 <Text style={styles.statLabel}>Transactions</Text>
-                <Text style={styles.statValue}>{profileDataRedux?.Total_Transactions || '0'}</Text>
+                <Text style={styles.statValue}>{dashboardStats?.totalTransactions || '0'}</Text>
               </View>
             </View>
           </View>
@@ -722,8 +713,10 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
           <View style={styles.listCard}>
             <TouchableOpacity style={styles.listItemTouch}>
               <Text style={styles.listLabel}>KYC Verification</Text>
-              <Text style={styles.dangerText}>{profileDataRedux?.KYC_Status} {'>'}</Text>
-            </TouchableOpacity>
+<Text style={[isKycCompleted ? styles.successText : styles.dangerText]}>
+                {kycStatusText}  {'>'}
+              </Text>
+                          </TouchableOpacity>
             <TouchableOpacity style={styles.listItemTouch}>
               <Text style={styles.listLabel}>Personal Information</Text>
               <Icon name="chevron-right" size={16} color="#9CA3AF" />
