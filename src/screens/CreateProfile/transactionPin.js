@@ -786,7 +786,7 @@ export default function TransactionPinScreen({ navigation }) {
       if (response.data?.Status === "201") {
         Keyboard.dismiss();
         navigation.navigate('Biometric');
-        await saveToken(response?.data?.Token || response?.data?.token);
+await saveToken((response?.data?.Token || response?.data?.token)?.trim());
       } else {
         setError(response.data?.Message || 'PIN validation check failed on backend.');
       }

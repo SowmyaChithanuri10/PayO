@@ -340,6 +340,7 @@
 
 
 
+
 import React, { useCallback, useState } from 'react';
 import {
   View,
@@ -353,10 +354,12 @@ import {
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../components/header';
 import Icon from 'react-native-vector-icons/Feather';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../api/axios';
+
+// --- Imported Components ---
+import MainSideHeader from '../components/MainSideHeader'; // Adjust path if needed
 
 // --- Imported Custom Theme and Responsiveness ---
 import { theme } from '../../MainTheme/theme'; 
@@ -377,27 +380,6 @@ const MarketScreen = ({ navigation }) => {
       // return () => clearInterval(interval);
     }, []),
   );
-
-
-  // const fetchExpertCoins = async () => {
-  //   try {
-  //     setLoading(true);
-
-  //     // 1. Update to the new crypto API endpoint
-  //     const res = await api.get('/api/market/crypto');
-
-  //     console.log(res.data, 'data');
-
-  //     // 2. Update the response mapping to match res.data.Data.data
-  //     const cryptoData = res?.data?.Data?.data || [];
-      
-  //     setCoins(cryptoData.slice(0, 50));
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.log('Expert picks error:', error?.response || error.message);
-  //     setLoading(false);
-  //   }
-  // };
 
   const fetchExpertCoins = async () => {
     try {
@@ -491,63 +473,13 @@ const MarketScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* <Header /> */}
-        <View style={styles.header}>
-                  <TouchableOpacity
-                    style={styles.headerIconBtn}
-                    activeOpacity={0.8}
-                    onPress={() => navigation.goBack()}
-                  >
-                    <Icon name="chevron-left" size={24} color={theme.colors.primaryBlue} />
-                  </TouchableOpacity>
-      
-                  <View style={styles.headerTitleContainer}>
-                    <Text style={styles.headerTitle}>Market</Text>
-                    <Text style={styles.headerSubtitle} numberOfLines={1}>
-                      Explore the Market
-                    </Text>
-                  </View>
-      
-                  <View style={styles.headerRight}>
-                    <TouchableOpacity
-                      style={styles.headerActionBtn}
-                      activeOpacity={0.8}
-                      onPress={() => navigation.navigate('Notifications')}
-                    >
-                      <Image
-                        source={require('../../../assets/images/walletscr/Icon (4).png')}
-                        style={styles.customHeaderIcon}
-                      />
-                      {/* <View style={styles.badge}>
-                        <Text style={styles.badgeText}></Text>
-                      </View> */}
-                    </TouchableOpacity>
-      
-                    <TouchableOpacity
-                      style={[styles.headerActionBtn, { marginLeft: 8 }]}
-                      activeOpacity={0.8}
-                    >
-                      <Image
-                        source={require('../../../assets/images/walletscr/Settings Icon.png')}
-                        style={styles.customHeaderIcon}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-      {/* <View style={styles.headerRow}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.canGoBack() && navigation.goBack()}>
-          <Icon
-            name="chevron-left"
-            size={moderateScale(28)}
-            color={theme.colors.textMain} // Changed to dark color for white background
-          />
-        </TouchableOpacity>
-
-        <Text style={styles.header}>Market</Text>
-      </View> */}
+      <MainSideHeader 
+        title="Market"
+        subtitle="Explore the Market"
+        onHelpPress={() => console.log('Help Pressed')}
+        onNotificationPress={() => navigation.navigate('Notifications')}
+        notificationCount={0} // Set to 0 to match your design image which shows no red badge
+      />
 
       <FlatList
         data={coins}
@@ -555,7 +487,8 @@ const MarketScreen = ({ navigation }) => {
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: verticalScale(16),
+          paddingHorizontal: scale(16),
+          //paddingTop: verticalScale(10),
           paddingBottom: verticalScale(140),
         }}
       />
@@ -569,70 +502,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.bgSurface, // Changed to white background from theme
-    paddingHorizontal: scale(16),
   },
-
-  // headerRow: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginBottom: verticalScale(12),
-  // },
-
-  // header: {
-  //   color: theme.colors.textMain, // Changed to textMain to be visible on white
-  //   fontSize: theme.typography.size.xl,
-  //   fontWeight: theme.typography.weight.bold,
-  //   marginLeft: scale(12),
-  // },
-
-   header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: verticalScale(10),
-       marginTop: verticalScale(20),
-    },
-    headerIconBtn: {
-      width: moderateScale(40),
-      height: moderateScale(40),
-      borderRadius: moderateScale(20),
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
-      ...theme.shadows.sm,
-    },
-    headerActionBtn: {
-      width: moderateScale(40),
-      height: moderateScale(40),
-      borderRadius: moderateScale(20),
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
-      ...theme.shadows.sm,
-    },
-    customHeaderIcon: {
-      width: moderateScale(20),
-      height: moderateScale(20),
-      resizeMode: 'contain',
-    },
-    headerTitleContainer: {
-      flex: 1,
-      marginLeft: scale(12),
-    },
-    headerTitle: {
-      fontSize: theme.typography.size.lg,
-      fontWeight: theme.typography.weight.bold,
-      color: theme.colors.textMain,
-    },
-    headerSubtitle: {
-      fontSize: theme.typography.size.xs,
-      color: theme.colors.textMain,
-      marginTop: verticalScale(2),
-    },
-    headerRight: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
 
   loaderContainer: {
     flex: 1,

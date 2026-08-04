@@ -1412,7 +1412,9 @@ import {
   Image,
   Modal,
   FlatList,
-  ActivityIndicator, // Added ActivityIndicator
+  ActivityIndicator,
+  PermissionsAndroid, // Added PermissionsAndroid
+  Alert,              // Added Alert
 } from 'react-native';
 
 import {
@@ -1500,6 +1502,30 @@ export default function LoginScreen({ navigation }) {
     return () => unsubscribe();
   }, []);
 
+  // 🚨 NEW: Function to request and check Location Permission
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Access Required',
+            message: 'To complete your login, PAYO requires access to your location.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    }
+    // Note: If you deploy to iOS, you'll need to use 'react-native-permissions' or Geolocation APIs here.
+    return true; 
+  };
+
   // --- SUBMIT FUNCTION ---
   const handleLoginWithOTP = async () => {
     if (!isConnected) {
@@ -1508,6 +1534,17 @@ export default function LoginScreen({ navigation }) {
     }
 
     if (!isMobileValid) return;
+
+    // 🚨 NEW: Enforce location permission before making the API call
+    const hasLocationPermission = await requestLocationPermission();
+    if (!hasLocationPermission) {
+      Alert.alert(
+        'Permission Denied',
+        'Location access is mandatory to login. Please allow location access to continue.',
+        [{ text: 'OK' }]
+      );
+      return; // Stop the flow immediately if denied
+    }
 
     // Dynamically prefix the calling code with '+' for the API request
     const computedCountryCode = `${selectedCountry?.country_calling_code || '91'}`;

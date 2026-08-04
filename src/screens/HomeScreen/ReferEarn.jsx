@@ -477,29 +477,108 @@ import Share from 'react-native-share';
 
 // 2. Importing theme
 import { theme } from '../MainTheme/theme';
-import { moderateScale, verticalScale, windowWidth,scale } from '../../utils/responsive';
+import { moderateScale, verticalScale, windowWidth, scale } from '../../utils/responsive';
+import { useAppSelector } from '../../redux/hooks';
+import RNFS from 'react-native-fs';
+// Adjust import path as needed
+
 
 const ReferEarn = ({ navigation }) => {
-  const referralCode = 'PAYO7630';
+  const walletData = useAppSelector((state) => state.deposit.walletData);
+  const referralCode = walletData?.Referral_Code;
+  const qrCodeUrl = walletData?.QR_Code_Link_Referral;
+
   const totalReferrals = 6;
   const totalRewards = 100;
 
   const handleCopy = () => {
-    Clipboard.setString(referralCode);
-    if (Platform.OS === 'android') {
-      ToastAndroid.show('Referral code copied!', ToastAndroid.SHORT);
-    } else {
-      Alert.alert('Copied', 'Referral code copied to clipboard');
+    if (referralCode) {
+      Clipboard.setString(referralCode);
+      if (Platform.OS === 'android') {
+        ToastAndroid.show('Referral code copied!', ToastAndroid.SHORT);
+      } else {
+        Alert.alert('Copied', 'Referral code copied to clipboard');
+      }
     }
   };
 
-  const handleShare = async () => {
+  // const handleShare = async () => {
+  //   try {
+  //     let imageFilePath = null;
+
+  //     // 1. If QR code link exists, download it temporarily to device storage
+  //     if (qrCodeUrl) {
+  //       const localPath = `${RNFS.CachesDirectoryPath}/referral_qr_${Date.now()}.png`;
+
+  //       const downloadResult = await RNFS.downloadFile({
+  //         fromUrl: qrCodeUrl,
+  //         toFile: localPath,
+  //       }).promise;
+
+  //       if (downloadResult.statusCode === 200) {
+  //         // Prepend file:// for react-native-share compatibility
+  //         imageFilePath = Platform.OS === 'android' ? `file://${localPath}` : localPath;
+  //       }
+  //     }
+
+  //     // 2. Prepare share options
+  //     const shareOptions = {
+  //       title: 'Share Referral',
+  //       message: `Join PAYO and earn rewards! Use my referral code: ${referralCode} to get started.`,
+  //       ...(imageFilePath && { url: imageFilePath }), // Attach image if available
+  //       type: 'image/png',
+  //     };
+
+  //     // 3. Trigger Share UI
+  //     await Share.open(shareOptions);
+  //   } catch (error) {
+  //     // react-native-share throws an error if user dismisses share modal (User did not share)
+  //     if (error?.message !== 'User did not share') {
+  //       console.log('Share error:', error);
+  //     }
+  //   }
+  // };
+
+
+  const handleShareReferral = async () => {
     try {
-      await Share.open({
-        message: `Join PAYO and earn rewards! Use my referral code: ${referralCode} to get started.`,
-      });
+      let localImagePath = null;
+
+      // 1. Download QR Code image to cache if URL exists
+      if (qrCodeUrl) {
+        const filePath = `${RNFS.CachesDirectoryPath}/referral_qr_${Date.now()}.png`;
+
+        const downloadResult = await RNFS.downloadFile({
+          fromUrl: qrCodeUrl,
+          toFile: filePath,
+        }).promise;
+
+        if (downloadResult.statusCode === 200) {
+          localImagePath = Platform.OS === 'android' ? `file://${filePath}` : filePath;
+        }
+      }
+
+      // 2. Format share text message
+      const shareMessage =
+        `Join PAYO and earn rewards!\n\n` +
+        `Referral Code: ${referralCode}\n\n` +
+        `Scan the QR code or use the code above to get started.`;
+
+      // 3. Build share options
+      const shareOptions = {
+        title: 'Share Referral Code',
+        message: shareMessage,
+        ...(localImagePath && { url: localImagePath }),
+        type: 'image/png',
+      };
+
+      // 4. Open share modal
+      await Share.open(shareOptions);
     } catch (error) {
-      console.log('Share error:', error);
+      // Ignore user-dismissed modal errors
+      if (error?.message !== 'User did not share') {
+        console.log('Share Referral Error:', error);
+      }
     }
   };
 
@@ -532,8 +611,9 @@ const ReferEarn = ({ navigation }) => {
 
           <TouchableOpacity
             onPress={() => navigation.navigate('UserProfile')}
-          
-          style={styles.profileBtn} activeOpacity={0.7}>
+            style={styles.profileBtn}
+            activeOpacity={0.7}
+          >
             <Icon name="user" size={moderateScale(20)} color="#FFF" />
           </TouchableOpacity>
         </View>
@@ -541,7 +621,7 @@ const ReferEarn = ({ navigation }) => {
         {/* Hero Banner Section */}
         <View style={styles.heroContainer}>
           <Image
-            source={require('../../../assets/images/addBankdetails/Refer and earn 2 1.png')} // Replace with your exact graphic asset path
+            source={require('../../../assets/images/addBankdetails/Refer and earn 2 1.png')}
             style={styles.heroImage}
           />
         </View>
@@ -555,13 +635,10 @@ const ReferEarn = ({ navigation }) => {
             </Text>
           </View>
           <View style={styles.giftIconContainer}>
-            {/* Elegant gift box container fallback if asset not present */}
-            {/* <Icon name="gift" size={moderateScale(32)} color="#FFD700" />
-             */}
-                <Image
-            source={require('../../../assets/images/addBankdetails/Text.png')} // Replace with your exact graphic asset path
-            style={styles.heroImage}
-          />
+            <Image
+              source={require('../../../assets/images/addBankdetails/Text.png')}
+              style={styles.heroImage}
+            />
           </View>
         </View>
 
@@ -579,36 +656,36 @@ const ReferEarn = ({ navigation }) => {
         {/* Action Buttons Row */}
         <View style={styles.actionButtonsRow}>
           <TouchableOpacity style={styles.actionBtn} onPress={handleCopy} activeOpacity={0.8}>
-            <Text style={styles.actionBtnText}>Copy address</Text>
+            <Text style={styles.actionBtnText}>Copy Referral</Text>
             <Icon name="copy" size={moderateScale(16)} color="#333" style={styles.actionBtnIcon} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionBtn} onPress={handleShare} activeOpacity={0.8}>
-            <Text style={styles.actionBtnText}>Share address</Text>
+          <TouchableOpacity style={styles.actionBtn} onPress={handleShareReferral} activeOpacity={0.8}>
+            <Text style={styles.actionBtnText}>Share Referral</Text>
             <Icon name="external-link" size={moderateScale(16)} color="#333" style={styles.actionBtnIcon} />
           </TouchableOpacity>
         </View>
 
-        {/* Statistics Row (Referrals & Rewards) */}
+        {/* Statistics Row */}
         <View style={styles.statsCard}>
           <View style={styles.statsColumn}>
-              <Image 
-            source={require('../../../assets/images/addBankdetails/wallet (2).png')}  
-             style={styles.statsIcon}
+            <Image
+              source={require('../../../assets/images/addBankdetails/wallet (2).png')}
+              style={styles.statsIcon}
             />
             <View>
               <Text style={styles.statsLabel}>Total Referrals</Text>
               <Text style={styles.statsValue}>{totalReferrals}</Text>
             </View>
           </View>
-          
+
           <View style={styles.statsDivider} />
 
           <View style={styles.statsColumn}>
-            <Image 
-            source={require('../../../assets/images/addBankdetails/Coins.png')} // Replace with your exact graphic asset path
-            
-            style={styles.statsIcon} />
+            <Image
+              source={require('../../../assets/images/addBankdetails/Coins.png')}
+              style={styles.statsIcon}
+            />
             <View>
               <Text style={styles.statsLabel}>Total Rewards</Text>
               <Text style={styles.statsValue}>{totalRewards}</Text>
@@ -642,11 +719,10 @@ const ReferEarn = ({ navigation }) => {
           <Text style={styles.disclaimerText}>
             The PAYO amount you receive may vary slightly due to market fluctuations
           </Text>
-              <Image 
-            source={require('../../../assets/images/addBankdetails/wallet (1).png')} // Replace with your exact graphic asset path
-            
-            style={styles.bottom} />
-          {/* <Icon name="pocket" size={moderateScale(24)} color="#7F3DFF" /> */}
+          <Image
+            source={require('../../../assets/images/addBankdetails/wallet (1).png')}
+            style={styles.bottom}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -935,8 +1011,8 @@ const styles = StyleSheet.create({
     lineHeight: moderateScale(16),
     marginHorizontal: moderateScale(12),
   },
-  bottom:{
-    width:50,
-    height:50
+  bottom: {
+    width: 50,
+    height: 50
   }
 });
