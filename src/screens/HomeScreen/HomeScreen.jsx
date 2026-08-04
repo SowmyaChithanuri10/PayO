@@ -1970,6 +1970,31 @@ export default function HomeScreen({ navigation }) {
   //   }
   // };
 
+
+
+  // const fetchExpertCoins = async () => {
+  //   try {
+  //     // 1. Updated endpoint to /api/market/crypto
+  //     const res = await api.get('/api/market/crypto');
+
+  //     // 2. Extracted array matching the API structure: res.data -> Data -> data
+  //     const cryptoData = res?.data?.Data?.data || [];
+      
+  //     setExpertCoins(cryptoData.slice(0, 5));
+  //   } catch (error) {
+  //     console.log('Market Crypto API error:', error?.response || error.message);
+  //     // Fallback data in case of error
+  //     setExpertCoins([
+  //       { symbol: 'BTC', name: 'Bitcoin', price: 9250000, priceChangePercentage24h: 2.8 },
+  //       { symbol: 'ETH', name: 'Ethereum', price: 245000, priceChangePercentage24h: -0.8 },
+  //       { symbol: 'BNB', name: 'BNB', price: 68000, priceChangePercentage24h: 1.2 },
+  //       { symbol: 'SOL', name: 'Solana', price: 15400, priceChangePercentage24h: 6.5 },
+  //       { symbol: 'PAYO', name: 'PAYO', price: 70.12, priceChangePercentage24h: 4.2 },
+  //     ]);
+  //   }
+  // };
+
+
   const fetchExpertCoins = async () => {
     try {
       const res = await api.get('/api/market/overview');
