@@ -74,8 +74,6 @@ export default function PaymentSuccessTemp({
     //     ],
     //   });
     // }, 3000);
-
-    // Inside your PaymentSuccess component's useEffect:
 const timer = setTimeout(() => {
   navigation.reset({
     index: 0,

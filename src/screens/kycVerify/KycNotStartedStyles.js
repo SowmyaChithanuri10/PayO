@@ -1,135 +1,4 @@
-// import { StyleSheet, Dimensions } from 'react-native';
-
-// const { width } = Dimensions.get('window');
-
-// export default StyleSheet.create({
-//   safeArea: {
-//     flex: 1,
-//     backgroundColor: '#120022',
-//   },
-
-//   scrollContent: {
-//     flexGrow: 1,
-//     paddingBottom: 30,
-//   },
-
-//   container: {
-//     flex: 1,
-//     paddingHorizontal: 24,
-//     backgroundColor: '#120022',
-//   },
-
-//   header: {
-//     marginTop: 10,
-//     marginBottom: 30,
-//   },
-
-//   loaderWrapper: {
-//     alignItems: 'center',
-//   },
-
-//   loaderOuter: {
-//     width: 100,
-//     height: 100,
-//     borderRadius: 50,
-//     borderWidth: 8,
-//     borderColor: 'rgba(255,255,255,0.2)',
-//     borderTopColor: '#FFFFFF',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-
-//   loaderInner: {
-//     width: 60,
-//     height: 60,
-//     borderRadius: 30,
-//     backgroundColor: '#4B0082',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-
-//   kycText: {
-//     color: '#FFB84D',
-//     fontSize: 14,
-//     marginTop: 16,
-//     fontWeight: '500',
-//   },
-
-//   title: {
-//     color: '#fff',
-//     fontSize: width * 0.085,
-//     textAlign: 'center',
-//     fontWeight: '600',
-//     marginTop: 32,
-//   },
-
-//   subTitle: {
-//     color: '#fff',
-//     textAlign: 'center',
-//     fontSize: 16,
-//     lineHeight: 26,
-//     marginTop: 16,
-//     opacity: 0.9,
-//     paddingHorizontal: 10,
-//   },
-
-//   card: {
-//     backgroundColor: '#7B2CFF',
-//     borderRadius: 28,
-//     padding: 24,
-//     marginTop: 40,
-//   },
-
-//   row: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     marginBottom: 22,
-//   },
-
-//   leftText: {
-//     color: '#fff',
-//     fontSize: 16,
-//     flex: 1,
-//   },
-
-//   completedText: {
-//     color: '#00FFD1',
-//     fontSize: 16,
-//     fontWeight: '600',
-//     marginLeft: 10,
-//   },
-
-//   pendingText: {
-//     color: '#E5D8FF',
-//     fontSize: 16,
-//     marginLeft: 10,
-//   },
-
-//   button: {
-//     backgroundColor: '#8B5CF6',
-//     paddingVertical: 16,
-//     borderRadius: 14,
-//     alignItems: 'center',
-//     marginTop: 28,
-//     marginBottom: 20,
-//   },
-
-//   buttonText: {
-//     color: '#fff',
-//     fontSize: 18,
-//     fontWeight: '600',
-//   },
-// });
-
-
-
-
-
-
 import { StyleSheet, Dimensions, Platform } from 'react-native';
-
-// Import your existing theme and responsive utilities
 import { theme } from '../../MainTheme/theme';
 import { scale, verticalScale } from '../../utils/responsive';
 
@@ -166,8 +35,8 @@ const styles = StyleSheet.create({
     height: scale(90),
     borderRadius: scale(45),
     borderWidth: scale(8),
-    borderColor: '#E5E7EB', // Light grey track
-    borderTopColor: theme.colors.primaryBlue, // Blue indicator
+    borderColor: '#E5E7EB', 
+    borderTopColor: theme.colors.primaryBlue, 
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -176,7 +45,7 @@ const styles = StyleSheet.create({
     width: scale(54),
     height: scale(54),
     borderRadius: scale(27),
-    backgroundColor: '#F0F4FF', // Very light blue inner circle
+    backgroundColor: '#F0F4FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -192,12 +61,12 @@ const styles = StyleSheet.create({
     width: scale(6),
     height: scale(6),
     borderRadius: scale(3),
-    backgroundColor: '#F59E0B', // Amber/Warning dot
+    backgroundColor: '#F59E0B',
     marginRight: scale(6),
   },
 
   kycText: {
-    color: '#F59E0B', // Amber text to indicate action needed
+    color: '#F59E0B', 
     fontSize: theme.typography.size.sm || scale(14),
     fontWeight: theme.typography.weight.medium,
   },
@@ -220,12 +89,12 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: '#F0F4FF', // Light blue inner box as requested
+    backgroundColor: '#F0F4FF', 
     borderRadius: theme.borderRadius.xl || 24,
     padding: scale(24),
     marginTop: verticalScale(40),
     borderWidth: 1,
-    borderColor: 'rgba(40, 92, 224, 0.1)', // Very subtle blue border
+    borderColor: 'rgba(40, 92, 224, 0.1)',
   },
 
   row: {
@@ -268,7 +137,7 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    backgroundColor: theme.colors.primaryBlue || '#285CE0', // Blue button as requested
+    backgroundColor: theme.colors.primaryBlue || '#285CE0', 
     height: scale(52),
     borderRadius: theme.borderRadius.md || 12,
     justifyContent: 'center',

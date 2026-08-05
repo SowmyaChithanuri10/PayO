@@ -4,20 +4,17 @@ import { View, StyleSheet, Animated } from 'react-native';
 import { moderateScale, verticalScale, windowWidth } from '../../../../utils/responsive';
 
 export default function HeroIllustration1() {
-  // 1. Initialize the animated value at scale 1
   const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  // 2. Start the looping animation when the component mounts
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
         Animated.timing(scaleAnim, {
-          toValue: 1.05, // Zoom in by 5%
-          duration: 1500, // Duration in milliseconds (2.5 seconds)
+          toValue: 1.05,
+          duration: 1500, 
           useNativeDriver: true,
         }),
         Animated.timing(scaleAnim, {
-          toValue: 1, // Zoom back to original size
+          toValue: 1, 
           duration: 1500,
           useNativeDriver: true,
         }),
@@ -27,7 +24,6 @@ export default function HeroIllustration1() {
 
   return (
     <View style={styles.container}>
-      {/* 3. Change Image to Animated.Image and apply the transform */}
       <Animated.Image
         source={require('../../../../../assets/images/ob1.png')}
         style={[

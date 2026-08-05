@@ -122,107 +122,12 @@ console.log('Saved Value =', value);
   }
 };
 
-//   useEffect(() => {
-//     const timers = [];
-
-//     Animated.timing(dotFade, {
-//       toValue: 1,
-//       duration: 1000,
-//       useNativeDriver: true,
-//     }).start();
-
-//     timers.push(
-//       setTimeout(() => {
-//         setScreenStep(2);
-
-//         Animated.timing(expandAnim, {
-//           toValue: 80,
-//           duration: 1600,
-//           easing: Easing.out(Easing.exp),
-//           useNativeDriver: true,
-//         }).start();
-//       }, 1200),
-//     );
-
-//     timers.push(
-//       setTimeout(() => {
-//         Animated.timing(blackOverlayScale, {
-//           toValue: 1,
-//           duration: 900,
-//           easing: Easing.out(Easing.exp),
-//           useNativeDriver: true,
-//         }).start(() => {
-//           setScreenStep(4);
-
-//           Animated.timing(finalLogoOpacity, {
-//             toValue: 1,
-//             duration: 800,
-//             easing: Easing.linear,
-//             useNativeDriver: true,
-//           }).start(() => {
-//             setTimeout(() => {
-//               Animated.timing(taglineOpacity, {
-//                 toValue: 1,
-//                 duration: 700,
-//                 easing: Easing.linear,
-//                 useNativeDriver: true,
-//               }).start(() => {
-//                 setTimeout(() => {
-//                   Animated.timing(welcomeOpacity, {
-//                     toValue: 1,
-//                     duration: 700,
-//                     easing: Easing.linear,
-//                     useNativeDriver: true,
-//                   }).start(() => {
-//                     setTimeout(() => {
-//                       Animated.timing(loadingOpacity, {
-//                         toValue: 1,
-//                         duration: 500,
-//                         easing: Easing.linear,
-//                         useNativeDriver: true,
-//                       }).start();
-
-//                       // setTimeout(() => {
-//                       //   Animated.timing(finalFadeOut, {
-//                       //     toValue: 0,
-//                       //     duration: 900,
-//                       //     easing: Easing.linear,
-//                       //     useNativeDriver: true,
-//                       //   }).start(() => {
-//                       //     navigation.replace('Onboarding1');
-//                       //   });
-//                       // }, 1400);
-
-//                       setTimeout(() => {
-//   Animated.timing(finalFadeOut, {
-//     toValue: 0,
-//     duration: 900,
-//     easing: Easing.linear,
-//     useNativeDriver: true,
-//   }).start(async () => {
-//     await checkUserFlow();
-//   });
-// }, 1400);
-//                     }, 500);
-//                   });
-//                 }, 500);
-//               });
-//             }, 500);
-//           });
-//         });
-//       }, 5000),
-//     );
-
-//     return () => timers.forEach(clearTimeout);
-//   }, [navigation]);
-
 
 useEffect(() => {
   const startSplash = async () => {
     const completed =
       (await AsyncStorage.getItem('hasCompletedOnboarding')) === 'true';
 
-    // Step 1 - Dot Animation
     Animated.timing(dotFade, {
       toValue: 1,
       duration: 1000,
@@ -231,8 +136,6 @@ useEffect(() => {
 
     setTimeout(() => {
       setScreenStep(2);
-
-      // Step 2 - Expand Circle
       Animated.timing(expandAnim, {
         toValue: 80,
         duration: 1600,

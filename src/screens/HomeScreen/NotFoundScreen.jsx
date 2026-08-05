@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     marginTop:10
   },
   icon: {
-    marginRight: 8, // ✅ Adds space between icon and text
+    marginRight: 8, 
   },
   buttonText: {
     color: '#ffffff',

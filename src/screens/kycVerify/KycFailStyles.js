@@ -1,93 +1,4 @@
-// import { StyleSheet } from 'react-native';
-
-// const styles = StyleSheet.create({
-//   safeArea: {
-//     flex: 1,
-//     backgroundColor: '#F3F3F3',
-//   },
-
-//   container: {
-//     flex: 1,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     paddingHorizontal: 28,
-//     backgroundColor: '#F3F3F3',
-//   },
-
-//   iconWrapper: {
-//     marginBottom: 40,
-//   },
-
-//   warningBox: {
-//     width: 120,
-//     height: 120,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-
-//   title: {
-//     color: '#FF1F1F',
-//     fontSize: 26,
-//     textAlign: 'center',
-//     fontWeight: '500',
-//     lineHeight: 44,
-//     marginBottom: 28,
-//   },
-
-//   subTitle: {
-//     color: '#444',
-//     fontSize: 18,
-//     textAlign: 'center',
-//     marginBottom: 20,
-//   },
-
-//   instructions: {
-//     color: '#555',
-//     fontSize: 16,
-//     textAlign: 'center',
-//     lineHeight: 28,
-//     marginBottom: 60,
-//   },
-
-//   retryBtn: {
-//     width: '100%',
-//     backgroundColor: '#009933',
-//     paddingVertical: 10,
-//     borderRadius: 14,
-//     alignItems: 'center',
-//     marginBottom: 22,
-//   },
-
-//   retryBtnText: {
-//     color: '#fff',
-//     fontSize: 24,
-//     fontWeight: '600',
-//   },
-
-//   supportBtn: {
-//     width: '100%',
-//     borderWidth: 1.5,
-//     borderColor: '#009933',
-//     paddingVertical: 10,
-//     borderRadius: 14,
-//     alignItems: 'center',
-//   },
-
-//   supportBtnText: {
-//     color: '#009933',
-//     fontSize: 22,
-//     fontWeight: '500',
-//   },
-// });
-
-// export default styles;
-
-
-
-
 import { StyleSheet, Platform, Dimensions } from 'react-native';
-
-// Import your existing theme and responsive utilities
 import { theme } from '../../MainTheme/theme';
 import { scale, verticalScale } from '../../utils/responsive';
 
@@ -102,7 +13,7 @@ const styles = StyleSheet.create({
   mainWrapper: {
     flex: 1,
     position: 'relative',
-    overflow: 'hidden', // Prevents the tall image from messing up the screen boundaries
+    overflow: 'hidden',
   },
 
   wavesBg: {
@@ -110,8 +21,6 @@ const styles = StyleSheet.create({
     bottom: -75,
     left: 0,
     width: width,
-    // By giving it a height 2.5x the screen width, 'contain' will fill the screen horizontally.
-    // The empty transparent top of the image will simply go up behind the text.
     height: width * 2.5, 
     resizeMode: 'contain', 
   },
@@ -127,7 +36,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: verticalScale(40), // Slightly bumps the content up from the buttons
+    paddingBottom: verticalScale(40),
   },
 
   warningIcon: {
@@ -138,7 +47,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: '#FF1F1F', // Red error color from your Figma design
+    color: '#FF1F1F',
     fontSize: theme.typography.size.lg || scale(20),
     textAlign: 'center',
     fontWeight: theme.typography.weight.semibold,

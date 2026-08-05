@@ -1,4 +1,3 @@
-// import { StyleSheet } from 'react-native';
 import { StyleSheet, Platform, StatusBar } from 'react-native';
 import { scale, verticalScale, moderateScale } from '../../utils/responsive';
 import { theme } from '../../MainTheme/theme'; 
@@ -68,13 +67,11 @@ export default StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
-    overflow: 'hidden', // Required so the background image respects the border radius
+    overflow: 'hidden', 
   },
-  
-  // Style property explicitly for the underlying background image component
   profileCardBgImage: {
     resizeMode: 'cover',
-    borderRadius: scale(16), // Symmetrical rounded crop
+    borderRadius: scale(16), 
   },
     profileArcBorder: {
       position: 'absolute',
@@ -131,7 +128,7 @@ export default StyleSheet.create({
       marginTop: verticalScale(2),
     },
     kycBadge: {
-      backgroundColor: '#ff000023', // Soft green color matching successful verification layout style
+      backgroundColor: '#ff000023',
       alignSelf: 'flex-start',
       paddingHorizontal: scale(8),
       paddingVertical: verticalScale(4),
@@ -144,8 +141,6 @@ export default StyleSheet.create({
       fontWeight: '700',
       letterSpacing: 0.5,
     },
-
-  // --- General Cards ---
   card: {
     backgroundColor: theme.colors.bgLightPurple,
     borderRadius: scale(12),
@@ -171,7 +166,6 @@ export default StyleSheet.create({
     marginLeft: scale(8),
   },
 
-  // --- Form Inputs ---
   inputLabel: {
     fontSize: moderateScale(12),
     color: theme.colors.primaryBlue,
@@ -198,7 +192,6 @@ export default StyleSheet.create({
     color: theme.colors.textMain,
   },
 
-  // --- Limits Progress Bars ---
   limitRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

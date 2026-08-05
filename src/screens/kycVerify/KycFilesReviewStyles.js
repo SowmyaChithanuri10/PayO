@@ -1,5 +1,4 @@
 import { StyleSheet, Platform } from 'react-native';
-
 import { theme } from '../../MainTheme/theme';
 import { scale, verticalScale } from '../../utils/responsive';
 
