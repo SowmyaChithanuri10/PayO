@@ -2349,7 +2349,7 @@ import Header from '../components/header';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { setDashboardStats, setProfileData, setWalletData } from '../../redux/features/depositSlice';
 import { PAYO_EXCHANGE_RATE } from '../../api/mainValuables';
-import Chats from '../chats/Chats';
+//import Chats from '../chats/Chats';
 
 const getCoinColor = (symbol) => {
   const sym = symbol?.toUpperCase();
@@ -2842,7 +2842,7 @@ export default function HomeScreen({ navigation }) {
           </View>
         </ScrollView>
       </SafeAreaView>
-      <Chats />
+      {/* <Chats /> */}
     </>
   );
 }

@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   Alert,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Feather';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import RNFS from 'react-native-fs';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import { pick } from '@react-native-documents/picker';
