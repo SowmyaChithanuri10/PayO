@@ -1065,6 +1065,18 @@ export default function RegisterMobileScreen({ navigation }) {
 
       } 
       else if(response.data?.status === '202' &&
+        response.data?.message === 'Registration already initiated for this mobile number. Please use RESEND_OTP to receive a new OTP.'){
+           const params = {
+          mobile,
+          countryCode: computedCountryCode,
+          userId: response.data?.userId,
+          type: 'register',
+          msg:"resend Otp"
+        };
+     setUserId(response?.data?.userId);
+          navigation.navigate('OTP', params);
+      }
+      else if(response.data?.status === '202' &&
         response.data?.message === 'Mobile Verification Completed'){
           setUserId(response?.data?.userId);
           navigation.replace('Profile');

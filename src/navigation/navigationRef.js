@@ -1,4 +1,4 @@
-// navigationRef.js
+
 import { createNavigationContainerRef, CommonActions } from '@react-navigation/native';
 
 export const navigationRef = createNavigationContainerRef();
@@ -9,7 +9,6 @@ export function navigate(name, params) {
   }
 }
 
-// Add this function to reset the stack cleanly
 export function resetRoot(routeName, params = {}) {
   if (navigationRef.isReady()) {
     navigationRef.dispatch(

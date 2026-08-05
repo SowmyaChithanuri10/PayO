@@ -45,17 +45,14 @@ const styles = {
     backgroundColor: "#6a0dad",
   },
 
-  // NUMPAD
   numpad: {
     alignItems: "center",
     marginTop: 30,
   },
-
   row: {
     flexDirection: "row",
     justifyContent: "center",
   },
-
   key: {
     width: width * 0.24,
     height: width * 0.24,
@@ -69,7 +66,6 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     elevation: 4,
-
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

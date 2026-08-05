@@ -1117,23 +1117,68 @@ export default function WalletScreen({ navigation }) {
     }
   };
 
+  // const handleShare = async () => {
+  //   try {
+  //     const result = await fetchQr();
+  //     if (!result) return;
+
+  //     const { qrImage, address: sharedAddress } = result;
+  //     const base64Data = qrImage.replace(/^data:image\/png;base64,/, '');
+  //     const filePath = `${RNFS.CachesDirectoryPath}/payo_qr.png`;
+
+  //     await RNFS.writeFile(filePath, base64Data, 'base64');
+
+  //     await Share.open({
+  //       url: 'file://' + filePath,
+  //       message: `Send PAYO to this Wallet ID:\n${wallet?.Wallet_ID || sharedAddress}`,
+  //     });
+  //   } catch (error) {
+  //     console.log('Share error:', error);
+  //   }
+  // };
+
+    const paymentAddress = walletData?.Wallet_ID; // Fallback / actual variable
+  const qrCodePaymentUrl = walletData?.QR_Code_Link_Payments;
+
   const handleShare = async () => {
     try {
-      const result = await fetchQr();
-      if (!result) return;
+      let localImagePath = null;
 
-      const { qrImage, address: sharedAddress } = result;
-      const base64Data = qrImage.replace(/^data:image\/png;base64,/, '');
-      const filePath = `${RNFS.CachesDirectoryPath}/payo_qr.png`;
+      // 1. Download QR Code image to cache if URL exists
+      if (qrCodePaymentUrl) {
+        const filePath = `${RNFS.CachesDirectoryPath}/payment_qr_${Date.now()}.png`;
 
-      await RNFS.writeFile(filePath, base64Data, 'base64');
+        const downloadResult = await RNFS.downloadFile({
+          fromUrl: qrCodePaymentUrl,
+          toFile: filePath,
+        }).promise;
 
-      await Share.open({
-        url: 'file://' + filePath,
-        message: `Send PAYO to this Wallet ID:\n${wallet?.Wallet_ID || sharedAddress}`,
-      });
+        if (downloadResult.statusCode === 200) {
+          localImagePath = Platform.OS === 'android' ? `file://${filePath}` : filePath;
+        }
+      }
+
+      // 2. Format share text message
+      const shareMessage = 
+        `Here is my PAYO payment address:\n\n` +
+        `Address: ${paymentAddress}\n\n` +
+        `Scan the QR code or use the address above to send payments directly.`;
+
+      // 3. Build share options
+      const shareOptions = {
+        title: 'Share Payment Address',
+        message: shareMessage,
+        ...(localImagePath && { url: localImagePath }),
+        type: 'image/png',
+      };
+
+      // 4. Open share modal
+      await Share.open(shareOptions);
     } catch (error) {
-      console.log('Share error:', error);
+      // Ignore user-dismissed modal errors
+      if (error?.message !== 'User did not share') {
+        console.log('Share Payment Address Error:', error);
+      }
     }
   };
 
@@ -1188,6 +1233,9 @@ export default function WalletScreen({ navigation }) {
               <TouchableOpacity
                 style={[styles.headerActionBtn, { marginLeft: 8 }]}
                 activeOpacity={0.8}
+                 onPress={() => navigation.navigate('Settings')}
+                
+
               >
                 <Image
                   source={require('../../../assets/images/walletscr/Settings Icon.png')}
@@ -1289,7 +1337,7 @@ export default function WalletScreen({ navigation }) {
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => navigation.navigate('Receive')}
+                onPress={() => navigation.navigate('ReferEarn')}
                 style={styles.promoBtn}
               >
                 <Text style={styles.promoBtnText}>Refer Now {'>'}</Text>
@@ -1409,6 +1457,8 @@ export default function WalletScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
+
 // import React, { useEffect, useState } from 'react';
 // import {
 //   View,

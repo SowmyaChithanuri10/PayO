@@ -18,16 +18,13 @@ export default function PayoLogo() {
   return (
     <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
 
-      {/* Center Content */}
       <View style={styles.centerContent}>
         <View style={styles.circle}>
           <Text style={styles.text}>PAYO</Text>
         </View>
 
-        {/* Line */}
         <View style={styles.line} />
 
-        {/* Dot */}
         <View style={styles.dot} />
       </View>
 
@@ -37,7 +34,7 @@ export default function PayoLogo() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,  // 🔥 FULL SCREEN
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -64,7 +61,7 @@ const styles = StyleSheet.create({
 
   line: {
     width: 2,
-    height: height / 2, // 🔥 goes down to bottom visually
+    height: height / 2,
     backgroundColor: 'white',
     marginTop: 8,
   },

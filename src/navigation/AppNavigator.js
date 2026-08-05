@@ -270,14 +270,11 @@ export default function AppNavigator() {
      >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-        {/* AUTH */}
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Animation" component={AnimationScreen} />
-        {/* <Stack.Screen name="Welcome" component={WelcomeScreen} /> */}
         <Stack.Screen name="Onboarding1" component={Onboarding1} options={{ animation: 'fade' }} />
         <Stack.Screen name="Onboarding2" component={Onboarding2} options={{ animation: 'fade' }} />
         <Stack.Screen name="Onboarding3" component={Onboarding3} options={{ animation: 'fade' }} />
-        {/* <Stack.Screen name="Onboarding4" component={Onboarding4} /> */}
         <Stack.Screen name="Login" component={LoginScreen} options={{ animation: 'fade' }} />
         <Stack.Screen name="RegisterMobile" component={RegisterMobileScreen} options={{ animation: 'fade' }} />
         <Stack.Screen name="OTP" component={OtpVerificationScreen} options={{ animation: 'fade' }} />
@@ -295,13 +292,8 @@ export default function AppNavigator() {
         <Stack.Screen name="ConfirmDeposite" component={ConfirmDepositeScreen} />
         <Stack.Screen name="MakePayment" component={MakePayment} />
 
-
-
-        {/* <Stack.Screen name="TransactionPin" component={TransactionPinScreen} /> */}
-
         <Stack.Screen name="ForgotPasswordScreen" component={ForgotPassword} />
 
-        {/* /// KYC VERIFICATION //////// */}
         <Stack.Screen name="KYCVerification" component={KYCVerification} />
         <Stack.Screen name="KycFilesReview" component={KycFilesReview} />
         <Stack.Screen name="KycUnderReview" component={KycUnderReview} />

@@ -2,10 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
-
-// Import your custom theme and responsiveness utilities
-import { theme } from '../../MainTheme/theme'; // Adjust path based on your folder structure
-import { moderateScale } from '../../utils/responsive'; // Adjust path based on your folder structure
+import { theme } from '../../MainTheme/theme'; 
+import { moderateScale } from '../../utils/responsive'; 
 
 const MainHeader = ({ title, subtitle, onHelpPress }) => {
   const navigation = useNavigation();
@@ -42,7 +40,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center', // Ensures the title container is centered
+    justifyContent: 'center',
     paddingVertical: moderateScale(16),
     backgroundColor: theme.colors.bgSurface, 
   },
@@ -55,7 +53,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.full,
     borderWidth: 1,
     borderColor: theme.colors.borderLight,
-    ...theme.shadows.sm, // Adds the subtle shadow shown in your design
+    ...theme.shadows.sm, 
   },
   helpButton: {
     position: 'absolute',
@@ -65,7 +63,7 @@ const styles = StyleSheet.create({
   },
   headerTitleContainer: {
     alignItems: 'center',
-    paddingHorizontal: moderateScale(60), // Prevents text from overlapping the absolute buttons
+    paddingHorizontal: moderateScale(60), 
   },
   headerTitle: {
     fontSize: moderateScale(theme.typography.size.base), 

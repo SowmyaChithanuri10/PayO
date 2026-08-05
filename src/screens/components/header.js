@@ -22,8 +22,6 @@ import * as Keychain from 'react-native-keychain';
 import api from '../../api/axios';
 import headerStyles from '../HomeScreen/homeStyling'; 
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-// --- Custom Theme & Responsiveness Imports ---
 import { theme } from '../../MainTheme/theme';
 import { scale, verticalScale, moderateScale } from '../../utils/responsive';
 import { useAppSelector } from '../../redux/hooks';
@@ -40,7 +38,7 @@ function Header() {
   const profileData = useAppSelector((state) => state.deposit.profileData);
   const walletData = useAppSelector((state) => state.deposit.walletData);
   const dashboardStats = useAppSelector((state) => state.deposit.dashboardStats);
-
+   console.log(dashboardStats,walletData,profileData,"09345")
   const totalTransactions = dashboardStats?.totalTransactions ?? 0;
   const successfulTransactions = dashboardStats?.successfulTransactions ?? 0;
 
@@ -52,7 +50,7 @@ function Header() {
     }
 
     if (accessLevel === 'full') {
-      return !(totalTransactions > 0 && successfulTransactions > 0);
+      return !(totalTransactions > 0 && successfulTransactions > 0 && (walletData?.Transaction_Amount ?? 0) >= 100);
     }
 
     return false;
@@ -62,7 +60,6 @@ function Header() {
     return !(totalTransactions > 0 && successfulTransactions > 0);
   }, [totalTransactions, successfulTransactions]);
 
-  // Animation values for smooth swiping
   const panX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const isDrawerOpen = useRef(false);
 
@@ -309,14 +306,11 @@ function Header() {
         </View>
       </View>
 
-      {/* Invisible Left Edge Swipe Detector */}
       <View 
         style={sidebarStyles.leftEdgeDetector} 
         {...panResponder.panHandlers} 
         pointerEvents={sidebarVisible ? 'none' : 'auto'}
       />
-
-      {/* Inline Sidebar Overlay Drawer */}
       {sidebarVisible && (
         <View style={sidebarStyles.overlay}>
           <TouchableWithoutFeedback onPress={closeDrawer}>

@@ -1,4 +1,4 @@
-// BankAddedScreen.js
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,22 +23,18 @@ const BankAddedScreen = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <Text style={styles.title}>Bank Added Successfully!</Text>
 
-      {/* Illustration */}
       <Image
         source={require('../../../assets/images/addBankdetails/Bank added 1.png')}
         style={styles.bankImage}
         resizeMode="contain"
       />
 
-      {/* Description */}
       <Text style={styles.subtitle}>
         Your Bank Account has been added and verified successfully.
       </Text>
 
-      {/* Bank Info Card */}
       <View style={styles.card}>
         <View style={styles.row}>
           <Image
@@ -60,7 +56,6 @@ const BankAddedScreen = ({navigation}) => {
         </View>
       </View>
 
-      {/* Buttons */}
       <TouchableOpacity onPress={()=>navigation.navigate('UserProfile')} style={styles.doneButton}>
         <Text style={styles.doneText}>Done</Text>
       </TouchableOpacity>

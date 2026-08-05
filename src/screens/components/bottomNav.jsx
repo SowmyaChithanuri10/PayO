@@ -64,7 +64,7 @@ export default function BottomNav({
               : moderateScale(78),
         },
       ]}>
-      {/* HOME */}
+     
       <TouchableOpacity
         style={styles.navItem}
         activeOpacity={0.8}
@@ -86,7 +86,6 @@ export default function BottomNav({
         </Text>
       </TouchableOpacity>
 
-      {/* WALLETS */}
       <TouchableOpacity
         style={styles.navItem}
         activeOpacity={0.8}
@@ -108,7 +107,6 @@ export default function BottomNav({
         </Text>
       </TouchableOpacity>
 
-      {/* CENTER SCANNER */}
       <TouchableOpacity
         style={styles.centerIcon}
         activeOpacity={0.85}
@@ -120,7 +118,7 @@ export default function BottomNav({
         />
       </TouchableOpacity>
 
-      {/* TRANSACTIONS */}
+
       <TouchableOpacity
         style={styles.navItem}
         activeOpacity={0.8}
@@ -144,7 +142,6 @@ export default function BottomNav({
         </Text>
       </TouchableOpacity>
 
-      {/* MARKET */}
       <TouchableOpacity
         style={styles.navItem}
         activeOpacity={0.8}

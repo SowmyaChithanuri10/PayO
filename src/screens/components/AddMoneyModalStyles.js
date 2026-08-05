@@ -12,8 +12,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 24,
-    elevation: 5, // For Android shadow
-    shadowColor: '#000', // For iOS shadow
+    elevation: 5, 
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12, // Native spacing between buttons
+    gap: 12, 
   },
   button: {
     flex: 1,
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   proceedButton: {
-    backgroundColor: '#0F62FE', // Matching the Cashfree theme color you set
+    backgroundColor: '#0F62FE', 
   },
   proceedButtonText: {
     color: '#FFFFFF',

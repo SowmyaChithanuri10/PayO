@@ -1,6 +1,5 @@
 import { StyleSheet, Platform } from 'react-native';
 
-// --- Design Tokens (Variables) ---
 export const theme = {
   colors: {
     primaryBlue: '#285CE0', 
@@ -67,7 +66,6 @@ export const theme = {
   }
 };
 
-// --- Global Classes ---
 export const globalStyles = StyleSheet.create({
   sectionHeading: {
     fontSize: theme.typography.size.lg,

@@ -13,13 +13,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import { globalStyles, theme } from '../../MainTheme/theme';
-import { verticalScale, scale, moderateScale } from '../../utils/responsive'; // Imported scale and moderateScale for deep responsiveness
+import { verticalScale, scale, moderateScale } from '../../utils/responsive';
 import { useAppSelector } from '../../redux/hooks';
 
 const { width: windowWidth } = Dimensions.get('window');
 
 export default function PaymentCompleteDetails({ route, navigation }) {
-  // Extract dynamic parameters passed down from previous transaction stacks
   const { amount = '300', recipient = 'User 2',transactionId , wallet_id} = route.params || {};
 
   const handleBackToHome = () => {
@@ -33,7 +32,6 @@ export default function PaymentCompleteDetails({ route, navigation }) {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar backgroundColor={theme.colors.bgApp} barStyle="dark-content" />
 
-      {/* HEADER ROW */}
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton} 
@@ -57,14 +55,13 @@ export default function PaymentCompleteDetails({ route, navigation }) {
         showsVerticalScrollIndicator={false} 
         contentContainerStyle={styles.scrollContent}
       >
-        {/* SUCCESS GRADIENT BANNER CARD */}
+
         <LinearGradient
           colors={['#6366f1', '#4f46e5', '#3b82f6']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.gradientCard}
         >
-          {/* Decorative Circle Elements */}
           <Image 
             source={require('../../../assets/images/transactionScreen/Image Container.png')} 
             style={styles.bgGlowOverlay}
@@ -72,7 +69,7 @@ export default function PaymentCompleteDetails({ route, navigation }) {
           />
 
           <View style={styles.gradientCardContent}>
-            {/* Success Check Icon Frame */}
+
             <Image 
               source={require('../../../assets/images/transactionScreen/Wallet Icon Container.png')}
               style={styles.statusCheckImage}
@@ -88,7 +85,6 @@ export default function PaymentCompleteDetails({ route, navigation }) {
               <Text style={styles.recipientText}>Paid to {recipient}</Text>
             </View>
 
-            {/* Wallet Visual illustration */}
             <Image 
               source={require('../../../assets/images/transactionScreen/Wallet image 1.png')} 
               style={styles.walletIllustration}
@@ -97,7 +93,6 @@ export default function PaymentCompleteDetails({ route, navigation }) {
           </View>
         </LinearGradient>
 
-        {/* METRICS & RECEIPT DETAILS CARD */}
         <View style={[globalStyles.card, styles.detailsCard]}>
           <View style={styles.detailRow}>
             <Text style={globalStyles.textMuted}>Transaction ID</Text>
@@ -132,7 +127,6 @@ export default function PaymentCompleteDetails({ route, navigation }) {
           </View>
         </View>
 
-        {/* REWARDS BANNER PILL */}
         <TouchableOpacity style={styles.rewardsCard} activeOpacity={0.9}>
           <Image 
             source={require('../../../assets/images/transactionScreen/Image Container.png')} 
@@ -157,7 +151,6 @@ export default function PaymentCompleteDetails({ route, navigation }) {
           <Icon name="chevron-right" size={moderateScale(18)} color={theme.colors.primaryPurple} />
         </TouchableOpacity>
 
-        {/* ACTION BUTTON FOOTER ROW */}
         <View style={styles.actionRow}>
   <TouchableOpacity style={styles.downloadBtn} activeOpacity={0.8}>
     <Text style={styles.downloadBtnText}>Download Receipt</Text>
@@ -216,7 +209,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: moderateScale(18), // Responsive text size
+    fontSize: moderateScale(18), 
     fontWeight: theme.typography.weight.bold,
     color: theme.colors.textMain,
   },
@@ -234,8 +227,8 @@ const styles = StyleSheet.create({
   gradientCard: {
     borderRadius: theme.borderRadius.lg,
     marginTop: verticalScale(16),
-    marginBottom: verticalScale(24), // Reduced from 40 to avoid crowding standard/small screens
-    height: verticalScale(130), // Proportional height
+    marginBottom: verticalScale(24), 
+    height: verticalScale(130), 
     position: 'relative',
     overflow: 'hidden',
     ...theme.shadows.md,
@@ -295,7 +288,7 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(8),
     borderWidth: 0,
        backgroundColor: '#F2F4F4',
-    marginTop: verticalScale(20), // Fixed: passed explicit density value
+    marginTop: verticalScale(20), 
     marginBottom:verticalScale(20),
   },
   detailRow: {
@@ -390,12 +383,12 @@ const styles = StyleSheet.create({
   },
  actionRow: {
   flexDirection: 'row',
-  justifyContent: 'center', // Centers the buttons horizontally
+  justifyContent: 'center', 
   alignItems: 'center',
-  marginTop: verticalScale(16), // Slightly increased spacing for a cleaner visual layout
+  marginTop: verticalScale(16), 
 },
 downloadBtn: {
-  width: scale(150), // Decreased to a compact, responsive width
+  width: scale(150), 
   height: verticalScale(46),
   borderRadius: theme.borderRadius.sm,
   borderWidth: 1.5,
@@ -403,7 +396,7 @@ downloadBtn: {
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'center',
-  marginRight: scale(12), // Gap between the buttons
+  marginRight: scale(12),
   backgroundColor: 'transparent',
 },
 downloadBtnText: {
@@ -412,7 +405,7 @@ downloadBtnText: {
   fontWeight: theme.typography.weight.semibold,
 },
 shareBtn: {
-  width: scale(120), // Matches the download button width
+  width: scale(120), 
   height: verticalScale(46),
   borderRadius: theme.borderRadius.sm,
   backgroundColor: theme.colors.primaryBlue,

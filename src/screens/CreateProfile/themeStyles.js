@@ -21,7 +21,6 @@ export const COLORS = {
 };
 
 export const COMMON_STYLES = StyleSheet.create({
-  // Primitives Base Layouts
   flex: {
     flex: 1,
   },
@@ -34,7 +33,6 @@ export const COMMON_STYLES = StyleSheet.create({
     paddingBottom: hp('3%'),
   },
 
-  // Navigation Core Elements
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -64,8 +62,6 @@ export const COMMON_STYLES = StyleSheet.create({
     width: moderateScale(120),
     height: moderateScale(40),
   },
-
-  // Onboarding Structural Modules
   illustrationContainer: {
     width: wp('90%'),
     height: hp('24%'),
@@ -111,16 +107,12 @@ export const COMMON_STYLES = StyleSheet.create({
     paddingHorizontal: wp('4%'),
     lineHeight: moderateScale(18),
   },
-
-  // Form Field Wrappers
   errorCenter: {
     color: COLORS.danger,
     textAlign: 'center',
     marginBottom: hp('1%'),
     fontSize: moderateScale(12),
   },
-
-  // CTA Interactive Control Buttons
   continueButton: {
     flexDirection: 'row',
     backgroundColor: COLORS.secondary,
