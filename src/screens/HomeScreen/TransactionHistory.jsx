@@ -16,6 +16,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import styles from './TransactionHistoryStyles';
 import api from '../../api/axios';
 import { theme } from '../../MainTheme/theme';
+// Ensure the path to MainSideHeader matches your folder structure
+import MainSideHeader from '../../screens/components/MainSideHeader'; 
 
 // Safe helper to create valid JS Date objects (handles null, undefined, invalid strings)
 const parseSafeDate = (dateVal) => {
@@ -178,130 +180,124 @@ export default function TransactionHistory({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <View style={styles.headerRow}>
-        <View style={styles.headerLeft}>
+      <MainSideHeader
+        title="Transaction Details"
+        subtitle="View your transaction information"
+        onHelpPress={() => console.log('Help Pressed')}
+        onNotificationPress={() => navigation.navigate('Notifications')}
+        notificationCount={0}
+      />
+
+      <View style={styles.contentContainer}>
+        <View style={styles.filterRow}>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => navigation.goBack()}
+            onPress={() => {
+              setDateFilter(null);
+              setStatusFilter(null);
+            }}
           >
-            <Icon name="chevron-left" size={28} color={theme.colors.textMain} />
+            <Text style={styles.activeFilter}>All</Text>
           </TouchableOpacity>
-          <Text style={styles.header}>Transaction History</Text>
+
+          <Dropdown
+            style={styles.dropdown}
+            data={dateOptions}
+            labelField="label"
+            valueField="value"
+            placeholder="Date"
+            value={dateFilter}
+            onChange={(item) => setDateFilter(item.value)}
+            placeholderStyle={styles.dropdownText}
+            selectedTextStyle={styles.dropdownText}
+            iconColor={theme.colors.textMain}
+          />
+
+          <Dropdown
+            style={styles.dropdown}
+            data={statusOptions}
+            labelField="label"
+            valueField="value"
+            placeholder="Status"
+            value={statusFilter}
+            onChange={(item) => setStatusFilter(item.value)}
+            placeholderStyle={styles.dropdownText}
+            selectedTextStyle={styles.dropdownText}
+            iconColor={theme.colors.textMain}
+          />
         </View>
 
-        <TouchableOpacity activeOpacity={0.8}>
-          <Icon name="share" size={22} color={theme.colors.textMain} />
-        </TouchableOpacity>
+        {loading ? (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator color={theme.colors.primaryBlue} size="large" />
+          </View>
+        ) : (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 120 }}
+          >
+            {sortedData?.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Icon name="file-text" size={60} color={theme.colors.textMuted} />
+                <Text style={styles.emptyTitle}>No Transactions Found</Text>
+                <Text style={styles.emptySub}>
+                  Your transaction history will appear here
+                </Text>
+              </View>
+            ) : (
+              <>
+                {grouped.today.length > 0 && (
+                  <>
+                    <Text style={styles.section}>
+                      {getTitle('today', grouped.today)}
+                    </Text>
+                    {grouped.today.map((item, i) => (
+                      <Item
+                        key={i}
+                        item={item}
+                        formatTime={formatTime}
+                        navigation={navigation}
+                      />
+                    ))}
+                  </>
+                )}
+
+                {grouped?.yesterday?.length > 0 && (
+                  <>
+                    <Text style={styles.section}>
+                      {getTitle('yesterday', grouped.yesterday)}
+                    </Text>
+                    {grouped.yesterday.map((item, i) => (
+                      <Item
+                        key={i}
+                        item={item}
+                        formatTime={formatTime}
+                        navigation={navigation}
+                      />
+                    ))}
+                  </>
+                )}
+
+                {grouped.week.length > 0 && (
+                  <>
+                    <Text style={styles.section}>
+                      {getTitle('week', grouped.week)}
+                    </Text>
+                    {grouped.week.map((item, i) => (
+                      <Item
+                        key={i}
+                        item={item}
+                        formatTime={formatTime}
+                        navigation={navigation}
+                      />
+                    ))}
+                  </>
+                )}
+              </>
+            )}
+          </ScrollView>
+        )}
       </View>
-
-      <View style={styles.filterRow}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => {
-            setDateFilter(null);
-            setStatusFilter(null);
-          }}
-        >
-          <Text style={styles.activeFilter}>All</Text>
-        </TouchableOpacity>
-
-        <Dropdown
-          style={styles.dropdown}
-          data={dateOptions}
-          labelField="label"
-          valueField="value"
-          placeholder="Date"
-          value={dateFilter}
-          onChange={(item) => setDateFilter(item.value)}
-          placeholderStyle={styles.dropdownText}
-          selectedTextStyle={styles.dropdownText}
-          iconColor={theme.colors.textMain}
-        />
-
-        <Dropdown
-          style={styles.dropdown}
-          data={statusOptions}
-          labelField="label"
-          valueField="value"
-          placeholder="Status"
-          value={statusFilter}
-          onChange={(item) => setStatusFilter(item.value)}
-          placeholderStyle={styles.dropdownText}
-          selectedTextStyle={styles.dropdownText}
-          iconColor={theme.colors.textMain}
-        />
-      </View>
-
-      {loading ? (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator color={theme.colors.primaryBlue} size="large" />
-        </View>
-      ) : (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 120 }}
-        >
-          {sortedData?.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Icon name="file-text" size={60} color={theme.colors.textMuted} />
-              <Text style={styles.emptyTitle}>No Transactions Found</Text>
-              <Text style={styles.emptySub}>
-                Your transaction history will appear here
-              </Text>
-            </View>
-          ) : (
-            <>
-              {grouped.today.length > 0 && (
-                <>
-                  <Text style={styles.section}>
-                    {getTitle('today', grouped.today)}
-                  </Text>
-                  {grouped.today.map((item, i) => (
-                    <Item
-                      key={i}
-                      item={item}
-                      formatTime={formatTime}
-                      navigation={navigation}
-                    />
-                  ))}
-                </>
-              )}
-
-              {grouped?.yesterday?.length > 0 && (
-                <>
-                  <Text style={styles.section}>
-                    {getTitle('yesterday', grouped.yesterday)}
-                  </Text>
-                  {grouped.yesterday.map((item, i) => (
-                    <Item
-                      key={i}
-                      item={item}
-                      formatTime={formatTime}
-                      navigation={navigation}
-                    />
-                  ))}
-                </>
-              )}
-
-              {grouped.week.length > 0 && (
-                <>
-                  <Text style={styles.section}>
-                    {getTitle('week', grouped.week)}
-                  </Text>
-                  {grouped.week.map((item, i) => (
-                    <Item
-                      key={i}
-                      item={item}
-                      formatTime={formatTime}
-                      navigation={navigation}
-                    />
-                  ))}
-                </>
-              )}
-            </>
-          )}
-        </ScrollView>
-      )}
     </SafeAreaView>
   );
 }

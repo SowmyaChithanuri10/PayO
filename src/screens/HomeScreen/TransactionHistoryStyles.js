@@ -11,33 +11,18 @@ export default StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.bgApp, // Clean white background
+  },
+
+  contentContainer: {
+    flex: 1,
     paddingHorizontal: scale(16),
-    paddingTop: verticalScale(16),
-  },
-
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: verticalScale(24),
-  },
-
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(12),
-  },
-
-  header: {
-    color: theme.colors.textMain,
-    fontSize: moderateScale(18),
-    fontWeight: theme.typography.weight.semibold || '600',
+    paddingTop: verticalScale(5),
   },
 
   filterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: verticalScale(24),
+    marginBottom: verticalScale(10),
     flexWrap: 'wrap',
     gap: scale(8),
   },
@@ -51,6 +36,7 @@ export default StyleSheet.create({
     fontSize: moderateScale(13),
     fontWeight: theme.typography.weight.medium || '500',
   },
+  
   dropdownDate: {
     minWidth: scale(80),
     height: verticalScale(34),

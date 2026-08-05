@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../components/header';
 import Icon from 'react-native-vector-icons/Feather';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../api/axios';
+import MainSideHeader from '../components/MainSideHeader';
 import { theme } from '../../MainTheme/theme'; 
 import { scale, verticalScale, moderateScale } from '../../utils/responsive'; 
 
@@ -126,63 +126,13 @@ const MarketScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* <Header /> */}
-        <View style={styles.header}>
-                  <TouchableOpacity
-                    style={styles.headerIconBtn}
-                    activeOpacity={0.8}
-                    onPress={() => navigation.goBack()}
-                  >
-                    <Icon name="chevron-left" size={24} color={theme.colors.primaryBlue} />
-                  </TouchableOpacity>
-      
-                  <View style={styles.headerTitleContainer}>
-                    <Text style={styles.headerTitle}>Market</Text>
-                    <Text style={styles.headerSubtitle} numberOfLines={1}>
-                      Explore the Market
-                    </Text>
-                  </View>
-      
-                  <View style={styles.headerRight}>
-                    <TouchableOpacity
-                      style={styles.headerActionBtn}
-                      activeOpacity={0.8}
-                      onPress={() => navigation.navigate('Notifications')}
-                    >
-                      <Image
-                        source={require('../../../assets/images/walletscr/Icon (4).png')}
-                        style={styles.customHeaderIcon}
-                      />
-                      {/* <View style={styles.badge}>
-                        <Text style={styles.badgeText}></Text>
-                      </View> */}
-                    </TouchableOpacity>
-      
-                    <TouchableOpacity
-                      style={[styles.headerActionBtn, { marginLeft: 8 }]}
-                      activeOpacity={0.8}
-                    >
-                      <Image
-                        source={require('../../../assets/images/walletscr/Settings Icon.png')}
-                        style={styles.customHeaderIcon}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-      {/* <View style={styles.headerRow}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.canGoBack() && navigation.goBack()}>
-          <Icon
-            name="chevron-left"
-            size={moderateScale(28)}
-            color={theme.colors.textMain} // Changed to dark color for white background
-          />
-        </TouchableOpacity>
-
-        <Text style={styles.header}>Market</Text>
-      </View> */}
+      <MainSideHeader 
+        title="Market"
+        subtitle="Explore the Market"
+        onHelpPress={() => console.log('Help Pressed')}
+        onNotificationPress={() => navigation.navigate('Notifications')}
+        notificationCount={0} // Set to 0 to match your design image which shows no red badge
+      />
 
       <FlatList
         data={coins}
@@ -190,7 +140,8 @@ const MarketScreen = ({ navigation }) => {
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: verticalScale(16),
+          paddingHorizontal: scale(16),
+          //paddingTop: verticalScale(10),
           paddingBottom: verticalScale(140),
         }}
       />
@@ -204,7 +155,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.bgSurface, // Changed to white background from theme
-    paddingHorizontal: scale(16),
   },
    header: {
       flexDirection: 'row',
