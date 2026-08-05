@@ -1779,7 +1779,7 @@ export default function TransactionHistory({ navigation }) {
         title="Transaction Details"
         subtitle="View your transaction information"
         onHelpPress={() => console.log('Help Pressed')}
-        onNotificationPress={() => console.log('Notification Pressed')}
+        onNotificationPress={() => navigation.navigate('Notifications')}
         notificationCount={0}
       />
 
