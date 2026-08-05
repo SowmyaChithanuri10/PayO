@@ -254,7 +254,7 @@ import AddMoneytoWallet from '../screens/HomeScreen/AddMoneytoWallet.jsx';
 import NotFoundScreen from '../screens/HomeScreen/NotFoundScreen.jsx';
 import PaymentCompleteDetails from '../screens/HomeScreen/completeTransaction.jsx';
 import { navigationRef } from './navigationRef.js';
-import Chats from '../screens/chats/Chats.jsx';
+//import Chats from '../screens/chats/Chats.jsx';
 
 import PaymentLoadingTemp from '../wallet/newloadingTemp.jsx';
 import PaymentSuccessTemp from '../wallet/successPaymentTemp.jsx';
@@ -283,7 +283,7 @@ export default function AppNavigator() {
         <Stack.Screen name="OTP" component={OtpVerificationScreen} options={{ animation: 'fade' }} />
         <Stack.Screen name="OtpVerified" component={OtpVerified} options={{ animation: 'fade' }} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
-        <Stack.Screen name="Chats" component={Chats} />
+        {/* <Stack.Screen name="Chats" component={Chats} /> */}
 
 
 

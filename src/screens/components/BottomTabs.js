@@ -234,7 +234,7 @@
 //   );
 // }
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -258,7 +258,6 @@ import { useAppSelector } from '../../redux/hooks';
 
 export default function CurvedTabs({ navigation }) {
   const isDarkMode = useColorScheme() === 'dark';
-  const walletData = useAppSelector((state) => state.deposit.walletData);
   const dashboardStats = useAppSelector((state) => state.deposit.dashboardStats);
 
   const colors = useMemo(() => getThemeColors(isDarkMode), [isDarkMode]);
@@ -267,31 +266,39 @@ export default function CurvedTabs({ navigation }) {
   const totalTransactions = dashboardStats?.totalTransactions ?? 0;
   const successfulTransactions = dashboardStats?.successfulTransactions ?? 0;
 
-  const checkIsRouteRestricted = (routeName) => {
-    if (routeName === 'Home') {
-      return false; // Always active
-    }
+  const checkIsRouteRestricted = useCallback(
+    (routeName) => {
+      if (routeName === 'Home') {
+        return false; // Always accessible
+      }
 
-    if (routeName === 'Transactions') {
-      // Active if totalTransactions > 0
-      return totalTransactions === 0;
-    }
+      if (routeName === 'Transactions') {
+        // Active if user has initiated at least one transaction
+        return totalTransactions === 0;
+      }
 
-    if (routeName === 'Wallets' || routeName === 'Profile' || routeName === 'Send') {
-      // Active ONLY when BOTH totalTransactions > 0 AND successfulTransactions > 0
-      return !(totalTransactions > 0 && successfulTransactions > 0);
-    }
+      if (routeName === 'Wallets' || routeName === 'Profile' || routeName === 'Send') {
+        // Active ONLY when BOTH totalTransactions > 0 AND successfulTransactions > 0
+        return !(totalTransactions > 0 && successfulTransactions > 0);
+      }
 
-    return false;
-  };
+      return false;
+    },
+    [totalTransactions, successfulTransactions]
+  );
 
   const getIconName = (routeName) => {
     switch (routeName) {
-      case 'Home': return 'home';
-      case 'Wallets': return 'credit-card';
-      case 'Transactions': return 'repeat';
-      case 'Profile': return 'user';
-      default: return 'help-circle';
+      case 'Home':
+        return 'home';
+      case 'Wallets':
+        return 'credit-card';
+      case 'Transactions':
+        return 'repeat';
+      case 'Profile':
+        return 'user';
+      default:
+        return 'help-circle';
     }
   };
 
@@ -309,23 +316,29 @@ export default function CurvedTabs({ navigation }) {
     const isRestricted = checkIsRouteRestricted(routeName);
 
     if (isRestricted) {
-      Alert.alert(
-        'Access Restricted',
-        'You are unable to access this feature. Please add money to your wallet.',
-        [
-          {
-            text: 'OK',
-            style: 'cancel',
-          },
-          {
-            text: 'Add Money',
-            onPress: () => {
-              navigation.navigate('AddMoneytoWallet');
+      // Determine context-aware alert details
+      const isPendingApproval = totalTransactions > 0 && successfulTransactions === 0;
+
+      if (isPendingApproval) {
+        Alert.alert(
+          'Account Pending Verification',
+          'Your transaction has been received. Please wait for approval from the administrator to unlock this feature.',
+          [{ text: 'okay', style: 'default' }]
+        );
+      } else {
+        Alert.alert(
+          'Access Restricted',
+          'You need an active deposit to access this feature. Please complete a deposit into your wallet.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Add Money',
+              onPress: () => navigation.navigate('AddMoneytoWallet'),
             },
-          },
-        ],
-        { cancelable: true }
-      );
+          ],
+          { cancelable: true }
+        );
+      }
     } else {
       // Execute standard tab navigation if allowed
       tabNavigate(routeName);

@@ -46,3 +46,5 @@ npm install react-native-webview
 
 
 npm install @react-native-community/geolocation
+
+
