@@ -31,10 +31,13 @@ export default function TransactionDetailScreen({ route, navigation }) {
     transactionId = 'N/A', 
     wallet_id = 'N/A',
     date = 'N/A',
-    status = 'Completed',
-    isApproved = true,
+    // status = 'Completed',
+    status = '',
+    isBonus= true,
     isFailed = false,
   } = route.params || {};
+
+  console.log(route.params)
 
   const viewShotRef = useRef();
   const walletData = useAppSelector((state) => state.deposit.walletData);
@@ -42,13 +45,13 @@ export default function TransactionDetailScreen({ route, navigation }) {
   let statusColor = '#10B981';
   let statusIcon = 'check-circle';
   let statusText = status || 'Completed';
-  let bannerStatusTitle = 'Payment Successful';
+  let bannerStatusTitle =isBonus? 'Bonus Amount' :'Payment Successful';
 
   if (isFailed) {
     statusColor = '#EF4444';
     statusIcon = 'x-circle';
     bannerStatusTitle = 'Payment Failed';
-  } else if (!isApproved && !isFailed) {
+  } else if (!status && !isFailed) {
     statusColor = '#EAB308';
     statusIcon = 'clock';
     bannerStatusTitle = 'Payment In-Progress';
@@ -120,7 +123,7 @@ export default function TransactionDetailScreen({ route, navigation }) {
           onPress={handleBackToHome}
           activeOpacity={0.7}
         >
-          <Icon name="chevron-left" size={moderateScale(22)} color={theme.colors.textMain} />
+          <Icon name="chevron-left" size={moderateScale(22)} color={theme.colors.primaryBlue} />
         </TouchableOpacity>
         
         <View style={styles.headerTitleContainer}>

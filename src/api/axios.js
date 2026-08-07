@@ -5,7 +5,7 @@ import { Alert } from 'react-native';
 import { navigate, resetRoot } from '../navigation/navigationRef';
 
 const api = axios.create({
-  baseURL: 'https://music-remission-stark.ngrok-free.dev',
+  baseURL: 'https://subtitle-outscore-collapse.ngrok-free.dev',
   timeout: 60000,
   headers: {
     'Accept': 'application/json',
