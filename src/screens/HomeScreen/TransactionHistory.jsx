@@ -16,13 +16,10 @@
 // import styles from './TransactionHistoryStyles';
 // import api from '../../api/axios';
 // import { theme } from '../../MainTheme/theme';
-// // Ensure the path to MainSideHeader matches your folder structure
 // import MainSideHeader from '../../screens/components/MainSideHeader'; 
 
-// // Safe helper to create valid JS Date objects (handles null, undefined, invalid strings)
 // const parseSafeDate = (dateVal) => {
 //   if (!dateVal) return null;
-//   // If date format is "YYYY-MM-DD HH:mm:ss", replace space with 'T' for iOS/Android JSC compatibility
 //   const formattedStr = typeof dateVal === 'string' ? dateVal.replace(' ', 'T') : dateVal;
 //   const parsed = new Date(formattedStr);
 //   return isNaN(parsed.getTime()) ? null : parsed;
@@ -44,23 +41,26 @@
 //         const isApproved = item.Payment_Status === 'Payment Approved';
 //         const isFailed = item.Payment_Status === 'Payment Failed';
 //         const isInProgress = item.Payment_Status === 'Payment Verification In-Progress';
+//         const isBonus = item.Payment_Status === 'Bonus Credited'; 
 
 //         let type = 'received';
 //         if (isFailed) type = 'failed';
 //         else if (isInProgress) type = 'progress';
+//         else if (isBonus) type = 'bonus'; 
 
 //         return {
 //           id: item.Transaction_UID,
-//           gatewayOrderId: item.Gateway_Order_ID,
+//           gatewayOrderId: item.Transaction_UID,
 //           depositUid: item.Deposit_UID,
 //           amount: parseFloat(item.Requested_Amount || 0),
 //           status: item.Payment_Status,
 //           createdAt: item.Payment_Date,
-//           name: item.Gateway_Order_ID || item.Transaction_UID,
+//           name: item.Transaction_UID || item.Transaction_UID,
 //           type: type,
 //           isApproved,
 //           isFailed,
 //           isInProgress,
+//           isBonus, 
 //         };
 //       });
 
@@ -91,17 +91,15 @@
 //   ];
 
 //   const filteredData = transactions.filter((item) => {
-//     // Status Dropdown Filter
 //     if (statusFilter === 'approved' && !item.isApproved) return false;
 //     if (statusFilter === 'failed' && !item.isFailed) return false;
 //     if (
 //       statusFilter === 'progress' &&
-//       (item.isApproved || item.isFailed)
+//       (item.isApproved || item.isFailed || item.isBonus)
 //     ) {
 //       return false;
 //     }
 
-//     // Date Filter with Safe Parse
 //     const parsedDate = parseSafeDate(item.createdAt);
 //     if (!parsedDate && dateFilter) return false;
 
@@ -305,6 +303,7 @@
 // export const Item = ({ item, formatTime, navigation }) => {
 //   const isApproved = item.isApproved;
 //   const isFailed = item.isFailed;
+//   const isBonus = item.isBonus;
 
 //   let statusColor = '#EAB308';
 //   let iconName = 'clock';
@@ -318,9 +317,12 @@
 //     statusColor = theme.colors.statusDanger || '#EF4444';
 //     iconName = 'x';
 //     displayStatus = item.status;
+//   } else if (isBonus) {
+//     statusColor = theme.colors.statusSuccess || '#10B981';
+//     iconName = 'gift';
+//     displayStatus = item.status; 
 //   }
 
-//   // Format creation date for the detail screen
 //   const parseSafeDate = (dateVal) => {
 //     if (!dateVal) return null;
 //     const formattedStr = typeof dateVal === 'string' ? dateVal.replace(' ', 'T') : dateVal;
@@ -351,6 +353,8 @@
 //           status: item.status,
 //           isApproved,
 //           isFailed,
+//           isBonus,
+//           isInProgress: item.isInProgress, 
 //         })
 //       }
 //     >
@@ -392,12 +396,6 @@
 
 
 
-
-
-
-
-
-
 import React, { useCallback, useState } from 'react';
 import {
   View,
@@ -416,13 +414,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import styles from './TransactionHistoryStyles';
 import api from '../../api/axios';
 import { theme } from '../../MainTheme/theme';
-// Ensure the path to MainSideHeader matches your folder structure
 import MainSideHeader from '../../screens/components/MainSideHeader'; 
 
-// Safe helper to create valid JS Date objects (handles null, undefined, invalid strings)
 const parseSafeDate = (dateVal) => {
   if (!dateVal) return null;
-  // If date format is "YYYY-MM-DD HH:mm:ss", replace space with 'T' for iOS/Android JSC compatibility
   const formattedStr = typeof dateVal === 'string' ? dateVal.replace(' ', 'T') : dateVal;
   const parsed = new Date(formattedStr);
   return isNaN(parsed.getTime()) ? null : parsed;
@@ -431,6 +426,7 @@ const parseSafeDate = (dateVal) => {
 export default function TransactionHistory({ navigation }) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mainFilter, setMainFilter] = useState('all'); // 'all' | 'transactions' | 'bonus'
   const [dateFilter, setDateFilter] = useState(null);
   const [statusFilter, setStatusFilter] = useState(null);
 
@@ -444,12 +440,12 @@ export default function TransactionHistory({ navigation }) {
         const isApproved = item.Payment_Status === 'Payment Approved';
         const isFailed = item.Payment_Status === 'Payment Failed';
         const isInProgress = item.Payment_Status === 'Payment Verification In-Progress';
-        const isBonus = item.Payment_Status === 'Bonus Credited'; // Added Bonus Check
+        const isBonus = item.Payment_Status === 'Bonus Credited'; 
 
         let type = 'received';
         if (isFailed) type = 'failed';
         else if (isInProgress) type = 'progress';
-        else if (isBonus) type = 'bonus'; // Assigned Bonus type
+        else if (isBonus) type = 'bonus'; 
 
         return {
           id: item.Transaction_UID,
@@ -463,7 +459,7 @@ export default function TransactionHistory({ navigation }) {
           isApproved,
           isFailed,
           isInProgress,
-          isBonus, // Pass flag to UI
+          isBonus, 
         };
       });
 
@@ -477,6 +473,11 @@ export default function TransactionHistory({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
+      // Reset all filters to default when screen is focused
+      setMainFilter('all');
+      setDateFilter(null);
+      setStatusFilter(null);
+      
       fetchTransactions();
     }, []),
   );
@@ -494,17 +495,21 @@ export default function TransactionHistory({ navigation }) {
   ];
 
   const filteredData = transactions.filter((item) => {
+    // Top-level Category Filter
+    if (mainFilter === 'transactions' && item.isBonus) return false;
+    if (mainFilter === 'bonus' && !item.isBonus) return false;
+
     // Status Dropdown Filter
     if (statusFilter === 'approved' && !item.isApproved) return false;
     if (statusFilter === 'failed' && !item.isFailed) return false;
     if (
       statusFilter === 'progress' &&
-      (item.isApproved || item.isFailed || item.isBonus) // Added isBonus to ignore from progress filter
+      (item.isApproved || item.isFailed || item.isBonus)
     ) {
       return false;
     }
 
-    // Date Filter with Safe Parse
+    // Date Dropdown Filter
     const parsedDate = parseSafeDate(item.createdAt);
     if (!parsedDate && dateFilter) return false;
 
@@ -581,6 +586,19 @@ export default function TransactionHistory({ navigation }) {
     return `Earlier, ${d}`;
   };
 
+  // Dynamic widths to ensure active text remains on a single line
+  const getDateDropdownWidth = () => {
+    if (dateFilter === 'yesterday') return 125;
+    if (dateFilter === 'week') return 115;
+    return 100;
+  };
+
+  const getStatusDropdownWidth = () => {
+    if (statusFilter === 'progress') return 135;
+    if (statusFilter === 'approved') return 120;
+    return 100;
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <MainSideHeader
@@ -592,19 +610,55 @@ export default function TransactionHistory({ navigation }) {
       />
 
       <View style={styles.contentContainer}>
-        <View style={styles.filterRow}>
+        {/* Main Category Filter Buttons */}
+        <View style={[styles.filterRow, { marginBottom: 16, justifyContent: 'flex-start' }]}>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => {
+              setMainFilter('all');
               setDateFilter(null);
               setStatusFilter(null);
             }}
+            style={[styles.pillButton, mainFilter === 'all' ? styles.pillActive : styles.pillInactive]}
           >
-            <Text style={styles.activeFilter}>All</Text>
+            <Text style={mainFilter === 'all' ? styles.pillTextActive : styles.pillTextInactive}>
+              All
+            </Text>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              setMainFilter('transactions');
+              setDateFilter(null);
+              setStatusFilter(null);
+            }}
+            style={[styles.pillButton, mainFilter === 'transactions' ? styles.pillActive : styles.pillInactive]}
+          >
+            <Text style={mainFilter === 'transactions' ? styles.pillTextActive : styles.pillTextInactive}>
+              Transactions
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              setMainFilter('bonus');
+              setDateFilter(null);
+              setStatusFilter(null);
+            }}
+            style={[styles.pillButton, mainFilter === 'bonus' ? styles.pillActive : styles.pillInactive]}
+          >
+            <Text style={mainFilter === 'bonus' ? styles.pillTextActive : styles.pillTextInactive}>
+              Bonus
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Dropdown Filters (Date & Status) */}
+        <View style={[styles.filterRow, { justifyContent: 'flex-start' }]}>
           <Dropdown
-            style={styles.dropdown}
+            style={[styles.dropdown, { width: getDateDropdownWidth() }]}
             data={dateOptions}
             labelField="label"
             valueField="value"
@@ -614,10 +668,13 @@ export default function TransactionHistory({ navigation }) {
             placeholderStyle={styles.dropdownText}
             selectedTextStyle={styles.dropdownText}
             iconColor={theme.colors.textMain}
+            selectedTextProps={{ numberOfLines: 1 }}
+            containerStyle={{ width: 130, borderRadius: 8, overflow: 'hidden' }} 
+            itemTextStyle={{ fontSize: 14, numberOfLines: 1 }}
           />
 
           <Dropdown
-            style={styles.dropdown}
+            style={[styles.dropdown, { width: getStatusDropdownWidth() }]}
             data={statusOptions}
             labelField="label"
             valueField="value"
@@ -627,6 +684,9 @@ export default function TransactionHistory({ navigation }) {
             placeholderStyle={styles.dropdownText}
             selectedTextStyle={styles.dropdownText}
             iconColor={theme.colors.textMain}
+            selectedTextProps={{ numberOfLines: 1 }}
+            containerStyle={{ width: 145, borderRadius: 8, overflow: 'hidden' }} 
+            itemTextStyle={{ fontSize: 14, numberOfLines: 1 }}
           />
         </View>
 
@@ -708,7 +768,7 @@ export default function TransactionHistory({ navigation }) {
 export const Item = ({ item, formatTime, navigation }) => {
   const isApproved = item.isApproved;
   const isFailed = item.isFailed;
-  const isBonus = item.isBonus; // Read the Bonus flag
+  const isBonus = item.isBonus;
 
   let statusColor = '#EAB308';
   let iconName = 'clock';
@@ -722,13 +782,12 @@ export const Item = ({ item, formatTime, navigation }) => {
     statusColor = theme.colors.statusDanger || '#EF4444';
     iconName = 'x';
     displayStatus = item.status;
-  } else if (isBonus) { // Apply styling for bonuses
+  } else if (isBonus) {
     statusColor = theme.colors.statusSuccess || '#10B981';
-    iconName = 'gift'; // Using a distinct icon for bonuses
-    displayStatus = item.status; // This will output "Bonus Credited"
+    iconName = 'gift';
+    displayStatus = item.status; 
   }
 
-  // Format creation date for the detail screen
   const parseSafeDate = (dateVal) => {
     if (!dateVal) return null;
     const formattedStr = typeof dateVal === 'string' ? dateVal.replace(' ', 'T') : dateVal;
@@ -759,7 +818,8 @@ export const Item = ({ item, formatTime, navigation }) => {
           status: item.status,
           isApproved,
           isFailed,
-          isBonus, // Pass new status param forward if needed
+          isBonus,
+          isInProgress: item.isInProgress, 
         })
       }
     >
