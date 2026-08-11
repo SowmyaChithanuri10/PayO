@@ -149,7 +149,7 @@ export default function LoginScreen({ navigation }) {
         mobile_cont_code: computedCountryCode,
       });
 
-      console.log('LOGIN API RESPONSE:', response?.data); 
+      // console.log('LOGIN API RESPONSE:', response?.data); 
 
       if (response?.data?.Message === 'Login OTP generated' && response?.data?.Status === '200' ) {
         

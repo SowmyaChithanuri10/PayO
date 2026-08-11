@@ -435,7 +435,7 @@ export default function HomeScreen({ navigation }) {
                       </View>
                     </View>
                     <Text style={[styles.tableCell, styles.coinPrice, {flex: 2, textAlign: 'right'}]}>
-                      ₹{coin.price?.toLocaleString()}
+                      ${coin.price?.toLocaleString()}
                     </Text>
                     <Text style={[styles.tableCell, {flex: 1.5, textAlign: 'right', color: isPositive ? '#10b981' : '#ef4444', fontWeight: '600'}]}>
                       {isPositive ? '▲' : '▼'} {Math.abs(coin.priceChangePercentage24h).toFixed(1)}%

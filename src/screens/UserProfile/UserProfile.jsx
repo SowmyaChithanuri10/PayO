@@ -311,7 +311,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
             </View>
             <View style={[styles.listItem, { borderBottomWidth: 0, paddingBottom: verticalScale(14)}]}>
               <Text style={styles.listLabel}>Linked Mobile</Text>
-              <Text style={styles.listValue}>+91 {profileDataRedux?.Mobile_Number || '8332 285 718'}</Text>
+              <Text style={styles.listValue}> {profileDataRedux?.Mobile_Number || '8332 285 718'}</Text>
             </View>
           </View>
 
@@ -331,10 +331,10 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
               <Text style={styles.listLabel}>Personal Information</Text>
               <Icon name="chevron-right" size={16} color="#9CA3AF" />
             </TouchableOpacity>
-            <View style={[styles.listItem, { borderBottomWidth: 0, paddingBottom: verticalScale(14) }]}>
+            {/* <View style={[styles.listItem, { borderBottomWidth: 0, paddingBottom: verticalScale(14) }]}>
               <Text style={styles.listLabel}>Linked Mobile</Text>
-              <Text style={styles.listValue}>+91 {profileDataRedux?.Mobile_Number || '1324 567 890'}</Text>
-            </View>
+              <Text style={styles.listValue}>{profileDataRedux?.Mobile_Number || '1324 567 890'}</Text>
+            </View> */}
           </View>
 
           {/* SECURITY */}
@@ -362,7 +362,7 @@ export default function UserProfile({ route, navigation ,isEditable: propIsEdita
             </View>
             <View style={[styles.listItem, { borderBottomWidth: 0, paddingBottom: verticalScale(14), paddingTop: 12 }]}>
               <Text style={styles.listLabel}>Change Mobile No.</Text>
-              <Text style={styles.listValue}>+91 {profileDataRedux?.Mobile_Number || '1324 567 890'}</Text>
+              <Text style={styles.listValue}>{profileDataRedux?.Mobile_Number || '1324 567 890'}</Text>
             </View>
           </View>
 
