@@ -25,6 +25,7 @@ import Pdf from 'react-native-pdf';
 import { WebView } from 'react-native-webview';
 
 const { width: windowWidth } = Dimensions.get('window');
+
 const SafePdfViewer = ({ uri, style, disabled = false, onPress }) => {
   if (!uri) return null;
 
@@ -58,8 +59,6 @@ const SafePdfViewer = ({ uri, style, disabled = false, onPress }) => {
     </TouchableOpacity>
   );
 };
-
-
 
 export default function KycDetailsCheck({ navigation }) {
   const [loading, setLoading] = useState(true);
@@ -218,10 +217,6 @@ export default function KycDetailsCheck({ navigation }) {
     setPreviewVisible(true);
   };
 
-  const handleSubmitKyc = () => {
-    Alert.alert('Success', 'Your KYC Application has been submitted.');
-  };
-
   const renderDocumentPreview = (item, fileData, isApproved) => {
     if (!fileData.url) {
       return (
@@ -261,6 +256,26 @@ export default function KycDetailsCheck({ navigation }) {
       </TouchableOpacity>
     );
   };
+
+  // --- DYNAMIC FOOTER LOGIC ---
+  const hasRejectedDocs = kycRecords.some(item => {
+    const statusLower = (item.status || '').toLowerCase();
+    return statusLower.includes('reject') || statusLower.includes('fail') || statusLower.includes('decline');
+  });
+
+  const handleFooterAction = () => {
+    if (hasRejectedDocs) {
+      // If there's a rejection, prompt them to use the local replace buttons
+      // Alert.alert('Action Required', 'Please tap on "Re-upload" for the rejected documents listed above.');
+      navigation.navigate('Main');
+
+    } else {
+      // If everything is under review or approved, take them to the Home Page
+      // (Make sure 'Home' matches the exact route name defined in your navigator)
+      navigation.navigate('Main');
+    }
+  };
+  // ----------------------------
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -329,7 +344,6 @@ export default function KycDetailsCheck({ navigation }) {
                           {fileData.fileName}
                         </Text>
                         
-                        {/* Action Link Logic */}
                         {isRejected ? (
                           <TouchableOpacity
                             activeOpacity={0.7}
@@ -346,7 +360,6 @@ export default function KycDetailsCheck({ navigation }) {
                       </View>
                     ) : null}
 
-                    {/* REJECTION REASON BOX */}
                     {isRejected && (
                       <View style={styles.rejectionBox}>
                         <Icon name="alert-triangle" size={16} color="#EF4444" style={{ marginTop: 2 }} />
@@ -359,7 +372,6 @@ export default function KycDetailsCheck({ navigation }) {
                       </View>
                     )}
 
-                    {/* RE-UPLOAD BUTTON FOR REJECTED DOCS */}
                     {isRejected && (
                       <TouchableOpacity
                         style={styles.reuploadButton}
@@ -377,13 +389,26 @@ export default function KycDetailsCheck({ navigation }) {
             })}
           </ScrollView>
 
+          {/* DYNAMIC FOOTER RENDER */}
           <View style={styles.footerContainer}>
             <TouchableOpacity
-              style={styles.submitButton}
+              style={[
+                styles.submitButton,
+                { backgroundColor: hasRejectedDocs ? '#4F46E5' : (theme.colors.primaryBlue || '#4F46E5') }
+              ]}
               activeOpacity={0.8}
-              onPress={handleSubmitKyc}>
-              <Text style={styles.submitButtonText}>Submit KYC</Text>
-              <Icon name="arrow-right" size={20} color="#FFFFFF" style={{ marginLeft: scale(8) }} />
+              onPress={handleFooterAction}>
+              
+              <Text style={styles.submitButtonText}>
+                {hasRejectedDocs ? 'Go to Home' : 'Go to Home'}
+              </Text>
+              
+              {/* <Icon 
+                name={hasRejectedDocs ? 'upload' : 'home'} 
+                size={20} 
+                color="#FFFFFF" 
+                style={{ marginLeft: scale(8) }} 
+              /> */}
             </TouchableOpacity>
 
             <View style={styles.secureBadge}>
@@ -394,7 +419,6 @@ export default function KycDetailsCheck({ navigation }) {
         </View>
       )}
 
-      {/* FULLSCREEN IMAGE PREVIEW MODAL */}
       <Modal
         visible={previewVisible}
         transparent={true}
