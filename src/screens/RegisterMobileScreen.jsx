@@ -279,7 +279,7 @@ export default function RegisterMobileScreen({ navigation }) {
                 <View style={[styles.mobileInputBox, isValidMobile && styles.mobileInputBoxValid]}>
                   <TextInput
                     style={styles.input}
-                    placeholder="Enter Mobile Number"
+                    placeholder="Enter your Mobile number"
                     placeholderTextColor="#999"
                     keyboardType="phone-pad"
                     value={mobile}
@@ -648,7 +648,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: moderateScale(14),
     color: '#000',
-    letterSpacing: 1,
   },
 
   // 🚨 UPDATED Terms Check
