@@ -108,8 +108,7 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
   ];
 
   const parseValueToString = (val) => {
-    // Remove non-numeric characters and limit raw string length to 6 digits
-    const clean = val.replace(/[^0-9]/g, '').slice(0, 6);
+    const clean = val.replace(/[^0-9]/g, '');
     return clean ? parseInt(clean, 10).toLocaleString('en-IN') : '';
   };
 
@@ -153,6 +152,20 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
+      {/* <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <FeatherIcon name="chevron-left" size={moderateScale(26)} color={theme.colors.primaryBlue} />
+        </TouchableOpacity>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Add Money to Wallet</Text>
+          <Text style={styles.headerSubtitle}>Choose a payment method to add funds</Text>
+        </View>
+        <TouchableOpacity style={styles.helpButton}>
+          <FeatherIcon name="help-circle" size={moderateScale(22)} color={theme.colors.primaryBlue} />
+        </TouchableOpacity>
+      </View> */}
+
        <MainHeader 
           title="Add Money to Wallet" 
           subtitle="Choose a payment method to add funds"
@@ -201,7 +214,7 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
             keyboardType="number-pad"
             placeholder='0'
             // maxLength={10} // Account for commas in formatted locale string (e.g., "1,00,000")
-          />
+           />
           <View style={styles.currencySelector}>
             <Text style={styles.currencySelectorText}>INR</Text>
             <Icon name="keyboard-arrow-down" size={moderateScale(18)} color="#4A5568" />
