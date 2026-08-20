@@ -1,5 +1,3 @@
-
-
 // import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 // import {
 //   View,
@@ -55,6 +53,10 @@
 //   const [marketNews, setMarketNews] = useState([]);
 //   const [newsCount, setNewsCount] = useState(10);
 //   const [activeBanner, setActiveBanner] = useState(0);
+  
+//   // State for controlling the KYC Reminder visibility for the current session
+//   const [showKycReminder, setShowKycReminder] = useState(true);
+
 //   const scrollRef = useRef(null);
 //   const flatListRef = useRef(null);
 //   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
@@ -62,7 +64,7 @@
 //   const newsItemRefs = useRef({});
 //   const dispatch = useAppDispatch();
 //   const dashboardStats = useAppSelector((state) => state.deposit.dashboardStats);
-//     const walletData = useAppSelector((state) => state.deposit.walletData);
+//   const walletData = useAppSelector((state) => state.deposit.walletData);
 //   const bannerData = useMemo(() => [
 //     { id: '1', image: require('../../../assets/images/banner1.png') },
 //     { id: '2', image: require('../../../assets/images/banner2.png') },
@@ -72,6 +74,15 @@
 
 //   const totalTransactions = dashboardStats?.totalTransactions ?? 0;
 //   const successfulTransactions = dashboardStats?.successfulTransactions ?? 0;
+//   const kycStatus = dashboardStats?.kycStatus;
+
+//   // Determine if KYC is completed to permanently hide the reminder
+//   const isKycVerified = useMemo(() => {
+//     const status = kycStatus?.toLowerCase() || '';
+//     return status === 'verified' || 
+//            status === 'approved' || 
+//            status.includes('completed'); // This will safely catch "kyc completed"
+//   }, [kycStatus]);
 
 //   const isRestricted = useMemo(() => {
 //     return !(totalTransactions > 0 && successfulTransactions > 0 && (walletData?.Transaction_Amount ?? 0) >= 100);
@@ -269,6 +280,33 @@
 //           showsVerticalScrollIndicator={false} 
 //           contentContainerStyle={styles.scrollContent}
 //         >
+
+//           {/* KYC Reminder Box */}
+//           {!isKycVerified && showKycReminder && (
+//             <View style={styles.kycReminderContainer}>
+//               <Text style={styles.kycReminderText}>
+//                 Please complete your KYC details
+//               </Text>
+//               <View style={styles.kycButtonsRow}>
+//                 <TouchableOpacity 
+//                   style={styles.kycOkBtn}
+//                   onPress={() => {
+//                     navigation.navigate('KYCVerification'); 
+//                   }}
+//                 >
+//                   <Text style={styles.kycBtnTextProceed}>Proceed</Text>
+//                 </TouchableOpacity>
+//                 {/* Updated Close Button with X Icon */}
+//   <TouchableOpacity 
+//     style={styles.kycCloseBtn}
+//     onPress={() => setShowKycReminder(false)}
+//   >
+//     <Icon name="x" size={18} color="#000000" />
+//   </TouchableOpacity>
+//               </View>
+//             </View>
+//           )}
+
 //           <LinearGradient 
 //             colors={['#6366f1', '#4f46e5']} 
 //             start={{ x: 0, y: 0 }} 
@@ -281,7 +319,8 @@
 //               <View style={styles.rowCenter}>
 //                 <Text style={styles.walletLabel}>Total Wallet Balance</Text>
 //                 <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)} style={{ marginLeft: 20 }}>
-//                   <Icon name={balanceVisible ? 'eye-off' : 'eye'} size={18} color="rgba(255,255,255,0.8)" />
+//                   {/* <Icon name={balanceVisible ? 'eye-off' : 'eye'} size={18} color="rgba(255,255,255,0.8)" /> */}
+//                   <Icon name={balanceVisible ? 'eye' : 'eye-off'} size={18} color="rgba(255,255,255,0.8)" />
 //                 </TouchableOpacity>
 //               </View>
 
@@ -541,6 +580,8 @@
 //     marginTop: 13,
 //   },
 // });
+
+
 
 
 
@@ -829,7 +870,8 @@ export default function HomeScreen({ navigation }) {
         >
 
           {/* KYC Reminder Box */}
-          {!isKycVerified && showKycReminder && (
+          {/* UPDATED: Added successfulTransactions > 0 condition here */}
+          {!isKycVerified && showKycReminder && successfulTransactions > 0 && (
             <View style={styles.kycReminderContainer}>
               <Text style={styles.kycReminderText}>
                 Please complete your KYC details
@@ -843,13 +885,12 @@ export default function HomeScreen({ navigation }) {
                 >
                   <Text style={styles.kycBtnTextProceed}>Proceed</Text>
                 </TouchableOpacity>
-                {/* Updated Close Button with X Icon */}
-  <TouchableOpacity 
-    style={styles.kycCloseBtn}
-    onPress={() => setShowKycReminder(false)}
-  >
-    <Icon name="x" size={18} color="#000000" />
-  </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.kycCloseBtn}
+                  onPress={() => setShowKycReminder(false)}
+                >
+                  <Icon name="x" size={18} color="#000000" />
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -866,7 +907,7 @@ export default function HomeScreen({ navigation }) {
               <View style={styles.rowCenter}>
                 <Text style={styles.walletLabel}>Total Wallet Balance</Text>
                 <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)} style={{ marginLeft: 20 }}>
-                  <Icon name={balanceVisible ? 'eye-off' : 'eye'} size={18} color="rgba(255,255,255,0.8)" />
+                  <Icon name={balanceVisible ? 'eye' : 'eye-off'} size={18} color="rgba(255,255,255,0.8)" />
                 </TouchableOpacity>
               </View>
 
