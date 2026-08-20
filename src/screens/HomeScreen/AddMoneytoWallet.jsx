@@ -181,7 +181,8 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
               <Text style={styles.balanceLabel}>Total Wallet Balance</Text>
               <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)}>
                 <FeatherIcon
-                  name={balanceVisible ? 'eye-off' : 'eye'}
+                  //name={balanceVisible ? 'eye-off' : 'eye'}
+                  name={balanceVisible ? 'eye' : 'eye-off'}
                   size={moderateScale(16)}
                   color="#E0E7FF"
                   style={{ marginLeft: moderateScale(16) }}

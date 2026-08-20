@@ -866,7 +866,8 @@ export default function HomeScreen({ navigation }) {
               <View style={styles.rowCenter}>
                 <Text style={styles.walletLabel}>Total Wallet Balance</Text>
                 <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)} style={{ marginLeft: 20 }}>
-                  <Icon name={balanceVisible ? 'eye-off' : 'eye'} size={18} color="rgba(255,255,255,0.8)" />
+                  {/* <Icon name={balanceVisible ? 'eye-off' : 'eye'} size={18} color="rgba(255,255,255,0.8)" /> */}
+                  <Icon name={balanceVisible ? 'eye' : 'eye-off'} size={18} color="rgba(255,255,255,0.8)" />
                 </TouchableOpacity>
               </View>
 

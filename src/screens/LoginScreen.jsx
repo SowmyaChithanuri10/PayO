@@ -316,7 +316,7 @@ export default function LoginScreen({ navigation }) {
                   {/* Text Input */}
                   <TextInput
                     style={styles.textInput}
-                    placeholder="Enter giMobile number"
+                    placeholder="Enter Mobile number"
                     placeholderTextColor="#9CA3AF"
                     keyboardType="phone-pad"
                     value={mobile}
