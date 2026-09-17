@@ -29,10 +29,11 @@ import api from '../../api/axios';
 import { verticalScale, windowWidth } from '../../utils/responsive';
 import { useAuth } from '../../context/AuthContext';
 
+// Flexible email validation regex matching standard formats (@gmail, @outlook, @yahoo, etc.)
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 export default function ProfileScreen({ route, navigation }) {
   const { userId } = useAuth();
-  console.log(userId,"userId")
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -41,8 +42,10 @@ export default function ProfileScreen({ route, navigation }) {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  const trimmedEmail = email.trim();
   const isNameValid = name.trim().length >= 3;
-  const isEmailValid = !email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  // Optional field: valid if empty OR if it matches standard email structure
+  const isEmailValid = !trimmedEmail || EMAIL_REGEX.test(trimmedEmail);
   const isFormValid = isNameValid && isEmailValid;
 
   useEffect(() => {
@@ -73,8 +76,9 @@ export default function ProfileScreen({ route, navigation }) {
     }
 
     if (field === 'email') {
-      if (email?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        err.email = 'Invalid email format';
+      const trimmed = email?.trim();
+      if (trimmed && !EMAIL_REGEX.test(trimmed)) {
+        err.email = 'Enter a valid email address (e.g. name@gmail.com)';
       } else {
         delete err.email;
       }
@@ -94,7 +98,8 @@ export default function ProfileScreen({ route, navigation }) {
     
     if (field === 'email') {
       setEmail(value);
-      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && errors.email) {
+      const trimmed = value.trim();
+      if ((!trimmed || EMAIL_REGEX.test(trimmed)) && errors.email) {
         setErrors(prev => { const { email, ...rest } = prev; return rest; });
       }
     }
@@ -112,8 +117,8 @@ export default function ProfileScreen({ route, navigation }) {
       const response = await api.post('/api/auth/register', {
         userId: userId || "", 
         name: name.trim(),
-        email: email.trim() || " ", 
-        referralCode: referral.trim() || " " 
+        email: email.trim() || null, // Sent as null or empty string instead of " " to prevent API rejection
+        referralCode: referral.trim() || null 
       });
 
       if (response?.data?.status === "200" || response?.status === 200) {
@@ -218,11 +223,11 @@ export default function ProfileScreen({ route, navigation }) {
                 autoCapitalize="none"
                 keyboardType="email-address"
               />
-              {email.trim() && isEmailValid ? (
+              {trimmedEmail && EMAIL_REGEX.test(trimmedEmail) ? (
                 <Icon name="check-circle" size={moderateScale(18)} color="#10B981" />
               ) : null}
             </View>
-            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+            {errors?.email && <Text style={styles.errorText}>{errors?.email}</Text>}
 
             <View style={styles.labelRow}>
               <Image 
