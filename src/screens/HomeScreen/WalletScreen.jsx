@@ -254,7 +254,8 @@ export default function WalletScreen({ navigation }) {
                   <Text style={styles.balanceLabel}>Total Wallet Balance</Text>
                   <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)}>
                     <Icon
-                      name={balanceVisible ? 'eye-off' : 'eye'}
+                      // name={balanceVisible ? 'eye-off' : 'eye'}
+                      name={balanceVisible ? 'eye' : 'eye-off'}
                       size={18}
                       color="#ffffffb3"
                       style={{ marginLeft: 10,padding:14 }}

@@ -181,7 +181,8 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
               <Text style={styles.balanceLabel}>Total Wallet Balance</Text>
               <TouchableOpacity onPress={() => setBalanceVisible(!balanceVisible)}>
                 <FeatherIcon
-                  name={balanceVisible ? 'eye-off' : 'eye'}
+                  //name={balanceVisible ? 'eye-off' : 'eye'}
+                  name={balanceVisible ? 'eye' : 'eye-off'}
                   size={moderateScale(16)}
                   color="#E0E7FF"
                   style={{ marginLeft: moderateScale(16) }}
@@ -212,7 +213,8 @@ export default function AddMoneytoWallet({ visible, onClose, navigation }) {
             onChangeText={(text) => setLocalAmount(parseValueToString(text))}
             keyboardType="number-pad"
             placeholder='0'
-          />
+            // maxLength={10} // Account for commas in formatted locale string (e.g., "1,00,000")
+           />
           <View style={styles.currencySelector}>
             <Text style={styles.currencySelectorText}>INR</Text>
             <Icon name="keyboard-arrow-down" size={moderateScale(18)} color="#4A5568" />
