@@ -694,7 +694,7 @@ function Header() {
     { label: 'Wallet', icon: 'credit-card', route: 'WalletScreen', accessLevel: 'full' },
     { label: 'Transactions', icon: 'refresh-cw', route: 'TransactionHistory', accessLevel: 'partial' },
     { label: 'Markets', icon: 'trending-up', route: 'MarketScreen', accessLevel: 'full' },
-    { label: 'Rewards', icon: 'gift', route: 'ReferEarn', accessLevel: 'full' },
+    { label: 'Rewards', icon: 'gift', route: 'RewardsOverview', accessLevel: 'full' },
     { label: 'Referrals', icon: 'users', route: 'ReferEarn', accessLevel: 'full' },
     { label: 'Verify KYC', icon: 'file', isKycAction: true, accessLevel: 'full' },
   ];
