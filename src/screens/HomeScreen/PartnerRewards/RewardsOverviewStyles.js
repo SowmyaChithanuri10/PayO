@@ -128,6 +128,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: verticalScale(16),
+     marginTop: verticalScale(16),
   },
   journeyTitle: {
     fontSize: theme.typography.size.lg,
@@ -141,16 +142,89 @@ export const styles = StyleSheet.create({
     fontWeight: theme.typography.weight.medium,
     fontFamily: theme.typography.fontFamily,
   },
+  // stepperContainer: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-between',
+  //   alignItems: 'flex-start',
+  //   marginBottom: verticalScale(30),
+  //   paddingHorizontal: scale(8),
+  // },
+  // stepWrapper: {
+  //   alignItems: 'center',
+  //   width: scale(50),
+  //   zIndex: 1,
+  // },
+  // stepCircle: {
+  //   width: scale(28),
+  //   height: scale(28),
+  //   borderRadius: scale(14),
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   backgroundColor: theme.colors.bgSurface,
+  //   zIndex: 2,
+  // },
+  // stepCircleCompleted: {
+  //   backgroundColor: theme.colors.statusSuccess,
+  // },
+  // stepCircleActiveOuter: {
+  //   width: scale(36),
+  //   height: scale(36),
+  //   borderRadius: scale(18),
+  //   backgroundColor: theme.colors.bgLightPurple,
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  // },
+  // stepCircleActiveInner: {
+  //   width: scale(24),
+  //   height: scale(24),
+  //   borderRadius: scale(12),
+  //   backgroundColor: theme.colors.primaryIndigo,
+  // },
+  // stepCircleLocked: {
+  //   backgroundColor: theme.colors.borderLight,
+  // },
+  // stepLine: {
+  //   position: 'absolute',
+  //   top: scale(14),
+  //   left: '50%',
+  //   right: '-50%',
+  //   height: 3,
+  //   backgroundColor: theme.colors.borderLight,
+  //   zIndex: 0,
+  // },
+  // stepLineCompleted: {
+  //   backgroundColor: theme.colors.statusSuccess,
+  // },
+  // stepTitle: {
+  //   marginTop: verticalScale(8),
+  //   fontSize: theme.typography.size.xs,
+  //   color: theme.colors.textMuted,
+  //   textAlign: 'center',
+  //   fontFamily: theme.typography.fontFamily,
+  // },
+  // stepTitleActive: {
+  //   color: theme.colors.primaryIndigo,
+  //   fontWeight: theme.typography.weight.bold,
+  // },
+
+  // --- Stepper Container Styles ---
   stepperContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: scale(4),
+    marginBottom: verticalScale(20),
+  },
+  stepperScrollContent: {
     alignItems: 'flex-start',
-    marginBottom: verticalScale(30),
     paddingHorizontal: scale(8),
+  },
+  stepItemContainer: {
+    width: scale(72), // Fixed wider width so multi-line text fits without overlapping neighbor steps
+    alignItems: 'center',
+    position: 'relative',
   },
   stepWrapper: {
     alignItems: 'center',
-    width: scale(50),
+    width: '100%',
     zIndex: 1,
   },
   stepCircle: {
@@ -166,28 +240,30 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.statusSuccess,
   },
   stepCircleActiveOuter: {
-    width: scale(36),
-    height: scale(36),
-    borderRadius: scale(18),
+    width: scale(32),
+    height: scale(32),
+    borderRadius: scale(16),
     backgroundColor: theme.colors.bgLightPurple,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
   },
   stepCircleActiveInner: {
-    width: scale(24),
-    height: scale(24),
-    borderRadius: scale(12),
+    width: scale(20),
+    height: scale(20),
+    borderRadius: scale(10),
     backgroundColor: theme.colors.primaryIndigo,
   },
   stepCircleLocked: {
     backgroundColor: theme.colors.borderLight,
   },
+  // Connecting line anchored relative to each step item
   stepLine: {
     position: 'absolute',
-    top: scale(14),
+    top: scale(14), // Aligns vertically with center of circles
     left: '50%',
-    right: '-50%',
-    height: 3,
+    width: scale(72), // Matches stepItemContainer width to bridge to the next item
+    height: 2,
     backgroundColor: theme.colors.borderLight,
     zIndex: 0,
   },
@@ -195,13 +271,27 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.colors.statusSuccess,
   },
   stepTitle: {
-    marginTop: verticalScale(8),
-    fontSize: theme.typography.size.xs,
+    marginTop: verticalScale(6),
+    fontSize: theme.typography.size.xs - 1,
     color: theme.colors.textMuted,
     textAlign: 'center',
     fontFamily: theme.typography.fontFamily,
+    lineHeight: 14, // Set explicit lineHeight for neat 2-line wraps
+    paddingHorizontal: scale(2),
   },
   stepTitleActive: {
+    color: theme.colors.primaryIndigo,
+    fontWeight: theme.typography.weight.bold,
+  },
+  stepAmount: {
+    marginTop: verticalScale(2),
+    fontSize: theme.typography.size.xs - 1,
+    color: theme.colors.textMuted,
+    textAlign: 'center',
+    fontFamily: theme.typography.fontFamily,
+    lineHeight: 14,
+  },
+  stepAmountActive: {
     color: theme.colors.primaryIndigo,
     fontWeight: theme.typography.weight.bold,
   },
