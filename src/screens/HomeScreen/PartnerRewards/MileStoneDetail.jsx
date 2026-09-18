@@ -75,7 +75,8 @@ const MileStoneDetail = ({ navigation }) => {
         </View>
 
         {/* Milestone Reward */}
-        <TouchableOpacity style={styles.rewardCard}>
+        <TouchableOpacity style={styles.rewardCard}
+        onPress={() => navigation.navigate('MileStoneCompleted')}>
           <View style={styles.miniCoin}>
             <Text style={styles.miniCoinText}>S</Text>
           </View>

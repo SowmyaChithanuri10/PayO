@@ -198,6 +198,9 @@ import ReferEarn from '../screens/HomeScreen/ReferEarn';
 import RewardsOverview from '../screens/HomeScreen/PartnerRewards/RewardsOverview.jsx';
 import RewardStruct from '../screens/HomeScreen/PartnerRewards/RewardStruc.jsx';
 import MileStoneDetail from '../screens/HomeScreen/PartnerRewards/MileStoneDetail.jsx';
+import MileStoneCompleted from '../screens/HomeScreen/PartnerRewards/MileStoneCompleted.jsx';
+import RewardHistory from '../screens/HomeScreen/PartnerRewards/RewardHistory.jsx';
+import RewardDetails from '../screens/HomeScreen/PartnerRewards/RewardDetails.jsx';
 import TransactionDetailScreen from '../screens/HomeScreen/TransactionDetailScreen';
 import NotificationScreen from '../screens/HomeScreen/NotificationScreen';
 import ForgotPassword from '../screens/ForgotPasswordScreen';
@@ -333,6 +336,9 @@ export default function AppNavigator() {
         <Stack.Screen name="RewardsOverview" component={RewardsOverview} />
         <Stack.Screen name="RewardStruct" component={RewardStruct} />
         <Stack.Screen name="MileStoneDetail" component={MileStoneDetail} />
+        <Stack.Screen name="MileStoneCompleted" component={MileStoneCompleted} />
+        <Stack.Screen name="RewardHistory" component={RewardHistory} />
+        <Stack.Screen name="RewardDetails" component={RewardDetails} />
         <Stack.Screen name="SendPin" component={SendPinScreen} />
         <Stack.Screen name="loading" component={PaymentLoading} />
         <Stack.Screen name="successfullPayment" component={PaymentSuccess} />

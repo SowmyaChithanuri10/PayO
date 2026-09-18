@@ -139,7 +139,8 @@ const RewardsOverview = ({ navigation }) => {
           <Ionicons name="chevron-forward" size={20} color={theme.colors.grey} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuCard}>
+        <TouchableOpacity style={styles.menuCard}
+        onPress={() => navigation.navigate('RewardHistory')}>
           <View style={[styles.menuIconWrapper, { backgroundColor: '#FEF3C7' }]}>
              <Ionicons name="trophy-outline" size={24} color="#F59E0B" />
           </View>
