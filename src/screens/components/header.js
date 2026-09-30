@@ -700,7 +700,7 @@ function Header() {
   ];
 
   const bottomMenuItems = [
-    { label: 'Settings', icon: 'settings', route: 'SettingsScreen', accessLevel: 'always' },
+    { label: 'Settings', icon: 'settings', route: 'Settings', accessLevel: 'always' },
     { label: 'Support', icon: 'help-circle', route: 'SupportScreen', accessLevel: 'always' },
     { label: 'Logout', icon: 'log-out', isLogout: true, accessLevel: 'always' },
   ];

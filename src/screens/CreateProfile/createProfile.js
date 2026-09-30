@@ -554,8 +554,8 @@ import { verticalScale, windowWidth } from '../../utils/responsive';
 import { useAuth } from '../../context/AuthContext';
 
 // Flexible email validation regex matching standard formats (@gmail, @outlook, @yahoo, etc.)
-// Only allows specific major email providers
-const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|icloud\.com)$/i;
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+// const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|icloud\.com)$/i;
 
 export default function ProfileScreen({ route, navigation }) {
   const { userId } = useAuth();
