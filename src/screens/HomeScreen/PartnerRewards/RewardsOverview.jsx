@@ -573,7 +573,14 @@ progress = Math.max(0, Math.min(100, progress));
                   Milestone Journey
                 </Text>
 
-                <TouchableOpacity>
+                <TouchableOpacity  onPress={() =>
+                  navigation.navigate(
+                    'RewardStruct',
+                    {
+                      milestones: milestones,
+                    }
+                  )
+                }>
                   <Text
                     style={styles.viewAllText}
                   >
@@ -610,6 +617,18 @@ progress = Math.max(0, Math.min(100, progress));
                       const isCompleted =
                         index <
                         currentMilestoneIndex;
+
+        <TouchableOpacity style={styles.menuCard}
+        onPress={() => navigation.navigate('RewardHistory')}>
+          <View style={[styles.menuIconWrapper, { backgroundColor: '#FEF3C7' }]}>
+             <Ionicons name="trophy-outline" size={24} color="#F59E0B" />
+          </View>
+          <View style={styles.menuTextContainer}>
+            <Text style={styles.menuTitle}>Your Rewards</Text>
+            <Text style={styles.menuSubtitle}>Scratch cards, coins, devices & more</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={theme.colors.grey} />
+        </TouchableOpacity>
 
                       const isActive =
                         index ===
@@ -812,6 +831,7 @@ progress = Math.max(0, Math.min(100, progress));
 
               <TouchableOpacity
                 style={styles.menuCard}
+                  onPress={() => navigation.navigate('RewardHistory')}
               >
                 <View
                   style={[

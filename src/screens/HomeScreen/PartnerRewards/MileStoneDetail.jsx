@@ -75,7 +75,8 @@ const MileStoneDetail = ({ navigation }) => {
         </View>
 
         {/* Milestone Reward */}
-        <TouchableOpacity style={styles.rewardCard}>
+        <TouchableOpacity style={styles.rewardCard}
+        onPress={() => navigation.navigate('MileStoneCompleted')}>
           <View style={styles.miniCoin}>
             <Text style={styles.miniCoinText}>S</Text>
           </View>
@@ -117,7 +118,7 @@ const MileStoneDetail = ({ navigation }) => {
       {/* Floating Bottom Button */}
       <View style={styles.bottomButtonContainer}>
         <TouchableOpacity activeOpacity={0.8}
-        onPress={() => navigation.navigate('RewardsOverview')}>
+        onPress={() => navigation.navigate('MileStoneCompleted')}>
           <LinearGradient
             colors={[theme.colors.primaryIndigo, theme.colors.primaryBlue]}
             start={{ x: 0, y: 0 }}

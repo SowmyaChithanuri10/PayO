@@ -9,9 +9,12 @@ import {
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
+import { useNavigation } from '@react-navigation/native'; // 1. Import useNavigation
 import styles from './KycCompleteStyles'; 
 
-export default function KycComplete({ navigation }) {
+export default function KycComplete() {
+  const navigation = useNavigation(); // 2. Initialize the hook
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor="#F9FFFB" barStyle="dark-content" />
@@ -30,21 +33,25 @@ export default function KycComplete({ navigation }) {
               <Icon name="chevron-left" size={28} color="#05070D" />
             </TouchableOpacity>
           </View>
+          
           <Text style={styles.title}>
             KYC Submitted Successfully!
           </Text>
+          
           <Image 
             source={require('../../../assets/images/kycscreens/Bank added 1.png')} 
             style={styles.illustration} 
           />
+          
           <Text style={styles.subTitle}>
             Thank you for submitting your{"\n"}document we'll verify it and complete{"\n"}your KYC as soon as possible
           </Text>
+          
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.homeBtn}
               activeOpacity={0.8}
-              onPress={() => navigation.navigate('Main')}
+              onPress={() => navigation.navigate('Main')} // 3. Updated to navigate correctly based on your AppNavigator
             >
               <Text style={styles.homeBtnText}>
                 Go Home
